@@ -1,10 +1,26 @@
 from fastapi import APIRouter
 
+from models.edge_model import EdgeModel
+from models.random_forest import RandomForest
+
 router = APIRouter()
+
+models = [
+    {
+        'name': type(EdgeModel).__name__,
+        'id': 1,
+        'hyperparameters': EdgeModel.get_hyperparameters()
+    },
+    {
+        'name': type(RandomForest).__name__,
+        'id': 2,
+        'hyperparameters': RandomForest.get_hyperparameters()
+    }
+]
 
 @router.get("/model/")
 async def model():
-    return [] #TODO: return the list of models available for training and the related hyperparameters
+    return 
 
 
 @router.post("/model/{model_id}")

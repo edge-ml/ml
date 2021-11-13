@@ -1,20 +1,21 @@
 from models.parameter_builder import ParameterBuilder
+from models.edge_model import EdgeModel
 
-class EdgeModel:
+class RandomForest(EdgeModel):
+    pass
+
     # static methods
     @staticmethod
     def get_hyperparameters():
-        pb = ParameterBuilder()
-        pb.add_number("window_size", 0, 60000, 100, False, True, 'int', True)
+        pb = ParameterBuilder(EdgeModel.get_hyperparameters()) # get base hyperparameters
+        # TODO: add random forest specific hyperparameters
         return pb.parameters
 
     # class methods
     def __init__(self, hyperparameters):
-        self.name
-        self.is_fit = False
-        self.hyperparameters = hyperparameters
+        super(hyperparameters)
         
-    def fit(self, X_train, y_train):
+    def fit(X_train, y_train):
         return True
     
     def predict(self, X_test, y_test):

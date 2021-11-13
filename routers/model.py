@@ -5,6 +5,7 @@ from models.random_forest import RandomForest
 
 router = APIRouter()
 
+# TODO this should be declared somewhere else
 models = [
     {
         'name': type(EdgeModel).__name__,

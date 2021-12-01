@@ -7,9 +7,17 @@ class RandomForest(EdgeModel):
     # static methods
     @staticmethod
     def get_hyperparameters():
-        pb = ParameterBuilder(EdgeModel.get_hyperparameters()) # get base hyperparameters
-        # TODO: add random forest specific hyperparameters
+        pb = ParameterBuilder(EdgeModel.get_hyperparameters()) #get base parameter
+
         return pb.parameters
+
+    @staticmethod
+    def get_name():
+        return "Random Forest Classifier"
+
+    @staticmethod
+    def get_description():
+        return "A simple random forest classifier."
 
     # class methods
     def __init__(self, hyperparameters):

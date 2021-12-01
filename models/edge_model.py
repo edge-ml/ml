@@ -8,6 +8,14 @@ class EdgeModel:
         pb.add_number("window_size", 0, 60000, 100, False, True, 'int', True)
         return pb.parameters
 
+    @staticmethod
+    def get_name():
+        return "Edge Model Base"
+
+    @staticmethod
+    def get_description():
+        return "Basic model that defines hyperparameters. Predicts random results based on class probability."
+
     # class methods
     def __init__(self, hyperparameters):
         self.name

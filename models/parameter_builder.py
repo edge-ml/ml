@@ -3,11 +3,12 @@ class ParameterBuilder:
         self.parameters = parameters
         return
 
-    def add_number(self, parameter_name, number_min, number_max, default, inclusive_min=True, inclusive_max=True, precision='float', required=True):
+    def add_number(self, parameter_name, display_name, number_min, number_max, default, inclusive_min=True, inclusive_max=True, precision='float', required=True):
         # TODO: parameter validation
 
         self.parameters[parameter_name] = {
             'parameter_type': 'number',
+            'display_name': display_name,
             'number_min': number_min,
             'number_max': number_max,
             'default': default,
@@ -18,11 +19,12 @@ class ParameterBuilder:
         }
         return self
 
-    def add_selection(self, parameter_name, options, default, multi_select=False, required=True):
+    def add_selection(self, parameter_name, display_name, options, default, multi_select=False, required=True):
         # TODO: parameter validation
 
         self.parameters[parameter_name] = {
             'parameter_type': 'selection',
+            'display_name': display_name,
             'options': options,
             'default': default,
             'multi_select': multi_select,
@@ -30,11 +32,12 @@ class ParameterBuilder:
         }
         return self
 
-    def add_boolean(self, parameter_name, default, required=True):
+    def add_boolean(self, parameter_name, display_name, default, required=True):
         # TODO: parameter validation
 
         self.parameters[parameter_name] = {
             'parameter_type': 'boolean',
+            'display_name': display_name,
             'default': default,
             'required': required
         }

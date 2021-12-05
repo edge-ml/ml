@@ -1,4 +1,4 @@
-from models.parameter_builder import ParameterBuilder
+from utils.parameter_builder import ParameterBuilder
 
 class EdgeModel:
     # static methods

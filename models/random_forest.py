@@ -1,5 +1,6 @@
 from utils.parameter_builder import ParameterBuilder
 from models.edge_model import EdgeModel
+import copy
 
 class RandomForest(EdgeModel):
     pass
@@ -7,8 +8,9 @@ class RandomForest(EdgeModel):
     # static methods
     @staticmethod
     def get_hyperparameters():
-        pb = ParameterBuilder(EdgeModel.get_hyperparameters()) #get base parameter
-        pb.add_selection("Other", "Parameter_Name", "Description of the hyperparameter", ["Option1", "Option2"], "Option1", True, True)
+        pb = copy.deepcopy(ParameterBuilder(EdgeModel.get_hyperparameters())) #get base parameter
+        pb.add_selection("other", "Parameter_Name", "Description of the hyperparameter", ["Option1", "Option2", "Option3"], "Option1", True, True)
+
         return pb.parameters
 
     @staticmethod

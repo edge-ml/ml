@@ -5,9 +5,9 @@ class EdgeModel:
     @staticmethod
     def get_hyperparameters():
         pb = ParameterBuilder()
-        pb.add_number("window_size", "Window Size", 0, 60000, 100, False, True, 'int', True)
-        pb.add_selection("kernel", "Kernel", ["rbf", "linear"], "linear", False, True)
-        pb.add_boolean("shrinking", "Shrinking Heuristic", False, True)
+        pb.add_number("window_size", "Window Size", "Sets the window size", 0, 60000, 100, False, True, 'int', True)
+        pb.add_selection("kernel", "Kernel", "Kernel desc", ["rbf", "linear"], "linear", False, True)
+        pb.add_boolean("shrinking", "Shrinking desc", "Shrinking Heuristic", False, True)
 
         return pb.parameters
 

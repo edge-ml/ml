@@ -8,7 +8,7 @@ class RandomForest(EdgeModel):
     @staticmethod
     def get_hyperparameters():
         pb = ParameterBuilder(EdgeModel.get_hyperparameters()) #get base parameter
-
+        pb.add_selection("Other", "Parameter_Name", "Description of the hyperparameter", ["Option1", "Option2"], "Option1", True, True)
         return pb.parameters
 
     @staticmethod

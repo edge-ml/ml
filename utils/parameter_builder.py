@@ -6,6 +6,8 @@ class ParameterBuilder:
     def add_number(self, parameter_name, display_name, description, number_min, number_max, default, inclusive_min=True, inclusive_max=True, step_size=1, required=True):
         # TODO: parameter validation
 
+        # self.__validateParameterName(self.parameters, parameter_name)
+
         self.parameters[parameter_name] = {
             'parameter_type': 'number',
             'display_name': display_name,
@@ -23,6 +25,8 @@ class ParameterBuilder:
     def add_selection(self, parameter_name, display_name, description, options, default, multi_select=False, required=True):
         # TODO: parameter validation
 
+        # self.__validateParameterName(self.parameters, parameter_name)
+
         self.parameters[parameter_name] = {
             'parameter_type': 'selection',
             'display_name': display_name,
@@ -37,14 +41,12 @@ class ParameterBuilder:
     def add_boolean(self, parameter_name, display_name, description, default, required=True):
         # TODO: parameter validation
 
-        self.parameters[parameter_name] = {
-            'parameter_type': 'boolean',
-            'display_name': display_name,
-            'description': description,
-            'default': default,
-            'required': required
-        }
+        # self.__validateParameterName(self.parameters, parameter_name)
+        self.add_selection(parameter_name, display_name, description, ["True", "False"], str(default), False, required)
         return self
     
+    def __validateParameterName(parameters, parameter_name):
+        if parameter_name in parameters:
+            raise ValueError("Parameter is already defined")
 
 

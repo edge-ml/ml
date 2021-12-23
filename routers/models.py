@@ -1,9 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from models.edge_model import EdgeModel
 from models.random_forest import RandomForest
 
-import json
+from routers.dependencies import validateUser
 
 router = APIRouter()
 
@@ -30,13 +30,19 @@ async def models():
 
     return edge_models
 
-# Train a model based on the edge_model matching the model_id and given set of hyperparameters
+# Create an edge model with given model id and hyperparameters
+# Return the created model('s id)
 @router.post("/models/{model_id}")
-async def models_train():
-    return "id of the model to train" #TODO return the trained model
+async def models_train(user_id = Depends(validateUser)):
+    return "Created model('s id)" #TODO return the trained model
+
+# Export a model
+@router.get("/models/export")
+async def models_export(platform: str):
+    return f"Model export to {platform}..."
 
 # Return a list of models that were trained before by the user
-@router.get("/models/userCreated") # userTrained / trained / created 
+@router.get("/models/{user_id}") # userTrained / trained / created 
 async def models_userCreated():
     return "List of models"
 
@@ -49,9 +55,3 @@ async def models_metrics():
 @router.get("/models/{model_id}/platforms")
 async def models_platforms():
     return "Platforms the model is available to"
-
-# Export a model
-@router.get("/models/{model_id}/export")
-async def models_export():
-    return "Model export..."
-

@@ -3,7 +3,7 @@ class ParameterBuilder:
         self.parameters = parameters
         return
 
-    def add_number(self, parameter_name, display_name, description, number_min, number_max, default, step_size=1, required=True):
+    def add_number(self, parameter_name, display_name, description, number_min, number_max, default, step_size=1, required=True, log=False):
         # TODO: parameter validation
 
         # self.__validateParameterName(self.parameters, parameter_name)
@@ -16,7 +16,8 @@ class ParameterBuilder:
             'number_max': number_max,
             'default': default,
             'step_size': step_size, # either 'float' or 'int'
-            'required': required
+            'required': required,
+            'log': log
         }
         return self
 

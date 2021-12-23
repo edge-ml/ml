@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends
 
 from models.edge_model import EdgeModel
+from models.kneighbours import KNeighbours
+from models.mlp import MLP
 from models.random_forest import RandomForest
 
 from routers.dependencies import validate_model, validate_user
@@ -19,6 +21,18 @@ edge_models = [
         'description': RandomForest.get_description(),
         'id': 2,
         'hyperparameters': RandomForest.get_hyperparameters()
+    },
+    {
+        'name': KNeighbours.get_name(),
+        'description': KNeighbours.get_description(),
+        'id': 3,
+        'hyperparameters': KNeighbours.get_hyperparameters()
+    },
+    {
+        'name': MLP.get_name(),
+        'description': MLP.get_description(),
+        'id': 4,
+        'hyperparameters': MLP.get_hyperparameters()
     }
 ]
 

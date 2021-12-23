@@ -7,7 +7,7 @@ class EdgeModel:
         pb = ParameterBuilder()
         pb.add_number("window_size", "Window Size", "Sets the window size", 0, 60000, 100, 1, True)
         pb.add_selection("kernel", "Kernel", "Kernel desc", ["rbf", "linear"], "linear", False, True)
-        pb.add_boolean("shrinking", "Shrinking desc", "Shrinking Heuristic", False, True)
+        pb.add_boolean("shrinking", "Shrinking Heuristic", "Shrinking desc", False, True)
 
         return pb.parameters
 

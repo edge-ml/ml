@@ -13,15 +13,18 @@ async def validate_user(Authorization: str = Header(...)):
         token = Authorization.split(' ')[1]
         print(token)
         print(SECRET_KEY)
-        decoded = jwt.decode(token, SECRET_KEY, algorithm="HS256")
+        decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         print(decoded)
         if 'exp' not in decoded:
             raise jwt.ExpiredSignatureError
         user_id = ObjectId(decoded['id'])
-        return user_id
+        return (user_id, token)
     except:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 async def validate_model(user_id = Depends(validate_user)):
     # TODO check with db 
     return True
+
+async def extract_project_id(project: str = Header(...)):
+    return project

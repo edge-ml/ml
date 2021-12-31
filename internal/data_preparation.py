@@ -5,7 +5,7 @@ def extract_labels(dataset, target_labeling):
     labeling = next((l for l in dataset['labelings'] if l['labelingId'] == target_labeling), None)
     if not labeling:
         raise "Dataset is not labeled with target labeling"
-    print(labeling['labels'])
+    # print(labeling['labels'])
     labels = [{'start': l['start'], 'end': l['end'], 'label_id':l['type']} for l in labeling['labels']]
     return labels
 
@@ -56,7 +56,7 @@ def label_dataset(df, labels, label_map):
     df_labeled['labels'] = df_labeled['labels'].fillna(label_map['Other'])
     return df_labeled
 
-def roll_sliding_window(df_labeled_each_dataset, window_size, step_size):
+def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_size):
     id = 0
     data_y = []
     df_sliding_window = pd.DataFrame()
@@ -66,9 +66,11 @@ def roll_sliding_window(df_labeled_each_dataset, window_size, step_size):
             window_end = i + window_size
             if window_end > df.shape[0]:
                 break
-            df_segment = df.iloc[window_start : window_end, : 6]
+            df_segment = df.iloc[window_start : window_end, : col_size]
+            print(df_segment)
             df_segment['id'] = id
             id = id + 1
             df_sliding_window = pd.concat([df_sliding_window, df_segment])
-            data_y.append(df.iloc[window_start : window_end, 6].mode().iloc[0])
+            data_y.append(df.iloc[window_start : window_end, col_size].mode().iloc[0])
+    print(data_y)
     return (df_sliding_window, data_y)    

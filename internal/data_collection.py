@@ -4,7 +4,7 @@ from requests.models import HTTPError
 
 def fetch_project_datasets(project_id, token):
     url = "http://localhost:3001/api" + "/datasets/"
-    print(url)
+    # print(url)
     try:
         samples = requests.get(url, headers={"Authorization": "Bearer " + token, "project": project_id})
     except:

@@ -62,7 +62,11 @@ async def models():
 # Return the created model('s id)
 @router.post("/train")
 async def models_train(body: TrainBody, user_id = Depends(validate_user), project_id = Depends(extract_project_id)):
-    print(body)
+    # print(body.hyperparameters)
+    window_size = next((param for param in body.hyperparameters if param['parameter_name'] == 'window_size'), None)['state']
+    sliding_step = next((param for param in body.hyperparameters if param['parameter_name'] == 'sliding_step'), None)['state']
+    target_labeling = body.target_labeling
+    selected_timeseries = body.selected_timeseries
     token = user_id[1]
     dataset_ids = fetch_project_datasets(project_id, token)
     if not dataset_ids:
@@ -70,17 +74,17 @@ async def models_train(body: TrainBody, user_id = Depends(validate_user), projec
     datasets = [fetch_dataset(project_id, token, id) for id in dataset_ids]
     if any(hasattr(d, 'error') for d in datasets):
         raise HTTPError("Dataset not in requested project")
-    labels_with_intervals = [extract_labels(dataset, "61c9ff4008af2e55f32e4db0") for dataset in datasets]
+    labels_with_intervals = [extract_labels(dataset, target_labeling) for dataset in datasets]
     labels = set([label['label_id'] for label in labels_with_intervals[0]])
     label_map = {label: idx for idx, label in enumerate(labels)}
     label_map['Other'] = len(label_map)
-    df_list_each_dataset = [create_dataframes(dataset, ["ACC_RAW_x", "ACC_RAW_y", "ACC_RAW_z", "GYRO_RAW_x", "GYRO_RAW_y", "GYRO_RAW_z"]) for dataset in datasets]
+    df_list_each_dataset = [create_dataframes(dataset, selected_timeseries) for dataset in datasets]
     df_merged_each_dataset = [merge_dataframes(df_list) for df_list in df_list_each_dataset]
     df_interpolated_each_dataset = [interpolate_values(df, 'linear', 'both') for df in df_merged_each_dataset]
     df_labeled_each_dataset = [label_dataset(df, labels_with_intervals[idx], label_map) for idx, df in enumerate(df_interpolated_each_dataset)]
-    (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, 10, 1)
-    return True
+    (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, window_size, sliding_step, len(selected_timeseries))
     train(df_sliding_window, data_y)
+    return True
 
 # Return a list of models that were trained before by the user
 @router.get("/userModels") # userTrained / trained / created 

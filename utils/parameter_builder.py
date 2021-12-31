@@ -11,6 +11,7 @@ class ParameterBuilder:
         self.parameters[parameter_name] = {
             'parameter_type': 'number',
             'display_name': display_name,
+            'parameter_name': parameter_name,
             'description': description,
             'number_min': number_min,
             'number_max': number_max,
@@ -29,6 +30,7 @@ class ParameterBuilder:
         self.parameters[parameter_name] = {
             'parameter_type': 'selection',
             'display_name': display_name,
+            'parameter_name': parameter_name,
             'description': description,
             'options': options,
             'default': default,

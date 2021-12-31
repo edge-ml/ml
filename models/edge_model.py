@@ -6,9 +6,10 @@ class EdgeModel:
     def get_hyperparameters():
         pb = ParameterBuilder()
         pb.add_number("window_size", "Window Size", "Sets the window size", 0, 60000, 100, 1, True)
+        pb.add_number("sliding_step", "Sliding Step", "Sets how many steps the sliding window will slide. If it's set less than the window size, the windows will overlap.", 1, 60000, 50, 1, True)
         pb.add_selection("kernel", "Kernel", "Kernel desc", ["rbf", "linear"], "linear", False, True)
         pb.add_boolean("shrinking", "Shrinking Heuristic", "Shrinking desc", False, True)
-
+        pb.add_selection("multi", "Multi", "", ["op1", "op2", "op3"], ["op1", "op2"], True)
         return pb.parameters
 
     @staticmethod

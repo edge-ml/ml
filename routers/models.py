@@ -5,7 +5,8 @@ from typing import List
 
 from requests.models import HTTPError
 from internal.data_collection import fetch_dataset, fetch_project_datasets
-from internal.data_preparation import concat_dataframes, extract_labels, create_dataframes, interpolate_values, merge_dataframes
+from internal.data_preparation import extract_labels, create_dataframes, interpolate_values, label_dataset, merge_dataframes, roll_sliding_window
+from internal.training import train
 
 from models.edge_model import EdgeModel
 from models.kneighbours import KNeighbours
@@ -17,9 +18,10 @@ from routers.dependencies import extract_project_id, validate_model, validate_us
 router = APIRouter()
 
 class TrainBody(BaseModel):
+    model_id: int
     selected_timeseries: List[str]
-    window_size: int
-    sliding_step: int
+    hyperparameters: List
+    target_labeling: str
 
 edge_models = [
     {
@@ -59,7 +61,8 @@ async def models():
 # Create an edge model with given model id and hyperparameters
 # Return the created model('s id)
 @router.post("/train")
-async def models_train(model_id, user_id = Depends(validate_user), project_id = Depends(extract_project_id)):
+async def models_train(body: TrainBody, user_id = Depends(validate_user), project_id = Depends(extract_project_id)):
+    print(body)
     token = user_id[1]
     dataset_ids = fetch_project_datasets(project_id, token)
     if not dataset_ids:
@@ -67,12 +70,17 @@ async def models_train(model_id, user_id = Depends(validate_user), project_id = 
     datasets = [fetch_dataset(project_id, token, id) for id in dataset_ids]
     if any(hasattr(d, 'error') for d in datasets):
         raise HTTPError("Dataset not in requested project")
-    # labels = [extract_labels(dataset, "61c9ff4008af2e55f32e4db0") for dataset in datasets]
+    labels_with_intervals = [extract_labels(dataset, "61c9ff4008af2e55f32e4db0") for dataset in datasets]
+    labels = set([label['label_id'] for label in labels_with_intervals[0]])
+    label_map = {label: idx for idx, label in enumerate(labels)}
+    label_map['Other'] = len(label_map)
     df_list_each_dataset = [create_dataframes(dataset, ["ACC_RAW_x", "ACC_RAW_y", "ACC_RAW_z", "GYRO_RAW_x", "GYRO_RAW_y", "GYRO_RAW_z"]) for dataset in datasets]
     df_merged_each_dataset = [merge_dataframes(df_list) for df_list in df_list_each_dataset]
-    df_all = concat_dataframes(df_merged_each_dataset)
-    interpolated = interpolate_values(df_all, 'linear', 'both')
+    df_interpolated_each_dataset = [interpolate_values(df, 'linear', 'both') for df in df_merged_each_dataset]
+    df_labeled_each_dataset = [label_dataset(df, labels_with_intervals[idx], label_map) for idx, df in enumerate(df_interpolated_each_dataset)]
+    (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, 10, 1)
     return True
+    train(df_sliding_window, data_y)
 
 # Return a list of models that were trained before by the user
 @router.get("/userModels") # userTrained / trained / created 

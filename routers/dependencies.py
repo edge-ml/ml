@@ -8,23 +8,23 @@ from fastapi import status, Header, HTTPException
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+
 async def validate_user(Authorization: str = Header(...)):
     try:
-        token = Authorization.split(' ')[1]
-        print(token)
-        print(SECRET_KEY)
+        token = Authorization.split(" ")[1]
         decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        print(decoded)
-        if 'exp' not in decoded:
+        if "exp" not in decoded:
             raise jwt.ExpiredSignatureError
-        user_id = ObjectId(decoded['id'])
+        user_id = ObjectId(decoded["id"])
         return (user_id, token)
     except:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
-async def validate_model(user_id = Depends(validate_user)):
-    # TODO check with db 
+
+async def validate_model(user_id=Depends(validate_user)):
+    # TODO check with db
     return True
+
 
 async def extract_project_id(project: str = Header(...)):
     return project

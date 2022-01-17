@@ -55,13 +55,13 @@ edge_models = [
         "hyperparameters": KNeighbours.get_hyperparameters(),
         "model": KNeighbours(),
     },
-    {
-        "name": MLP.get_name(),
-        "description": MLP.get_description(),
-        "id": 3,
-        "hyperparameters": MLP.get_hyperparameters(),
-        "model": MLP(),
-    },
+    # {
+    #     "name": MLP.get_name(),
+    #     "description": MLP.get_description(),
+    #     "id": 3,
+    #     "hyperparameters": MLP.get_hyperparameters(),
+    #     "model": MLP(),
+    # },
 ]
 
 # Get list of models that can be trained

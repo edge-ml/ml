@@ -1,5 +1,6 @@
 from utils.parameter_builder import ParameterBuilder
 from models.edge_model import EdgeModel
+from sklearn.neural_network import MLPClassifier
 import copy
 
 
@@ -36,18 +37,12 @@ class MLP(EdgeModel):
         return "A simple MLP classifier."
 
     # class methods
-    def __init__(self, hyperparameters):
-        super(hyperparameters)
-
-    def fit(X_train, y_train):
-        return True
-
-    def predict(self, X_test, y_test):
-        labels = ["a", "b"]
-        confusion_matrix = [[5, 0], [0, 5]]
-        return (labels, confusion_matrix)
+    def __init__(self, hyperparameters={}):
+        super().__init__(hyperparameters)
+        self.clf = MLPClassifier()
 
     def compile(self):
         if not self.is_fit:
             return
             # TODO: throw error
+

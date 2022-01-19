@@ -98,7 +98,7 @@ async def models_train(body: TrainBody, user_id=Depends(validate_user), project_
         raise HTTPError("Dataset not in requested project")
     
     labels_with_intervals = [extract_labels(dataset, target_labeling) for dataset in datasets]
-    labels = set([label["label_id"] for label in labels_with_intervals[0]])
+    labels = set([label["label_id"] for interval in labels_with_intervals for label in interval])
     label_map = {label: idx for idx, label in enumerate(labels)}
     label_map["Other"] = len(label_map)
     df_list_each_dataset = [create_dataframes(dataset, selected_timeseries) for dataset in datasets]

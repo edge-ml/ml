@@ -100,17 +100,18 @@ class KNeighbours(EdgeModel):
         # metric params takes dict
         # pb.add_selection('metric_params')
 
-        pb.add_number(
-            "n_jobs",
-            "N Jobs",
-            "The number of jobs to run in parallel. fit, predict, decision_path and apply are all parallelized over the trees. None means 1 unless in a joblib.parallel_backend context. -1 means using all processors.",
-            -1,
-            10000,
-            None,
-            1,
-            True,
-            False,
-        )
+        # user should not be able to set this
+        # pb.add_number(
+        #     "n_jobs",
+        #     "N Jobs",
+        #     "The number of jobs to run in parallel. fit, predict, decision_path and apply are all parallelized over the trees. None means 1 unless in a joblib.parallel_backend context. -1 means using all processors.",
+        #     -1,
+        #     10000,
+        #     None,
+        #     1,
+        #     True,
+        #     False,
+        # )
 
         return pb.parameters
 

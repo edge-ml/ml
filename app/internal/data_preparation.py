@@ -83,7 +83,7 @@ def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_siz
             if window_end > df.shape[0]:
                 break
             df_segment = df.iloc[window_start:window_end, :col_size]
-            print(df_segment)
+            #print(df_segment)
             df_segment["id"] = id
             id = id + 1
             df_sliding_window = pd.concat([df_sliding_window, df_segment])

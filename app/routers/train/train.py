@@ -1,21 +1,17 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import List
 from requests.models import HTTPError
+from starlette.requests import Request
+from app.ml.trainer import Trainer
 
 from app.routers.dependencies import extract_project_id, validate_user
 
 from app.internal.data_collection import fetch_dataset, fetch_project_datasets
 from app.internal.data_preparation import (
-    extract_labels,
-    create_dataframes,
     format_hyperparameters,
-    interpolate_values,
-    label_dataset,
-    merge_dataframes,
     roll_sliding_window,
 )
-from app.internal.training import train
 
 from app.routers.models.models import edge_models
 
@@ -30,7 +26,7 @@ class TrainBody(BaseModel):
 # Create an edge model with given model id and hyperparameters
 # Return the created model('s id)
 @router.post("/")
-def models_train(body: TrainBody, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
+async def models_train(request: Request, body: TrainBody, background_tasks: BackgroundTasks, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
     model_id = body.model_id
     window_size = next((param for param in body.hyperparameters if param["parameter_name"] == "window_size"), None)["state"]
     sliding_step = next((param for param in body.hyperparameters if param["parameter_name"] == "sliding_step"), None)["state"]
@@ -49,23 +45,10 @@ def models_train(body: TrainBody, user_id=Depends(validate_user), project_id=Dep
     datasets = [fetch_dataset(project_id, token, id) for id in dataset_ids]
     if any(hasattr(d, "error") for d in datasets):
         raise HTTPError("Dataset not in requested project")
+
+    t = Trainer(target_labeling, datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
     
-    labels_with_intervals = [extract_labels(dataset, target_labeling) for dataset in datasets]
-    labels = set([label["label_id"] for interval in labels_with_intervals for label in interval])
-    label_map = {label: idx for idx, label in enumerate(labels)}
-    label_map["Other"] = len(label_map)
-    df_list_each_dataset = [create_dataframes(dataset, selected_timeseries) for dataset in datasets]
-    df_merged_each_dataset = [merge_dataframes(df_list) for df_list in df_list_each_dataset]
-    df_interpolated_each_dataset = [interpolate_values(df, "linear", "both") for df in df_merged_each_dataset]
-    
-    df_labeled_each_dataset = [
-        label_dataset(df, labels_with_intervals[idx], label_map)
-        for idx, df in enumerate(df_interpolated_each_dataset)
-    ]
-    
-    (df_sliding_window, data_y) = roll_sliding_window(
-        df_labeled_each_dataset, window_size, sliding_step, len(selected_timeseries)
-    )
-    
-    train(df_sliding_window, data_y, selected_model, hyperparameters)
+    t_id = request.app.state.training_manager.add(t)
+    background_tasks.add_task(request.app.state.training_manager.start, t_id)
+
     return True

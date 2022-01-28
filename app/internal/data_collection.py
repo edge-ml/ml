@@ -1,25 +1,18 @@
-import requests
+import aiohttp
 
 from requests.models import HTTPError
 
-
-def fetch_project_datasets(project_id, token):
+async def fetch_project_datasets(project_id, token):
     url = "http://localhost:3001/api" + "/datasets/"
-    try:
-        samples = requests.get(
-            url, headers={"Authorization": "Bearer " + token, "project": project_id}
-        )
-    except:
-        raise HTTPError
-    return [x["_id"] for x in samples.json()]
+    headers={"Authorization": "Bearer " + token, "project": project_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as res:
+            return [x["_id"] for x in await res.json()]
 
 
-def fetch_dataset(project_id, token, dataset_id):
+async def fetch_dataset(project_id, token, dataset_id):
     url = "http://localhost:3001/api/datasets/" + dataset_id
-    try:
-        dataset = requests.get(
-            url, headers={"Authorization": "Bearer " + token, "project": project_id}
-        )
-    except:
-        raise HTTPError
-    return dataset.json()
+    headers={"Authorization": "Bearer " + token, "project": project_id}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as dataset:
+            return await dataset.json()

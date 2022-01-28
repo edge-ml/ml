@@ -18,6 +18,7 @@ def extract_labels(dataset, target_labeling):
 def create_dataframes(dataset, selected_timeseries):
     timeseries = [t for t in dataset["timeSeries"] if t["name"] in selected_timeseries]
     df_list = []
+    
     for t in timeseries:
         sensor = t["name"]
         timestamps = []
@@ -27,11 +28,13 @@ def create_dataframes(dataset, selected_timeseries):
             datapoint = d["datapoint"]
             timestamps.append(timestamp)
             datapoints.append(datapoint)
+        
         df = pd.DataFrame()
         df[sensor] = datapoints
         df.index = timestamps
         df.index = pd.to_datetime(df.index, unit="ms")
         df_list.append(df)
+
     return df_list
 
 

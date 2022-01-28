@@ -1,4 +1,4 @@
-from utils.parameter_builder import ParameterBuilder
+from app.utils.parameter_builder import ParameterBuilder
 
 
 class EdgeModel:

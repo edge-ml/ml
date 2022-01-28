@@ -2,11 +2,7 @@ import pandas as pd
 import tsfresh
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-
-from models.random_forest import RandomForest
-
 
 def train(df_sliding_window, data_y, clf, hyperparameters):
     settings = tsfresh.feature_extraction.settings.MinimalFCParameters()
@@ -28,3 +24,4 @@ def train(df_sliding_window, data_y, clf, hyperparameters):
     y_pred = clf.predict(trans_x_test)
     print("accuracy_score train :", accuracy_score(y_test, y_pred))
     return clf
+

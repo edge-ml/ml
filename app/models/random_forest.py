@@ -1,5 +1,5 @@
-from utils.parameter_builder import ParameterBuilder
-from models.edge_model import EdgeModel
+from app.utils.parameter_builder import ParameterBuilder
+from app.models.edge_model import EdgeModel
 from sklearn.ensemble import RandomForestClassifier
 import copy
 

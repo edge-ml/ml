@@ -1,13 +1,9 @@
-from dotenv.main import load_dotenv
 from fastapi.param_functions import Depends
 import jwt
 import os
 from bson.objectid import ObjectId
 from fastapi import status, Header, HTTPException
-
-load_dotenv()
-SECRET_KEY = os.getenv("SECRET_KEY")
-
+from app.internal.config import SECRET_KEY
 
 async def validate_user(Authorization: str = Header(...)):
     try:

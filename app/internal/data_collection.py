@@ -1,9 +1,9 @@
 import aiohttp
 
-from requests.models import HTTPError
+from app.internal.config import API_URI
 
 async def fetch_project_datasets(project_id, token):
-    url = "http://localhost:3001/api" + "/datasets/"
+    url = API_URI + "/datasets/"
     headers={"Authorization": "Bearer " + token, "project": project_id}
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as res:
@@ -11,7 +11,7 @@ async def fetch_project_datasets(project_id, token):
 
 
 async def fetch_dataset(project_id, token, dataset_id):
-    url = "http://localhost:3001/api/datasets/" + dataset_id
+    url = API_URI + "/datasets/" + dataset_id
     headers={"Authorization": "Bearer " + token, "project": project_id}
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as dataset:

@@ -4,6 +4,7 @@ import uvicorn
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.db.db import setup_db_connection
 from app.ml.training_manager import TrainingManager
 from app.routers import ml
 
@@ -30,6 +31,7 @@ async def root():
 
 @app.on_event("startup")
 async def startup():
+    setup_db_connection()
     loop = asyncio.get_event_loop()
     app.state.training_manager = TrainingManager(loop)
 

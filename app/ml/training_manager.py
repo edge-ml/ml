@@ -2,6 +2,9 @@ from asyncio import AbstractEventLoop
 from concurrent.futures import ProcessPoolExecutor
 from typing import Dict
 
+from app.db.models import add_model
+from app.db.models.model import Model
+
 from app.ml.trainer import Trainer
 
 class TrainingManager:
@@ -38,5 +41,10 @@ class TrainingManager:
         data_x, data_y = await self.loop.run_in_executor(self.executor, t.feature_extraction, df_labeled_each_dataset)
         result = await self.loop.run_in_executor(self.executor, t.train, data_x, data_y)
 
-        return result
+        id = await add_model(Model(
+            name="TODO IMPLEMENT", # we need names... for the models we create
+            edge_model=result
+        ))
+        # TODO(discussion): should we do anything with the model now? link it up with training etc maybe?
+
 

@@ -19,5 +19,5 @@ class Model():
     def unmarshal(data):
         return Model(
             name=data.name,
-            edge_model=pickle.laods(data.edge_model)
+            edge_model=pickle.loads(data.edge_model)
         )

@@ -82,7 +82,7 @@ async def trained_model(model=Depends(validate_model)):
         'id':model.id, 
         'name':model.name, 
         'creation_date':model.creation_date,
-        'classifier':type(model.edge_model).__name__.split('.')[-1],
+        'classifier':model.edge_model.get_name(),
         'accuracy': model.accuracy_score,
         'precision': model.precision_score,
         'f1_score': model.f1_score,
@@ -104,7 +104,7 @@ async def trained_models(project_id=Depends(extract_project_id), user=Depends(va
             'id':model.id, 
             'name':model.name, 
             'creation_date':model.creation_date, 
-            'classifier':type(model.edge_model).__name__.split('.')[-1], 
+            'classifier':model.edge_model.get_name(),
             'accuracy': model.accuracy_score,
             'precision': model.precision_score,
             'f1_score': model.f1_score

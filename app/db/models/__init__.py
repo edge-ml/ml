@@ -1,3 +1,4 @@
+from typing import List
 from motor.motor_asyncio import AsyncIOMotorCollection
 from bson.objectid import ObjectId
 
@@ -18,3 +19,10 @@ async def get_model(id: str) -> Model:
     if obj is None:
         raise RuntimeError("Model with given id doesn't exist")
     return Model.unmarshal(obj)
+
+async def get_project_models(project_id: str) -> List[Model]:
+    # TODO number of models that can be returned is limited by 10000
+    objs = await _models().find({'project_id': project_id}).to_list(length=10000)
+    objs =  [Model.unmarshal(obj) for obj in objs]
+    return objs
+

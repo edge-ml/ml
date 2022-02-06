@@ -16,6 +16,7 @@ router = APIRouter()
 
 class TrainBody(BaseModel):
     model_id: int
+    model_name: str
     selected_timeseries: List[str]
     hyperparameters: List
     target_labeling: str
@@ -25,6 +26,8 @@ class TrainBody(BaseModel):
 @router.post("/")
 async def models_train(request: Request, body: TrainBody, background_tasks: BackgroundTasks, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
     model_id = body.model_id
+    model_name = body.model_name
+    print('heey', model_name)
     window_size = next((param for param in body.hyperparameters if param["parameter_name"] == "window_size"), None)["state"]
     sliding_step = next((param for param in body.hyperparameters if param["parameter_name"] == "sliding_step"), None)["state"]
     selected_model = next((model for model in edge_models if model["id"] == model_id), None)["model"]

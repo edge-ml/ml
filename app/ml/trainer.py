@@ -4,6 +4,7 @@ from typing import Any
 import uuid
 
 import pandas as pd
+from numpy import array2string
 import tsfresh
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler
@@ -12,6 +13,7 @@ from sklearn.metrics import (
     confusion_matrix, 
     precision_score, 
     recall_score, 
+    f1_score,
     classification_report
 )
 
@@ -29,6 +31,17 @@ from app.ml.training_state import TrainingState
 class Trainer:
     training_state: TrainingState = TrainingState.NO_TRAINING_YET
     id: str
+
+    @staticmethod
+    def _calculate_model_metrics(y_test, y_pred):
+        metrics = {}
+        metrics['accuracy_score'] = accuracy_score(y_test, y_pred)
+        metrics['precision_score'] = precision_score(y_test, y_pred, average='weighted')
+        metrics['recall_score'] = recall_score(y_test, y_pred, average='weighted')
+        metrics['f1_score'] = f1_score(y_test, y_pred, average='weighted')
+        metrics['confusion_matrix'] = array2string(confusion_matrix(y_test, y_pred))
+        metrics['classification_report'] = classification_report(y_test, y_pred)
+        return metrics
 
     def __init__(
         self,
@@ -80,14 +93,16 @@ class Trainer:
         y_pred = self.selected_model.predict(trans_x_test)
         print("accuracy_score train :", accuracy_score(y_test, y_pred))
         print('confusion matrix: ', confusion_matrix(y_test, y_pred))
-        # print('precision', precision_score(y_test, y_pred))
-        # print('recall', recall_score(y_test, y_pred))
-        print(classification_report(y_test, y_pred))
+        print('precision', precision_score(y_test, y_pred, average='weighted'))
+        print('recall', recall_score(y_test, y_pred, average='weighted'))
+        print('f1', f1_score(y_test, y_pred, average='weighted'))
+        # print(classification_report(y_test, y_pred))
         #f1 accuracy precision recall
         ############# TRAINING_SUCCESSFUL
         self._setTrainingState(TrainingState.TRAINING_SUCCESSFUL)
-        return self.selected_model
+        return (self.selected_model, self._calculate_model_metrics(y_test, y_pred))
 
+    
     def get_df_labeled_each_dataset(self):
         ############# TRAINING_INITIATED
         self._setTrainingState(TrainingState.TRAINING_INITIATED)

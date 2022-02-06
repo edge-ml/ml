@@ -1,5 +1,8 @@
+from typing import List
 from fastapi import APIRouter, Depends
-from app.routers.dependencies import validate_model
+from app.db.models import get_project_models
+from app.routers.dependencies import extract_project_id, validate_model, validate_user
+from pydantic import BaseModel
 
 from app.models.edge_model import EdgeModel
 from app.models.kneighbours import KNeighbours
@@ -53,14 +56,41 @@ async def models():
 async def models_platforms():
     return "Platforms the model is available to"
 
-
 # Export a model
-@router.get("/{model_id}/export")
-async def models_export(platform: str, validation=Depends(validate_model)):
+@router.get("/trained/{model_id}/export")
+async def trained_model_export(platform: str, validation=Depends(validate_model)):
     return f"Model export to {platform}..."
 
 
-# Get the perfomance metrics of a trained model
-@router.get("/{model_id}/metrics")
-async def models_metrics(model=Depends(validate_model)):
+# Get a trained model
+@router.get("/trained/{model_id}")
+async def trained_model(model=Depends(validate_model)):
     return model.name
+
+class TrainedModel(BaseModel):
+    id: str
+    name: str
+    creation_date: float
+    classifier: str
+    accuracy: float
+    precision: float
+    f1_score: float
+
+# Get a list of trained models
+@router.get("/trained", response_model=List[TrainedModel])
+async def trained_models(project_id=Depends(extract_project_id), user=Depends(validate_user)):
+    models = await get_project_models(project_id)
+    if not models:
+        return [] 
+    classifier = type(models[0].edge_model).__name__.split('.')[-1]
+    return [
+        {
+            'id':model.id, 
+            'name':model.name, 
+            'creation_date':model.creation_date, 
+            'classifier':classifier, 
+            'accuracy': model.accuracy_score,
+            'precision': model.precision_score,
+            'f1_score': model.f1_score
+        } for model in models
+    ]

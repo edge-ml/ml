@@ -43,7 +43,7 @@ class TrainingManager:
         (model, metrics) = await self.loop.run_in_executor(self.executor, t.train, data_x, data_y)
 
         id = await add_model(Model(
-            name="TODO IMPLEMENT", # we need names... for the models we create
+            name=t.name,
             id=None,
             project_id=t.project_id,
             creation_date=time.time(),

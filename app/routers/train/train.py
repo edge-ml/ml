@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import List
-from requests.models import HTTPError
+from fastapi import status, HTTPException
 from starlette.requests import Request
 from app.ml.trainer import Trainer
 import asyncio
@@ -27,7 +27,8 @@ class TrainBody(BaseModel):
 async def models_train(request: Request, body: TrainBody, background_tasks: BackgroundTasks, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
     model_id = body.model_id
     model_name = body.model_name
-    print('heey', model_name)
+    if not model_name:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No name is given")
     window_size = next((param for param in body.hyperparameters if param["parameter_name"] == "window_size"), None)["state"]
     sliding_step = next((param for param in body.hyperparameters if param["parameter_name"] == "sliding_step"), None)["state"]
     selected_model = next((model for model in edge_models if model["id"] == model_id), None)["model"]
@@ -36,17 +37,17 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     selected_timeseries = body.selected_timeseries
     token = user_id[1]
     if not selected_timeseries:
-        raise HTTPError("No timeseries is selected")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No timeseries is selected")
     
     dataset_ids = await fetch_project_datasets(project_id, token)
     if not dataset_ids:
-        raise HTTPError("No dataset is available")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No dataset is available")
     
     datasets = await asyncio.gather(*[fetch_dataset(project_id, token, id) for id in dataset_ids])
     if any(hasattr(d, "error") for d in datasets):
-        raise HTTPError("Dataset not in requested project")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Dataset not in requested project")
 
-    t = Trainer(project_id, target_labeling, datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
+    t = Trainer(model_name, project_id, target_labeling, datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
     
     request.app.state.training_manager.add(t)
     background_tasks.add_task(request.app.state.training_manager.start, t.id)

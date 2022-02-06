@@ -45,11 +45,12 @@ class Trainer:
 
     def __init__(
         self,
-        project_id, target_labeling, datasets, selected_timeseries,
+        name, project_id, target_labeling, datasets, selected_timeseries,
         window_size, sliding_step,
         selected_model, hyperparameters
     ) -> None:
         self.id = uuid.uuid4().hex
+        self.name = name
         self.project_id = project_id
         self.target_labeling = target_labeling
         self.datasets = datasets

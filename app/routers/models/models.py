@@ -62,5 +62,5 @@ async def models_export(platform: str, validation=Depends(validate_model)):
 
 # Get the perfomance metrics of a trained model
 @router.get("/{model_id}/metrics")
-async def models_metrics(validation=Depends(validate_model)):
-    return "Performance metrics"
+async def models_metrics(model=Depends(validate_model)):
+    return model.name

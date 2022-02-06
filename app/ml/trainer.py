@@ -7,7 +7,13 @@ import pandas as pd
 import tsfresh
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import ( 
+    accuracy_score, 
+    confusion_matrix, 
+    precision_score, 
+    recall_score, 
+    classification_report
+)
 
 from app.internal.data_preparation import (
     extract_labels,
@@ -26,11 +32,12 @@ class Trainer:
 
     def __init__(
         self,
-        target_labeling, datasets, selected_timeseries,
+        project_id, target_labeling, datasets, selected_timeseries,
         window_size, sliding_step,
         selected_model, hyperparameters
     ) -> None:
         self.id = uuid.uuid4().hex
+        self.project_id = project_id
         self.target_labeling = target_labeling
         self.datasets = datasets
         self.selected_timeseries = selected_timeseries
@@ -72,7 +79,11 @@ class Trainer:
         self.selected_model.fit(trans_x_train, y_train)
         y_pred = self.selected_model.predict(trans_x_test)
         print("accuracy_score train :", accuracy_score(y_test, y_pred))
-        
+        print('confusion matrix: ', confusion_matrix(y_test, y_pred))
+        # print('precision', precision_score(y_test, y_pred))
+        # print('recall', recall_score(y_test, y_pred))
+        print(classification_report(y_test, y_pred))
+        #f1 accuracy precision recall
         ############# TRAINING_SUCCESSFUL
         self._setTrainingState(TrainingState.TRAINING_SUCCESSFUL)
         return self.selected_model

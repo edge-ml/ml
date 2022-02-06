@@ -43,8 +43,10 @@ class TrainingManager:
 
         id = await add_model(Model(
             name="TODO IMPLEMENT", # we need names... for the models we create
+            project_id=t.project_id,
             edge_model=result
         ))
+        print('id', id)
         # TODO(discussion): should we do anything with the model now? link it up with training etc maybe?
 
 

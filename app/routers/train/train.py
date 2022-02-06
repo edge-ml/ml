@@ -43,7 +43,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     if any(hasattr(d, "error") for d in datasets):
         raise HTTPError("Dataset not in requested project")
 
-    t = Trainer(target_labeling, datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
+    t = Trainer(project_id, target_labeling, datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
     
     request.app.state.training_manager.add(t)
     background_tasks.add_task(request.app.state.training_manager.start, t.id)

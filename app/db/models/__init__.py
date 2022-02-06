@@ -13,8 +13,8 @@ async def add_model(model: Model) -> ObjectId:
     return res.inserted_id
 
 
-async def get_model(id: ObjectId) -> Model:
-    obj = await _models().find_one({ '_id': id })
+async def get_model(id: str) -> Model:
+    obj = await _models().find_one({ '_id': ObjectId(id) })
     if obj is None:
         raise RuntimeError("Model with given id doesn't exist")
     return Model.unmarshal(obj)

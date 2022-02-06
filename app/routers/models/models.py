@@ -12,24 +12,24 @@ from app.models.random_forest import RandomForest
 router = APIRouter()
 
 edge_models = [
-    {
-        "name": EdgeModel.get_name(),
-        "description": EdgeModel.get_description(),
-        "id": 0,
-        "hyperparameters": EdgeModel.get_hyperparameters(),
-        "model": EdgeModel(),
-    },
+    # {
+    #     "name": EdgeModel.get_name(),
+    #     "description": EdgeModel.get_description(),
+    #     "id": 0,
+    #     "hyperparameters": EdgeModel.get_hyperparameters(),
+    #     "model": EdgeModel(),
+    # },
     {
         "name": RandomForest.get_name(),
         "description": RandomForest.get_description(),
-        "id": 1,
+        "id": 0,
         "hyperparameters": RandomForest.get_hyperparameters(),
         "model": RandomForest(),
     },
     {
         "name": KNeighbours.get_name(),
         "description": KNeighbours.get_description(),
-        "id": 2,
+        "id": 1,
         "hyperparameters": KNeighbours.get_hyperparameters(),
         "model": KNeighbours(),
     },
@@ -61,12 +61,6 @@ async def models_platforms():
 async def trained_model_export(platform: str, validation=Depends(validate_model)):
     return f"Model export to {platform}..."
 
-
-# Get a trained model
-@router.get("/trained/{model_id}")
-async def trained_model(model=Depends(validate_model)):
-    return model.name
-
 class TrainedModel(BaseModel):
     id: str
     name: str
@@ -76,19 +70,41 @@ class TrainedModel(BaseModel):
     precision: float
     f1_score: float
 
+class ModelMetrics(TrainedModel):
+    hyperparameters: dict
+    confusion_matrix: str
+    classification_report: str
+
+# Get a trained model
+@router.get("/trained/{model_id}", response_model=ModelMetrics)
+async def trained_model(model=Depends(validate_model)):
+    return {
+        'id':model.id, 
+        'name':model.name, 
+        'creation_date':model.creation_date,
+        'classifier':type(model.edge_model).__name__.split('.')[-1],
+        'accuracy': model.accuracy_score,
+        'precision': model.precision_score,
+        'f1_score': model.f1_score,
+        'confusion_matrix': model.confusion_matrix,
+        'classification_report': model.classification_report,
+        'hyperparameters': model.edge_model.hyperparameters
+    }
+
+
+
 # Get a list of trained models
 @router.get("/trained", response_model=List[TrainedModel])
 async def trained_models(project_id=Depends(extract_project_id), user=Depends(validate_user)):
     models = await get_project_models(project_id)
     if not models:
         return [] 
-    classifier = type(models[0].edge_model).__name__.split('.')[-1]
     return [
         {
             'id':model.id, 
             'name':model.name, 
             'creation_date':model.creation_date, 
-            'classifier':classifier, 
+            'classifier':type(model.edge_model).__name__.split('.')[-1], 
             'accuracy': model.accuracy_score,
             'precision': model.precision_score,
             'f1_score': model.f1_score

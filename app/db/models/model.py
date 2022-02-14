@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from app.models.edge_model import EdgeModel
 import pickle
 
@@ -15,6 +15,11 @@ class Model():
     confusion_matrix: str
     classification_report: str
     edge_model: EdgeModel
+
+    size: int = field(default=None)
+
+    def __post_init__(self):
+        self.size = self.size or len(pickle.dumps(self.edge_model))
 
     @staticmethod
     def marshal(that):
@@ -44,5 +49,6 @@ class Model():
             f1_score=data['f1_score'],
             confusion_matrix=data['confusion_matrix'],
             classification_report=data['classification_report'],
-            edge_model=pickle.loads(data['edge_model'])
+            edge_model=pickle.loads(data['edge_model']),
+            size=len(data['edge_model']),
         )

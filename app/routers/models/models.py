@@ -69,6 +69,7 @@ class TrainedModel(BaseModel):
     accuracy: float
     precision: float
     f1_score: float
+    size: int
 
 class ModelMetrics(TrainedModel):
     hyperparameters: dict
@@ -86,12 +87,11 @@ async def trained_model(model=Depends(validate_model)):
         'accuracy': model.accuracy_score,
         'precision': model.precision_score,
         'f1_score': model.f1_score,
+        'size': model.size,
         'confusion_matrix': model.confusion_matrix,
         'classification_report': model.classification_report,
-        'hyperparameters': model.edge_model.hyperparameters
+        'hyperparameters': model.edge_model.hyperparameters,
     }
-
-
 
 # Get a list of trained models
 @router.get("/trained", response_model=List[TrainedModel])
@@ -107,6 +107,7 @@ async def trained_models(project_id=Depends(extract_project_id), user=Depends(va
             'classifier':model.edge_model.get_name(),
             'accuracy': model.accuracy_score,
             'precision': model.precision_score,
-            'f1_score': model.f1_score
+            'f1_score': model.f1_score,
+            'size': model.size,
         } for model in models
     ]

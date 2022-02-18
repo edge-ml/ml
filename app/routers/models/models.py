@@ -8,6 +8,7 @@ from app.models.edge_model import EdgeModel
 from app.models.kneighbours import KNeighbours
 from app.models.mlp import MLP
 from app.models.random_forest import RandomForest
+from app.db.models import delete_model as db_delete_model
 
 router = APIRouter()
 
@@ -92,6 +93,11 @@ async def trained_model(model=Depends(validate_model)):
         'classification_report': model.classification_report,
         'hyperparameters': model.edge_model.hyperparameters,
     }
+
+# Delete a trained model
+@router.delete("/trained/{model_id}")
+async def delete_model(user=Depends(validate_user), model=Depends(validate_model)):
+    await db_delete_model(model.id)
 
 # Get a list of trained models
 @router.get("/trained", response_model=List[TrainedModel])

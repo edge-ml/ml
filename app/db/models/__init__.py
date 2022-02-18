@@ -13,9 +13,8 @@ async def add_model(model: Model) -> ObjectId:
     res = await _models().insert_one(Model.marshal(model))
     return res.inserted_id
 
-
 async def get_model(id: str) -> Model:
-    obj = await _models().find_one({ '_id': ObjectId(id) })
+    obj = await _models().find_one({'_id': ObjectId(id)})
     if obj is None:
         raise RuntimeError("Model with given id doesn't exist")
     return Model.unmarshal(obj)
@@ -26,3 +25,6 @@ async def get_project_models(project_id: str) -> List[Model]:
     objs =  [Model.unmarshal(obj) for obj in objs]
     return objs
 
+async def delete_model(id: str) -> None:
+    res = await _models().delete_one({ '_id': ObjectId(id)})
+    print(res.deleted_count)

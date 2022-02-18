@@ -98,6 +98,7 @@ async def trained_model(model=Depends(validate_model)):
 @router.delete("/trained/{model_id}")
 async def delete_model(user=Depends(validate_user), model=Depends(validate_model)):
     await db_delete_model(model.id)
+    return True
 
 # Get a list of trained models
 @router.get("/trained", response_model=List[TrainedModel])

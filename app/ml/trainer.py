@@ -67,6 +67,8 @@ class Trainer:
 
     def feature_extraction(self, df_labeled_each_dataset):
         (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, self.window_size, self.sliding_step, len(self.selected_timeseries))
+        if df_sliding_window.shape[0] // self.window_size <= 1:
+            raise ValueError("Not enough features to extract, try setting the window size to a lower value")
         ############# FEATURE_EXTRACTION
         self._setTrainingState(TrainingState.FEATURE_EXTRACTION)
         settings = tsfresh.feature_extraction.settings.MinimalFCParameters()
@@ -97,8 +99,6 @@ class Trainer:
         print('precision', precision_score(y_test, y_pred, average='weighted'))
         print('recall', recall_score(y_test, y_pred, average='weighted'))
         print('f1', f1_score(y_test, y_pred, average='weighted'))
-        # print(classification_report(y_test, y_pred))
-        #f1 accuracy precision recall
         ############# TRAINING_SUCCESSFUL
         self._setTrainingState(TrainingState.TRAINING_SUCCESSFUL)
         return (self.selected_model, self._calculate_model_metrics(y_test, y_pred))

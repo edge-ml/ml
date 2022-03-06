@@ -2,7 +2,8 @@ from fastapi.param_functions import Depends
 import jwt
 from bson.objectid import ObjectId
 from fastapi import status, Header, HTTPException
-from app.db.models import get_model, get_project
+from app.db.models import get_model
+from app.db.projects import get_project
 from app.internal.config import SECRET_KEY
 
 async def extract_project_id(project: str = Header(...)):

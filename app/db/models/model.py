@@ -17,9 +17,11 @@ class Model():
     edge_model: EdgeModel
 
     size: int = field(default=None)
+    pickled_edge_model: bytes = field(default=None)
 
     def __post_init__(self):
-        self.size = self.size or len(pickle.dumps(self.edge_model))
+        self.pickled_edge_model = self.pickled_edge_model or pickle.dumps(self.edge_model)
+        self.size = self.size or len(self.pickled_edge_model)
 
     @staticmethod
     def marshal(that):
@@ -50,5 +52,7 @@ class Model():
             confusion_matrix=data['confusion_matrix'],
             classification_report=data['classification_report'],
             edge_model=pickle.loads(data['edge_model']),
+
             size=len(data['edge_model']),
+            pickled_edge_model=data['edge_model'],
         )

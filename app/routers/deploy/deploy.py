@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, Request, Response
 
-from ml.app.db.models import get_model
+from app.db.models import get_model
 from .dependencies import deployment_authorized, deployment_unauthorized
 from app.db.deployments import delete_deployment as db_delete_deployment, rename_deployment as db_rename_deployment
 

@@ -1,5 +1,11 @@
 from app.utils.parameter_builder import ParameterBuilder
+from enum import Enum
 
+class EdgeModelPlatform(Enum):
+    PYTHON = 'python'
+    JAVASCRIPT = 'javascript'
+    JAVA = 'java'
+    C = 'c'
 
 class EdgeModel:
     # static methods
@@ -29,6 +35,10 @@ class EdgeModel:
     def get_description():
         return "Basic model that defines hyperparameters. Predicts random results based on class probability."
 
+    @staticmethod
+    def get_platforms():
+        return []
+
     # class methods
     def __init__(self, hyperparameters={}):
         self.is_fit = False
@@ -45,6 +55,12 @@ class EdgeModel:
         if not self.is_fit:
             return
             # TODO: throw error
+
+    def export(platform: EdgeModelPlatform): # https://github.com/nok/sklearn-porter#estimators (maybe?)
+        if platform == EdgeModelPlatform.JAVASCRIPT:
+            return 'code for js'
+        elif platform == EdgeModelPlatform.JAVA:
+            return 'code for java'
 
     @property
     def hyperparameters(self):

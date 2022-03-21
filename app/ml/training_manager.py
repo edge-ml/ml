@@ -1,4 +1,4 @@
-from asyncio import AbstractEventLoop
+import asyncio
 from concurrent.futures import ProcessPoolExecutor
 from typing import Dict
 
@@ -10,13 +10,11 @@ from app.ml.trainer import Trainer
 
 class TrainingManager:
     executor: ProcessPoolExecutor
-    loop: AbstractEventLoop
 
     trainers: Dict[str, Trainer]
 
-    def __init__(self, loop) -> None:
+    def __init__(self) -> None:
         self.executor = ProcessPoolExecutor()
-        self.loop = loop
         self.trainers = dict()
         pass
 
@@ -35,12 +33,18 @@ class TrainingManager:
         self.executor.shutdown()
         pass
 
+    @staticmethod
+    def train(t):
+        df_labeled_each_dataset = t.get_df_labeled_each_dataset()
+        data_x, data_y = t.feature_extraction(df_labeled_each_dataset)
+        model, metrics = t.train(data_x, data_y)
+
+        return model, metrics
+
     # TODO: implement caching for each intermeditary variable
     async def start(self, id: str):
         t = self.get(id)
-        df_labeled_each_dataset = await self.loop.run_in_executor(self.executor, t.get_df_labeled_each_dataset)
-        data_x, data_y = await self.loop.run_in_executor(self.executor, t.feature_extraction, df_labeled_each_dataset)
-        (model, metrics) = await self.loop.run_in_executor(self.executor, t.train, data_x, data_y)
+        model, metrics = await asyncio.get_running_loop().run_in_executor(self.executor, TrainingManager.train, t)
 
         id = await add_model(Model(
             name=t.name,

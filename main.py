@@ -32,8 +32,7 @@ async def root():
 @app.on_event("startup")
 async def startup():
     setup_db_connection()
-    loop = asyncio.get_event_loop()
-    app.state.training_manager = TrainingManager(loop)
+    app.state.training_manager = TrainingManager()
 
 @app.on_event("shutdown")
 async def shutdown():

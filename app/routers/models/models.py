@@ -78,6 +78,7 @@ class TrainedModel(BaseModel):
 
 class ModelMetrics(TrainedModel):
     hyperparameters: dict
+    labels: List[str]
     confusion_matrix: str
     classification_report: str
 
@@ -93,6 +94,7 @@ async def trained_model(model=Depends(validate_model)):
         'precision': model.precision_score,
         'f1_score': model.f1_score,
         'size': model.size,
+        'labels': model.labels if model.labels else [],
         'confusion_matrix': model.confusion_matrix,
         'classification_report': model.classification_report,
         'hyperparameters': model.edge_model.hyperparameters,

@@ -35,16 +35,16 @@ class TrainingManager:
 
     @staticmethod
     def train(t):
-        df_labeled_each_dataset = t.get_df_labeled_each_dataset()
+        (labels, df_labeled_each_dataset) = t.get_df_labeled_each_dataset()
         data_x, data_y = t.feature_extraction(df_labeled_each_dataset)
         model, metrics = t.train(data_x, data_y)
 
-        return model, metrics
+        return model, metrics, labels
 
     # TODO: implement caching for each intermeditary variable
     async def start(self, id: str):
         t = self.get(id)
-        model, metrics = await asyncio.get_running_loop().run_in_executor(self.executor, TrainingManager.train, t)
+        model, metrics, labels = await asyncio.get_running_loop().run_in_executor(self.executor, TrainingManager.train, t)
 
         id = await add_model(Model(
             name=t.name,
@@ -55,6 +55,7 @@ class TrainingManager:
             precision_score=metrics['precision_score'],
             f1_score=metrics['f1_score'],
             recall_score=metrics['recall_score'],
+            labels=list(labels),
             confusion_matrix=metrics['confusion_matrix'],
             classification_report=metrics['classification_report'],
             edge_model=model

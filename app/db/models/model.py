@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import List
 from app.models.edge_model import EdgeModel
 import pickle
 
@@ -12,6 +13,7 @@ class Model():
     precision_score: float
     recall_score: float
     f1_score: float
+    labels: List[str]
     confusion_matrix: str
     classification_report: str
     edge_model: EdgeModel
@@ -33,6 +35,7 @@ class Model():
             'precision_score': that.precision_score,
             'recall_score': that.recall_score,
             'f1_score': that.f1_score,
+            'labels': that.labels,
             'confusion_matrix': that.confusion_matrix,
             'classification_report': that.classification_report,
             'edge_model': pickle.dumps(that.edge_model)
@@ -49,6 +52,7 @@ class Model():
             precision_score=data['precision_score'],
             recall_score=data['recall_score'],
             f1_score=data['f1_score'],
+            labels=data.get('labels'),
             confusion_matrix=data['confusion_matrix'],
             classification_report=data['classification_report'],
             edge_model=pickle.loads(data['edge_model']),

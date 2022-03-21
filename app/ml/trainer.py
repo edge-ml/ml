@@ -115,7 +115,7 @@ class Trainer:
         df_merged_each_dataset = [merge_dataframes(df_list) for df_list in df_list_each_dataset]
         df_interpolated_each_dataset = [interpolate_values(df, "linear", "both") for df in df_merged_each_dataset]
         
-        return [
+        return (labels, [
             label_dataset(df, labels_with_intervals[idx], label_map)
             for idx, df in enumerate(df_interpolated_each_dataset)
-        ]
+        ])

@@ -7,6 +7,19 @@ class EdgeModelPlatform(Enum):
     JAVA = 'java'
     C = 'c'
 
+    @staticmethod
+    def from_str(label):
+        if label in ('python'):
+            return EdgeModelPlatform.PYTHON
+        elif label in ('javascript'):
+            return EdgeModelPlatform.JAVASCRIPT
+        elif label in ('java'):
+            return EdgeModelPlatform.JAVA
+        elif label in ('c'):
+            return EdgeModelPlatform.C
+        else:
+            raise NotImplementedError
+
 class EdgeModel:
     # static methods
     @staticmethod
@@ -56,11 +69,8 @@ class EdgeModel:
             return
             # TODO: throw error
 
-    def export(platform: EdgeModelPlatform): # https://github.com/nok/sklearn-porter#estimators (maybe?)
-        if platform == EdgeModelPlatform.JAVASCRIPT:
-            return 'code for js'
-        elif platform == EdgeModelPlatform.JAVA:
-            return 'code for java'
+    def export(self, platform: EdgeModelPlatform): # https://github.com/nok/sklearn-porter#estimators (maybe?)
+        raise NotImplementedError
 
     @property
     def hyperparameters(self):

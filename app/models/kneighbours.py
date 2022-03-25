@@ -3,7 +3,6 @@ from app.models.edge_model import EdgeModel, EdgeModelPlatform
 from sklearn.neighbors import KNeighborsClassifier
 import copy
 
-
 class KNeighbours(EdgeModel):
     # static methods
     @staticmethod
@@ -125,7 +124,13 @@ class KNeighbours(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [EdgeModelPlatform.PYTHON, EdgeModelPlatform.JAVASCRIPT, EdgeModelPlatform.JAVA]
+        return [EdgeModelPlatform.PYTHON]
+
+    def export(self, platform: EdgeModelPlatform):
+        if platform == EdgeModelPlatform.PYTHON:
+            return "" # use the saved pickle model
+        else:
+            raise NotImplementedError
 
     # class methods
     def __init__(self):

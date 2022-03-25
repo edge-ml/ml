@@ -214,7 +214,13 @@ class RandomForest(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [EdgeModelPlatform.PYTHON, EdgeModelPlatform.C]
+        return [EdgeModelPlatform.PYTHON]
+
+    def export(self, platform: EdgeModelPlatform):
+        if platform == EdgeModelPlatform.PYTHON:
+            return ""
+        else:
+            raise NotImplementedError
 
     # class methods
     def __init__(self, hyperparameters={}):

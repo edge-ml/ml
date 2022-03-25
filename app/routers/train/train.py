@@ -8,7 +8,7 @@ import asyncio
 from app.routers.dependencies import extract_project_id, validate_user
 
 from app.internal.data_collection import fetch_dataset, fetch_project_datasets
-from app.internal.data_preparation import format_hyperparameters
+from app.internal.data_preparation import filter_by_timeseries, format_hyperparameters
 
 from app.routers.models.models import edge_models
 
@@ -46,8 +46,9 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     datasets = await asyncio.gather(*[fetch_dataset(project_id, token, id) for id in dataset_ids])
     if any(hasattr(d, "error") for d in datasets):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Dataset not in requested project")
-
-    t = Trainer(model_name, project_id, target_labeling, datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
+    
+    filtered_datasets = filter_by_timeseries(datasets, selected_timeseries)
+    t = Trainer(model_name, project_id, target_labeling, filtered_datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
     
     request.app.state.training_manager.add(t)
     background_tasks.add_task(request.app.state.training_manager.start, t.id)

@@ -1,6 +1,18 @@
 import numpy as np
 import pandas as pd
 
+def filter_by_timeseries(datasets, timeseries):
+    filtered_dataset = []
+    for dataset in datasets:
+        dataset_series = [t['name'] for t in dataset['timeSeries']]
+        valid = True
+        for t in timeseries:
+            if t not in dataset_series:
+                valid = False
+                break
+        if valid:
+            filtered_dataset.append(dataset)
+    return filtered_dataset
 
 def extract_labels(dataset, target_labeling):
     labeling = next(

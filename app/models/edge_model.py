@@ -7,7 +7,7 @@ class EdgeModel:
     def get_hyperparameters():
         pb = ParameterBuilder()
         pb.add_number(
-            "window_size", "Window Size", "Sets the window size", 0, 60000, 100, 1, True
+            "window_size", "Window Size", "Sets the window size (in samples)", 0, 60000, 100, 1, True
         )
         pb.add_number(
             "sliding_step",

@@ -7,7 +7,7 @@ def extract_labels(dataset, target_labeling):
         (l for l in dataset["labelings"] if l["labelingId"] == target_labeling), None
     )
     if not labeling:
-        raise "Dataset is not labeled with target labeling"
+        return []
     labels = [
         {"start": l["start"], "end": l["end"], "label_id": l["type"]}
         for l in labeling["labels"]

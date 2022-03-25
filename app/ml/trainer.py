@@ -108,10 +108,11 @@ class Trainer:
         ############# TRAINING_INITIATED
         self._setTrainingState(TrainingState.TRAINING_INITIATED)
         labels_with_intervals = [extract_labels(dataset, self.target_labeling) for dataset in self.datasets]
+        filtered_datasets = [dataset for idx, dataset in enumerate(self.datasets) if labels_with_intervals[idx]]
         labels = set([label["label_id"] for interval in labels_with_intervals for label in interval])
         label_map = {label: idx for idx, label in enumerate(labels)}
         label_map["Other"] = len(label_map)
-        df_list_each_dataset = [create_dataframes(dataset, self.selected_timeseries) for dataset in self.datasets]
+        df_list_each_dataset = [create_dataframes(dataset, self.selected_timeseries) for dataset in filtered_datasets]
         df_merged_each_dataset = [merge_dataframes(df_list) for df_list in df_list_each_dataset]
         df_interpolated_each_dataset = [interpolate_values(df, "linear", "both") for df in df_merged_each_dataset]
         

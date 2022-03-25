@@ -14,6 +14,8 @@ class Model():
     recall_score: float
     f1_score: float
     labels: List[str]
+    timeseries: List[str]
+    window_size: int
     confusion_matrix: str
     classification_report: str
     edge_model: EdgeModel
@@ -36,6 +38,8 @@ class Model():
             'recall_score': that.recall_score,
             'f1_score': that.f1_score,
             'labels': that.labels,
+            'timeseries': that.timeseries,
+            'window_size': that.window_size,
             'confusion_matrix': that.confusion_matrix,
             'classification_report': that.classification_report,
             'edge_model': pickle.dumps(that.edge_model)
@@ -53,6 +57,8 @@ class Model():
             recall_score=data['recall_score'],
             f1_score=data['f1_score'],
             labels=data.get('labels'),
+            timeseries=data.get('timeseries'),
+            window_size=data.get('window_size'),
             confusion_matrix=data['confusion_matrix'],
             classification_report=data['classification_report'],
             edge_model=pickle.loads(data['edge_model']),

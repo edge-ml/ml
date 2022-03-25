@@ -34,7 +34,7 @@ class TrainingManager:
         pass
 
     @staticmethod
-    def train(t):
+    def train(t: Trainer):
         (labels, df_labeled_each_dataset) = t.get_df_labeled_each_dataset()
         data_x, data_y = t.feature_extraction(df_labeled_each_dataset)
         model, metrics = t.train(data_x, data_y)
@@ -56,6 +56,8 @@ class TrainingManager:
             f1_score=metrics['f1_score'],
             recall_score=metrics['recall_score'],
             labels=list(labels),
+            timeseries=t.selected_timeseries,
+            window_size=t.window_size,
             confusion_matrix=metrics['confusion_matrix'],
             classification_report=metrics['classification_report'],
             edge_model=model

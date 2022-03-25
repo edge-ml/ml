@@ -73,7 +73,7 @@ class Trainer:
         self._setTrainingState(TrainingState.FEATURE_EXTRACTION)
         settings = tsfresh.feature_extraction.settings.MinimalFCParameters()
         data_x = tsfresh.extract_features(
-            df_sliding_window, column_id="id", default_fc_parameters=settings, n_jobs=0
+            df_sliding_window, column_id="id", default_fc_parameters=settings
         )
 
         return data_x, data_y

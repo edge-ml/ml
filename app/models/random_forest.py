@@ -1,6 +1,8 @@
 from app.utils.parameter_builder import ParameterBuilder
 from app.models.edge_model import EdgeModel, EdgeModelPlatform
 from sklearn.ensemble import RandomForestClassifier
+from micromlgen import port
+
 import copy
 
 
@@ -214,12 +216,15 @@ class RandomForest(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [EdgeModelPlatform.PYTHON]
+        return [EdgeModelPlatform.PYTHON, EdgeModelPlatform.C]
 
     def export(self, platform: EdgeModelPlatform):
         if platform == EdgeModelPlatform.PYTHON:
             return ""
+        elif platform == EdgeModelPlatform.C:
+            return port(self.clf)
         else:
+            print(platform)
             raise NotImplementedError
 
     # class methods

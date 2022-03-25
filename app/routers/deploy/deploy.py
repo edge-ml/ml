@@ -19,6 +19,8 @@ async def export(platform: str, model: Model = Depends(validate_model)):
     timeseries = model.timeseries if model.timeseries else ["Sensor_A", "Sensor_B", "Sensor_C"]
     labels = model.labels if model.labels else []
     wsize =  model.window_size if model.window_size else "<WINDOW_SIZE>"
+
+    print(platform + " Platform: " + str(EdgeModelPlatform.from_str(platform)))
     
     if (EdgeModelPlatform.from_str(platform) == EdgeModelPlatform.PYTHON):
         tadd = ""

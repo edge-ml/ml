@@ -9,13 +9,13 @@ class EdgeModelPlatform(Enum):
 
     @staticmethod
     def from_str(label):
-        if label in ('python'):
+        if label.lower() == 'python':
             return EdgeModelPlatform.PYTHON
-        elif label in ('javascript'):
+        elif label.lower() == 'javascript':
             return EdgeModelPlatform.JAVASCRIPT
-        elif label in ('java'):
+        elif label.lower() == 'java':
             return EdgeModelPlatform.JAVA
-        elif label in ('c'):
+        elif label.lower() == 'c':
             return EdgeModelPlatform.C
         else:
             raise NotImplementedError

@@ -30,6 +30,7 @@ edge_models = [
         "id": 0,
         "hyperparameters": RandomForest.get_hyperparameters(),
         "model": RandomForest(),
+        "platforms": RandomForest.get_platforms()
     },
     {
         "name": KNeighbours.get_name(),
@@ -37,6 +38,7 @@ edge_models = [
         "id": 1,
         "hyperparameters": KNeighbours.get_hyperparameters(),
         "model": KNeighbours(),
+        "platforms": RandomForest.get_platforms()
     },
     # {
     #     "name": MLP.get_name(),

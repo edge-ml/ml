@@ -1,5 +1,5 @@
 from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel
+from app.models.edge_model import EdgeModel, EdgeModelPlatform
 from sklearn.ensemble import RandomForestClassifier
 import copy
 
@@ -211,6 +211,10 @@ class RandomForest(EdgeModel):
     @staticmethod
     def get_description():
         return "A simple random forest classifier."
+
+    @staticmethod
+    def get_platforms():
+        return [EdgeModelPlatform.PYTHON, EdgeModelPlatform.C]
 
     # class methods
     def __init__(self, hyperparameters={}):

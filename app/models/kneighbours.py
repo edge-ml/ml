@@ -1,5 +1,5 @@
 from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel
+from app.models.edge_model import EdgeModel, EdgeModelPlatform
 from sklearn.neighbors import KNeighborsClassifier
 import copy
 
@@ -122,6 +122,10 @@ class KNeighbours(EdgeModel):
     @staticmethod
     def get_description():
         return "A simple K-Nearest Neighbours classifier."
+
+    @staticmethod
+    def get_platforms():
+        return [EdgeModelPlatform.PYTHON, EdgeModelPlatform.JAVASCRIPT, EdgeModelPlatform.JAVA]
 
     # class methods
     def __init__(self):

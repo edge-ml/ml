@@ -46,7 +46,7 @@ class Trainer:
     def __init__(
         self,
         name, project_id, target_labeling, datasets, selected_timeseries,
-        window_size, sliding_step,
+        window_size, sliding_step, use_unlabelled,
         selected_model, hyperparameters
     ) -> None:
         self.id = uuid.uuid4().hex
@@ -57,6 +57,7 @@ class Trainer:
         self.selected_timeseries = selected_timeseries
         self.window_size = window_size
         self.sliding_step = sliding_step
+        self.use_unlabelled = use_unlabelled
         self.selected_model = selected_model
         self.hyperparameters = hyperparameters
 
@@ -118,6 +119,6 @@ class Trainer:
         df_interpolated_each_dataset = [interpolate_values(df, "linear", "both") for df in df_merged_each_dataset]
         
         return (labels, [
-            label_dataset(df, labels_with_intervals[idx], label_map)
+            label_dataset(df, labels_with_intervals[idx], label_map, self.use_unlabelled)
             for idx, df in enumerate(df_interpolated_each_dataset)
         ])

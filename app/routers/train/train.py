@@ -1,3 +1,4 @@
+from re import U
 from fastapi import APIRouter, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import List
@@ -31,6 +32,8 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No name is given")
     window_size = next((param for param in body.hyperparameters if param["parameter_name"] == "window_size"), None)["state"]
     sliding_step = next((param for param in body.hyperparameters if param["parameter_name"] == "sliding_step"), None)["state"]
+    use_unlabelled = next((param for param in body.hyperparameters if param["parameter_name"] == "use_unlabelled"), None)["state"]
+    use_unlabelled = True if use_unlabelled['value'] == 'True' else False
     selected_model = next((model for model in edge_models if model["id"] == model_id), None)["model"]
     hyperparameters = format_hyperparameters(body.hyperparameters)
     target_labeling = body.target_labeling
@@ -48,7 +51,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Dataset not in requested project")
     
     filtered_datasets = filter_by_timeseries(datasets, selected_timeseries)
-    t = Trainer(model_name, project_id, target_labeling, filtered_datasets, selected_timeseries, window_size, sliding_step, selected_model, hyperparameters)
+    t = Trainer(model_name, project_id, target_labeling, filtered_datasets, selected_timeseries, window_size, sliding_step, use_unlabelled, selected_model, hyperparameters)
     
     request.app.state.training_manager.add(t)
     background_tasks.add_task(request.app.state.training_manager.start, t.id)

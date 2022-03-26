@@ -67,7 +67,7 @@ def interpolate_values(df, method, direction):
     return df.interpolate(method=method, limit_direction=direction)
 
 
-def label_dataset(df, labels, label_map):
+def label_dataset(df, labels, label_map, use_unlabelled):
     label_list = np.array([np.NAN] * df.shape[0])
     df_labeled = df.copy()
     df_labeled_temp = df_labeled.reset_index()
@@ -80,7 +80,8 @@ def label_dataset(df, labels, label_map):
         ]
         label_list[df_interval.index] = label_map[label]
     df_labeled["labels"] = label_list
-    df_labeled["labels"] = df_labeled["labels"].fillna(label_map["Other"])
+    if use_unlabelled:
+        df_labeled["labels"] = df_labeled["labels"].fillna(label_map["Other"])
     return df_labeled
 
 
@@ -94,12 +95,14 @@ def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_siz
             window_end = i + window_size
             if window_end > df.shape[0]:
                 break
+            most_voted = df.iloc[window_start:window_end, col_size].mode()
+            if most_voted.empty:
+                continue
             df_segment = df.iloc[window_start:window_end, :col_size]
-            #print(df_segment)
             df_segment["id"] = id
             id = id + 1
             df_sliding_window = pd.concat([df_sliding_window, df_segment])
-            data_y.append(df.iloc[window_start:window_end, col_size].mode().iloc[0])
+            data_y.append(most_voted.iloc[0])
     print(data_y)
     return (df_sliding_window, data_y)
 
@@ -109,7 +112,7 @@ def format_hyperparameters(hyperparameters):
     formatted = {}
     for param in hyperparameters:
         param_name = param["parameter_name"]
-        if param_name == "window_size" or param_name == "sliding_step":
+        if param_name == "window_size" or param_name == "sliding_step" or param_name == "use_unlabelled":
             continue
         param_value = (
             param["state"]["value"]

@@ -112,7 +112,7 @@ def format_hyperparameters(hyperparameters):
     formatted = {}
     for param in hyperparameters:
         param_name = param["parameter_name"]
-        if param_name == "window_size" or param_name == "sliding_step" or param_name == "use_unlabelled":
+        if param_name == "window_size" or param_name == "sliding_step":
             continue
         param_value = (
             param["state"]["value"]

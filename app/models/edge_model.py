@@ -38,8 +38,6 @@ class EdgeModel:
             1,
             True,
         )
-
-        pb.add_boolean("use_unlabelled", "Use Unlabelled", "Option to define behaviour whether the unlabelled parts should be included in the model training as labelled with 'Other'", False, True)
         return pb.parameters
 
     @staticmethod

@@ -1,4 +1,3 @@
-from re import U
 from fastapi import APIRouter, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import List
@@ -21,6 +20,7 @@ class TrainBody(BaseModel):
     selected_timeseries: List[str]
     hyperparameters: List
     target_labeling: str
+    use_unlabelled: bool
 
 # Create an edge model with given model id and hyperparameters
 # Return the created model('s id)
@@ -32,10 +32,9 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No name is given")
     window_size = next((param for param in body.hyperparameters if param["parameter_name"] == "window_size"), None)["state"]
     sliding_step = next((param for param in body.hyperparameters if param["parameter_name"] == "sliding_step"), None)["state"]
-    use_unlabelled = next((param for param in body.hyperparameters if param["parameter_name"] == "use_unlabelled"), None)["state"]
-    use_unlabelled = True if use_unlabelled['value'] == 'True' else False
     selected_model = next((model for model in edge_models if model["id"] == model_id), None)["model"]
     hyperparameters = format_hyperparameters(body.hyperparameters)
+    use_unlabelled = body.use_unlabelled
     target_labeling = body.target_labeling
     selected_timeseries = body.selected_timeseries
     token = user_id[1]

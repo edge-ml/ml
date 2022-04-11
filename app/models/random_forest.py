@@ -1,7 +1,9 @@
+from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel, EdgeModelPlatform
+from app.models.edge_model import EdgeModel
 from sklearn.ensemble import RandomForestClassifier
 from micromlgen import port
+import m2cgen as m2c
 
 import copy
 
@@ -216,13 +218,17 @@ class RandomForest(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [EdgeModelPlatform.PYTHON, EdgeModelPlatform.C]
+        return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.C_EMBEDDED]
 
-    def export(self, platform: EdgeModelPlatform):
-        if platform == EdgeModelPlatform.PYTHON:
-            return ""
-        elif platform == EdgeModelPlatform.C:
+    def export(self, platform: InferenceFormats):
+        if platform == InferenceFormats.PYTHON:
+            return m2c.export_to_python(self.clf)
+        elif platform == InferenceFormats.C_EMBEDDED:
             return port(self.clf)
+        elif platform == InferenceFormats.C:
+            return m2c.export_to_c(self.clf)
+        elif platform == InferenceFormats.C:
+            return m2c.export_to_javascript(self.clf)
         else:
             print(platform)
             raise NotImplementedError

@@ -3,7 +3,6 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from bson.objectid import ObjectId
 
 from app.db.db import get_db
-from app.db.deployments import delete_all_deployments_of_model
 
 from .model import Model
 
@@ -27,5 +26,4 @@ async def get_project_models(project_id: str) -> List[Model]:
     return objs
 
 async def delete_model(id: str) -> None:
-    await delete_all_deployments_of_model(id) # mongo not relational
     await _models().delete_one({ '_id': ObjectId(id)})

@@ -2,6 +2,7 @@ import time
 from typing import List, Optional
 from uuid import uuid4
 from fastapi import APIRouter, Depends
+from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.db.models import get_project_models
 from app.routers.dependencies import extract_project_id, validate_model, validate_user
 from pydantic import BaseModel
@@ -11,8 +12,6 @@ from app.models.kneighbours import KNeighbours
 from app.models.mlp import MLP
 from app.models.random_forest import RandomForest
 from app.db.models import delete_model as db_delete_model
-from app.db.deployments import add_deployment, get_model_deployments
-from app.db.deployments.deployment import Deployment
 
 router = APIRouter()
 
@@ -57,17 +56,6 @@ async def models():
 
     return edge_models
 
-
-# Get a list of platforms the model is available to.
-@router.get("/platforms")
-async def models_platforms():
-    return "Platforms the model is available to"
-
-# Export a model
-@router.get("/trained/{model_id}/export")
-async def trained_model_export(platform: str, validation=Depends(validate_model)):
-    return f"Model export to {platform}..."
-
 class TrainedModel(BaseModel):
     id: str
     name: str
@@ -83,6 +71,7 @@ class ModelMetrics(TrainedModel):
     labels: List[str]
     confusion_matrix: str
     classification_report: str
+    platforms: List[InferenceFormats]
 
 # Get a trained model
 @router.get("/trained/{model_id}", response_model=ModelMetrics)
@@ -100,6 +89,7 @@ async def trained_model(model=Depends(validate_model)):
         'confusion_matrix': model.confusion_matrix,
         'classification_report': model.classification_report,
         'hyperparameters': model.edge_model.hyperparameters,
+        'platforms': model.edge_model.get_platforms(),
     }
 
 # Delete a trained model
@@ -125,33 +115,4 @@ async def trained_models(project_id=Depends(extract_project_id), user=Depends(va
             'f1_score': model.f1_score,
             'size': model.size,
         } for model in models
-    ]
-
-class NewDeploymentBody(BaseModel):
-    name: str = "New deployment"
-
-# Create a new deployment from trained model
-@router.post("/trained/{model_id}/deploy")
-async def trained_deploy(body: NewDeploymentBody, user=Depends(validate_user), model=Depends(validate_model)):
-    key = await add_deployment(Deployment(
-        name=body.name,
-        model_id=model.id,
-        project_id=model.project_id,
-        creation_date=time.time(),
-        key=str(uuid4())
-    ))
-    return key
-
-# Get model deployments
-@router.get("/trained/{model_id}/deployments")
-async def trained_deploy(user=Depends(validate_user), model=Depends(validate_model)):
-    deployments = await get_model_deployments(project_id=model.project_id, model_id=model.id)
-    if not deployments:
-        return []
-    return [
-        {
-            'name': dep.name,
-            'key': str(dep.key),
-            'creation_date': dep.creation_date,
-        } for dep in deployments
     ]

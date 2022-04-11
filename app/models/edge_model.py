@@ -1,24 +1,5 @@
+from app.codegen.inference import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from enum import Enum
-
-class EdgeModelPlatform(Enum):
-    PYTHON = 'python'
-    JAVASCRIPT = 'javascript'
-    JAVA = 'java'
-    C = 'c'
-
-    @staticmethod
-    def from_str(label):
-        if label.lower() == 'python':
-            return EdgeModelPlatform.PYTHON
-        elif label.lower() == 'javascript':
-            return EdgeModelPlatform.JAVASCRIPT
-        elif label.lower() == 'java':
-            return EdgeModelPlatform.JAVA
-        elif label.lower() == 'c':
-            return EdgeModelPlatform.C
-        else:
-            raise NotImplementedError
 
 class EdgeModel:
     # static methods
@@ -69,7 +50,7 @@ class EdgeModel:
             return
             # TODO: throw error
 
-    def export(self, platform: EdgeModelPlatform): # https://github.com/nok/sklearn-porter#estimators (maybe?)
+    def export(self, platform: InferenceFormats): # https://github.com/nok/sklearn-porter#estimators (maybe?)
         raise NotImplementedError
 
     @property

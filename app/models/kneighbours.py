@@ -1,5 +1,6 @@
+from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel, EdgeModelPlatform
+from app.models.edge_model import EdgeModel
 from sklearn.neighbors import KNeighborsClassifier
 import copy
 
@@ -124,12 +125,9 @@ class KNeighbours(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [EdgeModelPlatform.PYTHON]
+        return []
 
-    def export(self, platform: EdgeModelPlatform):
-        if platform == EdgeModelPlatform.PYTHON:
-            return "" # use the saved pickle model
-        else:
+    def export(self):
             raise NotImplementedError
 
     # class methods

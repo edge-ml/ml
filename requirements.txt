@@ -11,3 +11,4 @@ pandas==1.3.5
 aiohttp==3.8.1
 motor==2.5.1
 micromlgen==1.1.26
+m2cgen==0.9.0

@@ -68,6 +68,8 @@ class TrainedModel(BaseModel):
 
 class ModelMetrics(TrainedModel):
     hyperparameters: dict
+    window_size: int
+    sliding_step: int
     labels: List[str]
     confusion_matrix: str
     classification_report: str
@@ -89,6 +91,8 @@ async def trained_model(model=Depends(validate_model)):
         'confusion_matrix': model.confusion_matrix,
         'classification_report': model.classification_report,
         'hyperparameters': model.edge_model.hyperparameters,
+        'window_size': model.window_size,
+        'sliding_step': model.sliding_step if model.sliding_step else -1,
         'platforms': model.edge_model.get_platforms(),
     }
 

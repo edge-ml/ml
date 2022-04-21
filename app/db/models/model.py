@@ -16,6 +16,7 @@ class Model():
     labels: List[str]
     timeseries: List[str]
     window_size: int
+    sliding_step: int
     confusion_matrix: str
     classification_report: str
     edge_model: EdgeModel
@@ -40,6 +41,7 @@ class Model():
             'labels': that.labels,
             'timeseries': that.timeseries,
             'window_size': that.window_size,
+            'sliding_step': that.sliding_step,
             'confusion_matrix': that.confusion_matrix,
             'classification_report': that.classification_report,
             'edge_model': pickle.dumps(that.edge_model)
@@ -59,6 +61,7 @@ class Model():
             labels=data.get('labels'),
             timeseries=data.get('timeseries'),
             window_size=data.get('window_size'),
+            sliding_step=data.get('sliding_step'),
             confusion_matrix=data['confusion_matrix'],
             classification_report=data['classification_report'],
             edge_model=pickle.loads(data['edge_model']),

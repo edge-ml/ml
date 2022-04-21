@@ -16,7 +16,6 @@ class TrainingManager:
     def __init__(self) -> None:
         self.executor = ProcessPoolExecutor()
         self.trainers = dict()
-        pass
 
     def add(self, t: Trainer) -> str:
         self.trainers[t.id] = t
@@ -31,7 +30,6 @@ class TrainingManager:
 
     def destroy(self):
         self.executor.shutdown()
-        pass
 
     @staticmethod
     def train(t: Trainer):
@@ -58,11 +56,11 @@ class TrainingManager:
             labels=list(labels),
             timeseries=t.selected_timeseries,
             window_size=t.window_size,
+            sliding_step=t.sliding_step,
             confusion_matrix=metrics['confusion_matrix'],
             classification_report=metrics['classification_report'],
             edge_model=model
         ))
         print('id', id)
-        # TODO(discussion): should we do anything with the model now? link it up with training etc maybe?
 
 

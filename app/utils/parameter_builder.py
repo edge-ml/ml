@@ -3,7 +3,7 @@ class ParameterBuilder:
         self.parameters = parameters
         return
 
-    def add_number(self, parameter_name, display_name, description, number_min, number_max, default, step_size=1, required=True, log=False):
+    def add_number(self, parameter_name, display_name, description, number_min, number_max, default, step_size=1, required=True, log=False, is_advanced=True):
         # TODO: parameter validation
 
         # self.__validateParameterName(self.parameters, parameter_name)
@@ -18,11 +18,12 @@ class ParameterBuilder:
             'default': default,
             'step_size': step_size, # either 'float' or 'int'
             'required': required,
-            'log': log
+            'log': log,
+            'is_advanced': is_advanced
         }
         return self
 
-    def add_selection(self, parameter_name, display_name, description, options, default, multi_select=False, required=True):
+    def add_selection(self, parameter_name, display_name, description, options, default, multi_select=False, required=True, is_advanced=True):
         # TODO: parameter validation
 
         # self.__validateParameterName(self.parameters, parameter_name)
@@ -35,15 +36,16 @@ class ParameterBuilder:
             'options': options,
             'default': default,
             'multi_select': multi_select,
-            'required': required
+            'required': required,
+            'is_advanced': is_advanced
         }
         return self
 
-    def add_boolean(self, parameter_name, display_name, description, default, required=True):
+    def add_boolean(self, parameter_name, display_name, description, default, required=True, is_advanced=True):
         # TODO: parameter validation
 
         # self.__validateParameterName(self.parameters, parameter_name)
-        self.add_selection(parameter_name, display_name, description, ["True", "False"], str(default), False, required)
+        self.add_selection(parameter_name, display_name, description, ["True", "False"], str(default), False, required, is_advanced)
         return self
     
     def __validateParameterName(parameters, parameter_name):

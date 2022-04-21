@@ -11,6 +11,9 @@ from app.models.edge_model import EdgeModel
 from app.models.kneighbours import KNeighbours
 from app.models.mlp import MLP
 from app.models.random_forest import RandomForest
+from app.models.svc import SVC
+from app.models.decision_tree import DecisionTree
+from app.models.random_forest import RandomForest
 from app.db.models import delete_model as db_delete_model
 
 router = APIRouter()
@@ -37,12 +40,28 @@ edge_models = [
         "id": 1,
         "hyperparameters": KNeighbours.get_hyperparameters(),
         "model": KNeighbours(),
-        "platforms": RandomForest.get_platforms()
+        "platforms": KNeighbours.get_platforms()
+    },
+    {
+        "name": DecisionTree.get_name(),
+        "description": DecisionTree.get_description(),
+        "id": 2,
+        "hyperparameters": DecisionTree.get_hyperparameters(),
+        "model": DecisionTree(),
+        "platforms": DecisionTree.get_platforms()
+    },
+    {
+        "name": SVC.get_name(),
+        "description": SVC.get_description(),
+        "id": 3,
+        "hyperparameters": SVC.get_hyperparameters(),
+        "model": SVC(),
+        "platforms": SVC.get_platforms()
     },
     # {
     #     "name": MLP.get_name(),
     #     "description": MLP.get_description(),
-    #     "id": 3,
+    #     "id": 4,
     #     "hyperparameters": MLP.get_hyperparameters(),
     #     "model": MLP(),
     # },
@@ -68,6 +87,8 @@ class TrainedModel(BaseModel):
 
 class ModelMetrics(TrainedModel):
     hyperparameters: dict
+    window_size: int
+    sliding_step: int
     labels: List[str]
     confusion_matrix: str
     classification_report: str
@@ -89,6 +110,8 @@ async def trained_model(model=Depends(validate_model)):
         'confusion_matrix': model.confusion_matrix,
         'classification_report': model.classification_report,
         'hyperparameters': model.edge_model.hyperparameters,
+        'window_size': model.window_size,
+        'sliding_step': model.sliding_step if model.sliding_step else -1,
         'platforms': model.edge_model.get_platforms(),
     }
 

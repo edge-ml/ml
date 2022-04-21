@@ -1,0 +1,14 @@
+{% if tree['left'][i] != tree['right'][i] %}
+    if (features[{{ tree['features'][i] }}] <= {{ tree['thresholds'][i] }}) {
+        {% with i = tree['left'][i] %}
+            {% include 'tree.jinja' %}
+        {% endwith %}
+    }
+    else {
+        {% with i = tree['right'][i] %}
+            {% include 'tree.jinja' %}
+        {% endwith %}
+    }
+{% else %}
+    votes[{{ tree['classes'][i].argmax() }}] += 1;
+{% endif %}

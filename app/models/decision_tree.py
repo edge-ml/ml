@@ -4,6 +4,7 @@ from app.models.edge_model import EdgeModel
 from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
+from app.mcuConverter.mcuConverter import convertMCU
 
 import copy
 
@@ -164,9 +165,9 @@ class DecisionTree(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.C_EMBEDDED]
+        return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.C_EMBEDDED, InferenceFormats.ARDUINO_CPP]
 
-    def export(self, platform: InferenceFormats):
+    def export(self, platform: InferenceFormats, window_size, labels, timeseries):
         if platform == InferenceFormats.PYTHON:
             return m2c.export_to_python(self.clf)
         elif platform == InferenceFormats.C_EMBEDDED:
@@ -175,6 +176,8 @@ class DecisionTree(EdgeModel):
             return m2c.export_to_c(self.clf)
         elif platform == InferenceFormats.JAVASCRIPT:
             return m2c.export_to_javascript(self.clf)
+        elif platform == InferenceFormats.ARDUINO_CPP:
+            return convertMCU(self, window_size, labels, timeseries)
         else:
             print(platform)
             raise NotImplementedError

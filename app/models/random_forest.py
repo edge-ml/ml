@@ -4,7 +4,7 @@ from app.models.edge_model import EdgeModel
 from sklearn.ensemble import RandomForestClassifier
 from micromlgen import port
 import m2cgen as m2c
-from app.mcuConverter.mcuConverter import convertRandomForest
+from app.mcuConverter.mcuConverter import convertMCU
 
 import copy
 
@@ -231,7 +231,7 @@ class RandomForest(EdgeModel):
         elif platform == InferenceFormats.JAVASCRIPT:
             return m2c.export_to_javascript(self.clf)
         elif platform == InferenceFormats.ARDUINO_CPP:
-            return convertRandomForest(self, window_size, labels, timeseries)
+            return convertMCU(self, window_size, labels, timeseries)
         else:
             print(platform)
             raise NotImplementedError

@@ -32,20 +32,22 @@ class Trainer:
     training_state: TrainingState = TrainingState.NO_TRAINING_YET
     id: str
 
-    @staticmethod
-    def _calculate_model_metrics(y_test, y_pred):
+    def _calculate_model_metrics(self, y_test, y_pred):
         metrics = {}
         metrics['accuracy_score'] = accuracy_score(y_test, y_pred)
         metrics['precision_score'] = precision_score(y_test, y_pred, average='weighted')
         metrics['recall_score'] = recall_score(y_test, y_pred, average='weighted')
         metrics['f1_score'] = f1_score(y_test, y_pred, average='weighted')
-        metrics['confusion_matrix'] = array2string(confusion_matrix(y_test, y_pred))
-        metrics['classification_report'] = classification_report(y_test, y_pred)
+        num_labels = [float(idx) for idx, label in enumerate(self.labels)]
+        if self.use_unlabelled:
+            num_labels.append(float(len(num_labels)))
+        metrics['confusion_matrix'] = array2string(confusion_matrix(y_test, y_pred, labels=num_labels))
+        metrics['classification_report'] = classification_report(y_test, y_pred, labels=num_labels, zero_division=0)
         return metrics
 
     def __init__(
         self,
-        name, project_id, target_labeling, datasets, selected_timeseries,
+        name, project_id, target_labeling, labels, datasets, selected_timeseries,
         window_size, sliding_step, use_unlabelled,
         selected_model, hyperparameters
     ) -> None:
@@ -53,6 +55,7 @@ class Trainer:
         self.name = name
         self.project_id = project_id
         self.target_labeling = target_labeling
+        self.labels = labels
         self.datasets = datasets
         self.selected_timeseries = selected_timeseries
         self.window_size = window_size
@@ -111,14 +114,14 @@ class Trainer:
         labels_with_intervals = [extract_labels(dataset, self.target_labeling) for dataset in self.datasets]
         # if dataset does not have the target labeling, filter it
         filtered_datasets = [dataset for idx, dataset in enumerate(self.datasets) if labels_with_intervals[idx]]
-        labels = set([label["label_id"] for interval in labels_with_intervals for label in interval])
-        label_map = {label: idx for idx, label in enumerate(labels)}
+        # self.labels is assumed to have no duplicates
+        label_map = {label: idx for idx, label in enumerate(self.labels)}
         label_map["Other"] = len(label_map)
         df_list_each_dataset = [create_dataframes(dataset, self.selected_timeseries) for dataset in filtered_datasets]
         df_merged_each_dataset = [merge_dataframes(df_list) for df_list in df_list_each_dataset]
         df_interpolated_each_dataset = [interpolate_values(df, "linear", "both") for df in df_merged_each_dataset]
         
-        return (labels, [
+        return (self.labels, [
             label_dataset(df, labels_with_intervals[idx], label_map, self.use_unlabelled)
             for idx, df in enumerate(df_interpolated_each_dataset)
         ])

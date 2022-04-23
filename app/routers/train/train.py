@@ -20,6 +20,7 @@ class TrainBody(BaseModel):
     selected_timeseries: List[str]
     hyperparameters: List
     target_labeling: str
+    labels: List[str]
     use_unlabelled: bool
 
 # Create an edge model with given model id and hyperparameters
@@ -36,6 +37,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     hyperparameters = format_hyperparameters(body.hyperparameters)
     use_unlabelled = body.use_unlabelled
     target_labeling = body.target_labeling
+    labels = body.labels
     selected_timeseries = body.selected_timeseries
     token = user_id[1]
     if not selected_timeseries:
@@ -50,7 +52,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Dataset not in requested project")
     
     filtered_datasets = filter_by_timeseries(datasets, selected_timeseries)
-    t = Trainer(model_name, project_id, target_labeling, filtered_datasets, selected_timeseries, window_size, sliding_step, use_unlabelled, selected_model, hyperparameters)
+    t = Trainer(model_name, project_id, target_labeling, labels, filtered_datasets, selected_timeseries, window_size, sliding_step, use_unlabelled, selected_model, hyperparameters)
     
     request.app.state.training_manager.add(t)
     background_tasks.add_task(request.app.state.training_manager.start, t.id)

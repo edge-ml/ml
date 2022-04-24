@@ -22,6 +22,7 @@ class TrainBody(BaseModel):
     target_labeling: str
     labels: List[str]
     use_unlabelled: bool
+    unlabelled_name: str
 
 # Create an edge model with given model id and hyperparameters
 # Return the created model('s id)
@@ -36,13 +37,21 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     selected_model = next((model for model in edge_models if model["id"] == model_id), None)["model"]
     hyperparameters = format_hyperparameters(body.hyperparameters)
     use_unlabelled = body.use_unlabelled
+    unlabelled_name = body.unlabelled_name
     target_labeling = body.target_labeling
     labels = body.labels
     selected_timeseries = body.selected_timeseries
     token = user_id[1]
+    
     if not selected_timeseries:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No timeseries is selected")
     
+    if not unlabelled_name and use_unlabelled:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No name is provided for the other label")
+
+    if unlabelled_name in labels:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Cannot use id of a label as other label")
+
     dataset_ids = await fetch_project_datasets(project_id, token)
     if not dataset_ids:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No dataset is available")
@@ -52,7 +61,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Dataset not in requested project")
     
     filtered_datasets = filter_by_timeseries(datasets, selected_timeseries)
-    t = Trainer(model_name, project_id, target_labeling, labels, filtered_datasets, selected_timeseries, window_size, sliding_step, use_unlabelled, selected_model, hyperparameters)
+    t = Trainer(model_name, project_id, target_labeling, labels, filtered_datasets, selected_timeseries, window_size, sliding_step, use_unlabelled, unlabelled_name, selected_model, hyperparameters)
     
     request.app.state.training_manager.add(t)
     background_tasks.add_task(request.app.state.training_manager.start, t.id)

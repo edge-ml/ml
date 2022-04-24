@@ -42,7 +42,7 @@ class Trainer:
         target_names = self.labels
         if self.use_unlabelled:
             num_labels.append(float(len(num_labels)))
-            target_names.append("Other")
+            target_names.append(self.unlabelled_name)
         metrics['confusion_matrix'] = array2string(confusion_matrix(y_test, y_pred, labels=num_labels))
         metrics['classification_report'] = classification_report(y_test, y_pred, labels=num_labels, zero_division=0, target_names=target_names)
         return metrics
@@ -50,7 +50,7 @@ class Trainer:
     def __init__(
         self,
         name, project_id, target_labeling, labels, datasets, selected_timeseries,
-        window_size, sliding_step, use_unlabelled,
+        window_size, sliding_step, use_unlabelled, unlabelled_name,
         selected_model, hyperparameters
     ) -> None:
         self.id = uuid.uuid4().hex
@@ -63,6 +63,7 @@ class Trainer:
         self.window_size = window_size
         self.sliding_step = sliding_step
         self.use_unlabelled = use_unlabelled
+        self.unlabelled_name = unlabelled_name
         self.selected_model = selected_model
         self.hyperparameters = hyperparameters
 
@@ -119,12 +120,12 @@ class Trainer:
         # self.labels is assumed to have no duplicates
         label_map = {label: idx for idx, label in enumerate(self.labels)}
         if self.use_unlabelled:
-            label_map["Other"] = len(label_map)
+            label_map[self.unlabelled_name] = len(label_map)
         df_list_each_dataset = [create_dataframes(dataset, self.selected_timeseries) for dataset in filtered_datasets]
         df_merged_each_dataset = [merge_dataframes(df_list) for df_list in df_list_each_dataset]
         df_interpolated_each_dataset = [interpolate_values(df, "linear", "both") for df in df_merged_each_dataset]
         
         return (list(label_map.keys()), [
-            label_dataset(df, labels_with_intervals[idx], label_map, self.use_unlabelled)
+            label_dataset(df, labels_with_intervals[idx], label_map, self.use_unlabelled, self.unlabelled_name)
             for idx, df in enumerate(df_interpolated_each_dataset)
         ])

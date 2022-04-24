@@ -67,7 +67,7 @@ def interpolate_values(df, method, direction):
     return df.interpolate(method=method, limit_direction=direction)
 
 
-def label_dataset(df, labels, label_map, use_unlabelled):
+def label_dataset(df, labels, label_map, use_unlabelled, unlabelled_name):
     label_list = np.array([np.NAN] * df.shape[0])
     df_labeled = df.copy()
     df_labeled_temp = df_labeled.reset_index()
@@ -81,7 +81,7 @@ def label_dataset(df, labels, label_map, use_unlabelled):
         label_list[df_interval.index] = label_map[label]
     df_labeled["labels"] = label_list
     if use_unlabelled:
-        df_labeled["labels"] = df_labeled["labels"].fillna(label_map["Other"])
+        df_labeled["labels"] = df_labeled["labels"].fillna(label_map[unlabelled_name])
     return df_labeled
 
 

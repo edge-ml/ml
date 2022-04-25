@@ -5,6 +5,8 @@ from fastapi import status, HTTPException
 from starlette.requests import Request
 from app.ml.trainer import Trainer
 import asyncio
+from app.ml.training_manager import TrainingManager
+from app.ml.training_state import TrainingState
 from app.routers.dependencies import extract_project_id, validate_user
 
 from app.internal.data_collection import fetch_dataset, fetch_project_datasets
@@ -13,6 +15,26 @@ from app.internal.data_preparation import filter_by_timeseries, format_hyperpara
 from app.routers.models.models import edge_models
 
 router = APIRouter()
+
+class Training(BaseModel):
+    id: str
+    name: str
+    training_state: TrainingState
+
+# Get an active training process
+@router.get("/ongoing/{train_id}", response_model=Training)
+async def trained_model(train_id: str, request: Request, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
+    tm: TrainingManager = request.app.state.training_manager
+    if not tm.has(train_id):
+        raise HTTPException(status_code=404, detail="No active training process with given id")
+    t = tm.get(train_id)
+    return Training(**t.__dict__)
+
+# Get all active training processes
+@router.get("/ongoing", response_model=List[Training])
+async def trained_model(request: Request, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
+    tm: TrainingManager = request.app.state.training_manager
+    return [ Training(**t.__dict__) for t in tm.all() ]
 
 class TrainBody(BaseModel):
     model_id: int

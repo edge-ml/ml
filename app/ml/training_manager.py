@@ -1,12 +1,13 @@
 import asyncio
 from concurrent.futures import ProcessPoolExecutor
-from typing import Dict
+from typing import Dict, List
 
 import time
 from app.db.models import add_model
 from app.db.models.model import Model
 
 from app.ml.trainer import Trainer
+from app.ml.training_state import TrainingState
 
 class TrainingManager:
     executor: ProcessPoolExecutor
@@ -17,9 +18,8 @@ class TrainingManager:
         self.executor = ProcessPoolExecutor()
         self.trainers = dict()
 
-    def add(self, t: Trainer) -> str:
-        self.trainers[t.id] = t
-        return t.id
+    def all(self) -> List[Trainer]:
+        return self.trainers.values()
 
     def has(self, id: str) -> bool:
         return id in self.trainers
@@ -31,20 +31,19 @@ class TrainingManager:
     def destroy(self):
         self.executor.shutdown()
 
-    @staticmethod
-    def train(t: Trainer):
-        (labels, df_labeled_each_dataset) = t.get_df_labeled_each_dataset()
-        data_x, data_y = t.feature_extraction(df_labeled_each_dataset)
-        model, metrics = t.train(data_x, data_y)
-
-        return model, metrics, labels
-
     # TODO: implement caching for each intermeditary variable
-    async def start(self, id: str):
-        t = self.get(id)
-        model, metrics, labels = await asyncio.get_running_loop().run_in_executor(self.executor, TrainingManager.train, t)
+    async def start(self, t: Trainer):
+        self.trainers[t.id] = t
 
-        id = await add_model(Model(
+        t.training_state = TrainingState.TRAINING_INITIATED
+        labels, df_labeled_each_dataset = await asyncio.get_running_loop().run_in_executor(self.executor, t.get_df_labeled_each_dataset)
+        t.training_state = TrainingState.FEATURE_EXTRACTION
+        data_x, data_y = await asyncio.get_running_loop().run_in_executor(self.executor, t.feature_extraction, df_labeled_each_dataset)
+        t.training_state = TrainingState.MODEL_TRAINING
+        model, metrics = await asyncio.get_running_loop().run_in_executor(self.executor, t.train, data_x, data_y)
+        t.training_state = TrainingState.TRAINING_SUCCESSFUL
+
+        await add_model(Model(
             name=t.name,
             id=None,
             project_id=t.project_id,
@@ -61,6 +60,7 @@ class TrainingManager:
             classification_report=metrics['classification_report'],
             edge_model=model
         ))
-        print('id', id)
+        
+        del self.trainers[t.id]
 
 

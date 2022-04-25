@@ -1,8 +1,7 @@
-from asyncio import AbstractEventLoop
-from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 import uuid
 
+from dataclasses import dataclass, field
 import pandas as pd
 from numpy import array2string
 import tsfresh
@@ -28,9 +27,27 @@ from app.internal.data_preparation import (
 
 from app.ml.training_state import TrainingState
 
+@dataclass
 class Trainer:
-    training_state: TrainingState = TrainingState.NO_TRAINING_YET
-    id: str
+    name: str
+    project_id: str
+    target_labeling: Any
+    labels: Any
+    datasets: Any
+    selected_timeseries: Any
+    window_size: Any
+    sliding_step: Any
+    use_unlabelled: Any
+    unlabelled_name: Any
+    selected_model: Any
+    hyperparameters: Any
+
+    training_state: TrainingState = field(default=None)
+    id: str = field(default=None)
+
+    def __post_init__(self):
+        self.id = uuid.uuid4().hex
+        self.training_state = TrainingState.NO_TRAINING_YET
 
     def _calculate_model_metrics(self, y_test, y_pred):
         metrics = {}
@@ -47,37 +64,11 @@ class Trainer:
         metrics['classification_report'] = classification_report(y_test, y_pred, labels=num_labels, zero_division=0, target_names=target_names)
         return metrics
 
-    def __init__(
-        self,
-        name, project_id, target_labeling, labels, datasets, selected_timeseries,
-        window_size, sliding_step, use_unlabelled, unlabelled_name,
-        selected_model, hyperparameters
-    ) -> None:
-        self.id = uuid.uuid4().hex
-        self.name = name
-        self.project_id = project_id
-        self.target_labeling = target_labeling
-        self.labels = labels
-        self.datasets = datasets
-        self.selected_timeseries = selected_timeseries
-        self.window_size = window_size
-        self.sliding_step = sliding_step
-        self.use_unlabelled = use_unlabelled
-        self.unlabelled_name = unlabelled_name
-        self.selected_model = selected_model
-        self.hyperparameters = hyperparameters
-
-        print("trainer created")
-
-    def _setTrainingState(self, t: TrainingState):
-        self.training_state = t
-
     def feature_extraction(self, df_labeled_each_dataset):
         (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, self.window_size, self.sliding_step, len(self.selected_timeseries))
         if df_sliding_window.shape[0] // self.window_size <= 1:
             raise ValueError("Not enough features to extract, try setting the window size to a lower value")
         ############# FEATURE_EXTRACTION
-        self._setTrainingState(TrainingState.FEATURE_EXTRACTION)
         settings = tsfresh.feature_extraction.settings.MinimalFCParameters()
         data_x = tsfresh.extract_features(
             df_sliding_window, column_id="id", default_fc_parameters=settings
@@ -90,7 +81,6 @@ class Trainer:
             data_x, data_y, random_state=5, test_size=0.33
         )  # TODO fix hardcoded
         ############### MODEL_TRAINING
-        self._setTrainingState(TrainingState.MODEL_TRAINING)
         scaler = RobustScaler()
         scaler.fit(x_train)
         trans_x_train = scaler.transform(x_train)
@@ -107,13 +97,11 @@ class Trainer:
         print('recall', recall_score(y_test, y_pred, average='weighted'))
         print('f1', f1_score(y_test, y_pred, average='weighted'))
         ############# TRAINING_SUCCESSFUL
-        self._setTrainingState(TrainingState.TRAINING_SUCCESSFUL)
         return (self.selected_model, self._calculate_model_metrics(y_test, y_pred))
 
     
     def get_df_labeled_each_dataset(self):
         ############# TRAINING_INITIATED
-        self._setTrainingState(TrainingState.TRAINING_INITIATED)
         labels_with_intervals = [extract_labels(dataset, self.target_labeling) for dataset in self.datasets]
         # if dataset does not have the target labeling, filter it
         filtered_datasets = [dataset for idx, dataset in enumerate(self.datasets) if labels_with_intervals[idx]]

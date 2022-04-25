@@ -63,7 +63,6 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     filtered_datasets = filter_by_timeseries(datasets, selected_timeseries)
     t = Trainer(model_name, project_id, target_labeling, labels, filtered_datasets, selected_timeseries, window_size, sliding_step, use_unlabelled, unlabelled_name, selected_model, hyperparameters)
     
-    request.app.state.training_manager.add(t)
-    background_tasks.add_task(request.app.state.training_manager.start, t.id)
+    background_tasks.add_task(request.app.state.training_manager.start, t)
 
     return t.id

@@ -1,0 +1,11 @@
+{% extends 'interface.jinja' %}
+
+{% block predict %}
+    uint8_t votes[{{ data.num_classes }}] = { 0 };
+    {% for k, tree in data.f.enumerate(data.trees) %}
+        {% with i = 0 %}
+            {% include 'randomforest/tree.jinja' %}
+        {% endwith %}
+    {% endfor %}
+    {% include 'vote.jinja' %}
+{% endblock %}

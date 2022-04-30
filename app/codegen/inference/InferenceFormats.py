@@ -5,6 +5,7 @@ class InferenceFormats(Enum):
     PYTHON = 'python', 'Model as python code' # https://github.com/BayesWitnesses/m2cgen
     C = 'c', 'Model as C code' # https://github.com/BayesWitnesses/m2cgen
     C_EMBEDDED = 'c-embedded', 'Model as C code, low memory usage' # https://github.com/eloquentarduino/micromlgen
+    ARDUINO_CPP ="arduino_cpp", "Model as Arduino Header file"
 
     def __new__(cls, *args, **kwds):
         obj = object.__new__(cls)
@@ -25,13 +26,7 @@ class InferenceFormats(Enum):
 
     @staticmethod
     def from_str(label):
-        if label.lower() == 'javascript':
-            return InferenceFormats.JAVASCRIPT
-        if label.lower() == 'python':
-            return InferenceFormats.PYTHON
-        elif label.lower() == 'c':
-            return InferenceFormats.C
-        elif label.lower() == 'c-embedded':
-            return InferenceFormats.C_EMBEDDED
-        else:
+        try:
+            return InferenceFormats(label.lower())
+        except:
             raise NotImplementedError

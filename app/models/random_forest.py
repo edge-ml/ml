@@ -4,6 +4,7 @@ from app.models.edge_model import EdgeModel
 from sklearn.ensemble import RandomForestClassifier
 from micromlgen import port
 import m2cgen as m2c
+from app.mcuConverter.mcuConverter import convertMCU
 
 import copy
 
@@ -134,7 +135,7 @@ class RandomForest(EdgeModel):
             False,
             True,
         )
-        
+
         # user should not be able to set this
         # pb.add_number(
         #     "n_jobs",
@@ -218,9 +219,9 @@ class RandomForest(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.C_EMBEDDED]
+        return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.C_EMBEDDED, InferenceFormats.ARDUINO_CPP]
 
-    def export(self, platform: InferenceFormats):
+    def export(self, platform: InferenceFormats, window_size, labels, timeseries):
         if platform == InferenceFormats.PYTHON:
             return m2c.export_to_python(self.clf)
         elif platform == InferenceFormats.C_EMBEDDED:
@@ -229,6 +230,8 @@ class RandomForest(EdgeModel):
             return m2c.export_to_c(self.clf)
         elif platform == InferenceFormats.JAVASCRIPT:
             return m2c.export_to_javascript(self.clf)
+        elif platform == InferenceFormats.ARDUINO_CPP:
+            return convertMCU(self, window_size, labels, timeseries)
         else:
             print(platform)
             raise NotImplementedError

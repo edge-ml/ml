@@ -51,27 +51,28 @@ public:
             label = "{{ts}}";
             return 0;
         }
-        return 1;
     {% endfor %}
+    return 1;
     }
 
 
     int predict()
     {
-        features = computeFeatures();
+        computeFeatures();
         return run_classifier();
     }
 
     bool add_datapoint(const char *sensor, float value)
     {
         {% for ts in data.timeSeries %}
-            if (sensor == "{{ts}}") {
+            if (strcmp(sensor, "{{ts}}")) {
                 values_{{ts}}[c_idx_{{ts}} * NUM_SENSORS] = value;
                 c_idx_{{ts}} = (c_idx_{{ts}} + 1) % (WINDOW_SIZE * NUM_SENSORS);
-                return true;
+                values_collected_{{ts}} = max(values_collected_{{ts}}, {{data.window_size}});
+                return 0;
             }
         {% endfor %}
-        return false;
+        return 1;
     }
 
 private:
@@ -81,6 +82,7 @@ private:
     int NUM_CLASSES = {{data.num_classes}};
     {% for ts in data.timeSeries %}
     vector<float> values_{{ts}} = vector<float>({{ data.window_size }}, 0);
+    int values_collected_{{ts}} = 0;
     int c_idx_{{ts}} = 0;
     {% endfor %}
 
@@ -88,7 +90,7 @@ private:
 
     Extractor *ext = new Extractor();
 
-    vector<float> computeFeatures()
+    void computeFeatures()
     {
 
         {% for i, ts in data.f.enumerate(data.timeSeries) %}
@@ -96,7 +98,7 @@ private:
         features[{{i}} * NUM_FEATURES] = ext->sum(values_{{ts}});
         features[{{i}} * NUM_FEATURES + 1] = ext->median(values_{{ts}});
         features[{{i}} * NUM_FEATURES + 2] = ext->mean(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 3] = (float) values_{{ts}}.size();
+        features[{{i}} * NUM_FEATURES + 3] = (float) values_collected_{{ts}};
         features[{{i}} * NUM_FEATURES + 4] = ext->std_dev(values_{{ts}}, ext->var(values_{{ts}}, ext->mean(values_{{ts}})));
         features[{{i}} * NUM_FEATURES + 5] = ext->var(values_{{ts}}, ext->mean(values_{{ts}}));
         features[{{i}} * NUM_FEATURES + 6] = ext->root_mean_square(values_{{ts}}, ext->abs_energy(values_{{ts}}));
@@ -105,7 +107,6 @@ private:
         features[{{i}} * NUM_FEATURES + 9] = ext->min(values_{{ts}});
 
         {% endfor %}
-        return features;
     }
 
     int run_classifier()

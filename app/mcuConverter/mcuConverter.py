@@ -36,7 +36,7 @@ def convertMCU(model: EdgeModel, window_size, labels, timeseries):
         template = templateEnv.get_template("randomforest/randomforest.jinja")
         interface = template.render(data=data)
     
-    if isinstance(clf, DecisionTreeClassifier):
+    elif isinstance(clf, DecisionTreeClassifier):
         tree = {
             'left': clf.tree_.children_left,
             'right': clf.tree_.children_right,
@@ -50,7 +50,12 @@ def convertMCU(model: EdgeModel, window_size, labels, timeseries):
         template = templateEnv.get_template("decisiontree/decisiontree.jinja")
         interface = template.render(data=data, **tree)
 
+    else:
+        raise NotImplementedError("SVM is not implemented for conversion")
+
+        '''
     if isinstance(clf, SVC):
+        
 
         support_v = clf.support_vectors_
         n_classes = len(clf.n_support_)
@@ -76,5 +81,7 @@ def convertMCU(model: EdgeModel, window_size, labels, timeseries):
         data = {**functions, **params}
         template = templateEnv.get_template("svm/svm.jinja")
         interface = template.render(data=data, **svm)
+        '''
+
 
     return interface

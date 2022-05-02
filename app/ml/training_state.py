@@ -10,6 +10,8 @@ class TrainingState(str, Enum):
     MODEL_TRAINING = "MODEL_TRAINING",
     # Successful state
     TRAINING_SUCCESSFUL = "TRAINING_SUCCESSFUL"
+    # Failure state
+    TRAINING_FAILED = "TRAINING_FAILED"
 
     def is_in_progress_training_state(self):
         return self in _in_progress_training_states

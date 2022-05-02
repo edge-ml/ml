@@ -36,12 +36,18 @@ class TrainingManager:
         self.trainers[t.id] = t
 
         t.training_state = TrainingState.TRAINING_INITIATED
-        labels, df_labeled_each_dataset = await asyncio.get_running_loop().run_in_executor(self.executor, t.get_df_labeled_each_dataset)
-        t.training_state = TrainingState.FEATURE_EXTRACTION
-        data_x, data_y = await asyncio.get_running_loop().run_in_executor(self.executor, t.feature_extraction, df_labeled_each_dataset)
-        t.training_state = TrainingState.MODEL_TRAINING
-        model, metrics = await asyncio.get_running_loop().run_in_executor(self.executor, t.train, data_x, data_y)
-        t.training_state = TrainingState.TRAINING_SUCCESSFUL
+        try:
+            labels, df_labeled_each_dataset = await asyncio.get_running_loop().run_in_executor(self.executor, t.get_df_labeled_each_dataset)
+            t.training_state = TrainingState.FEATURE_EXTRACTION
+            data_x, data_y = await asyncio.get_running_loop().run_in_executor(self.executor, t.feature_extraction, df_labeled_each_dataset)
+            t.training_state = TrainingState.MODEL_TRAINING
+            model, metrics = await asyncio.get_running_loop().run_in_executor(self.executor, t.train, data_x, data_y)
+            t.training_state = TrainingState.TRAINING_SUCCESSFUL
+        except ValueError:
+            t.training_state = TrainingState.TRAINING_FAILED
+            await asyncio.sleep(60)
+            del self.trainers[t.id]
+            return
 
         await add_model(Model(
             name=t.name,

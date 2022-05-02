@@ -13,7 +13,7 @@ class ArduinoPlatform(BasePlatform):
 
     def codegen(self, window_size, timeseries, labels, format):
         temp = []
-        temp.append(f"#include <___DOWNLOADED_MODEL_BASENAME___.hpp>")
+        temp.append(f'#include "___DOWNLOADED_MODEL_BASENAME___.hpp"')
         temp.append("")
         temp.append("String label;")
         temp.append("EdgeMlClassifier *cls;")

@@ -20,6 +20,7 @@ class Training(BaseModel):
     id: str
     name: str
     training_state: TrainingState
+    error_msg: str
 
 # Get an active training process
 @router.get("/ongoing/{train_id}", response_model=Training)

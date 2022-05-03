@@ -44,6 +44,7 @@ class Trainer:
 
     training_state: TrainingState = field(default=None)
     id: str = field(default=None)
+    error_msg: str = field(default="")
 
     def __post_init__(self):
         self.id = uuid.uuid4().hex
@@ -106,7 +107,7 @@ class Trainer:
         # if dataset does not have the target labeling, filter it
         filtered_datasets = [dataset for idx, dataset in enumerate(self.datasets) if labels_with_intervals[idx]]
         if not filtered_datasets:
-            raise ValueError("Datasets do not have the target labeling.")
+            raise ValueError("Datasets do not have the target labeling")
         # self.labels is assumed to have no duplicates
         label_map = {label: idx for idx, label in enumerate(self.labels)}
         if self.use_unlabelled:

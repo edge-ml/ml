@@ -43,8 +43,9 @@ class TrainingManager:
             t.training_state = TrainingState.MODEL_TRAINING
             model, metrics = await asyncio.get_running_loop().run_in_executor(self.executor, t.train, data_x, data_y)
             t.training_state = TrainingState.TRAINING_SUCCESSFUL
-        except ValueError:
+        except ValueError as err:
             t.training_state = TrainingState.TRAINING_FAILED
+            t.error_msg = str(err)
             await asyncio.sleep(60)
             del self.trainers[t.id]
             return

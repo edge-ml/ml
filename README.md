@@ -10,6 +10,8 @@ Before you can run the server run:
 pip3 install -r requirements.txt
 ```
 
+(if you're using macOS and this fails, try [this](https://github.com/edge-ml/edge-ml/wiki#Troubleshooting))
+
 Then create a .env file containing the credentials:
 
 ```

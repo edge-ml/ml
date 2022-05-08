@@ -25,7 +25,7 @@ class PythonPlatform(BasePlatform):
     def codegen(self, window_size, timeseries, labels, format):
         tadd = ""
         for ts in timeseries:
-            tadd = tadd + '\n\tp.add_datapoint(\'{ts}\', get{ts}())'.format(ts = ts)
+            tadd = tadd + '\n    p.add_datapoint(\'{ts}\', get{ts}())'.format(ts = ts)
 
         return """import time
 from edgeml.predictor import Predictor, PredictorError

@@ -9,6 +9,10 @@ from app.db.models.model import Model
 from app.ml.trainer import Trainer
 from app.ml.training_state import TrainingState
 
+from codecarbon import OfflineEmissionsTracker
+import csv
+import os
+
 class TrainingManager:
     executor: ProcessPoolExecutor
 
@@ -33,6 +37,11 @@ class TrainingManager:
 
     # TODO: implement caching for each intermeditary variable
     async def start(self, t: Trainer):
+        if os.path.exists('emissions.csv'):
+            os.remove('emissions.csv')
+        emissions_tracker = OfflineEmissionsTracker(log_level = "CRITICAL", country_iso_code="DEU")
+        emissions_tracker.start()
+
         self.trainers[t.id] = t
 
         t.training_state = TrainingState.TRAINING_INITIATED
@@ -49,6 +58,21 @@ class TrainingManager:
             await asyncio.sleep(60)
             del self.trainers[t.id]
             return
+
+        emissions_tracker.stop()
+        with open('emissions.csv') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            next(csv_reader)
+            data = next(csv_reader)
+
+            emissions = round(float(data[4]) * 1e6, 2) #in milligram
+            energy = round(float(data[12]) * 36e5, 2) #in Joules
+
+            print("Energy consumed for training (in Joule): ", energy)
+            print("This resulted in the following emissions (in milligram CO₂): ", emissions)
+        
+        if os.path.exists('emissions.csv'):
+            os.remove('emissions.csv')
 
         await add_model(Model(
             name=t.name,
@@ -67,7 +91,7 @@ class TrainingManager:
             classification_report=metrics['classification_report'],
             edge_model=model
         ))
-        
+
         del self.trainers[t.id]
 
 

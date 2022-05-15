@@ -106,6 +106,7 @@ class Trainer:
         labels_with_intervals = [extract_labels(dataset, self.target_labeling) for dataset in self.datasets]
         # if dataset does not have the target labeling, filter it
         filtered_datasets = [dataset for idx, dataset in enumerate(self.datasets) if labels_with_intervals[idx]]
+        labels_with_intervals = list(filter(None, labels_with_intervals))
         if not filtered_datasets:
             raise ValueError("Datasets do not have the target labeling")
         # self.labels is assumed to have no duplicates

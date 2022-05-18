@@ -26,16 +26,16 @@ class Training(BaseModel):
 @router.get("/ongoing/{train_id}", response_model=Training)
 async def trained_model(train_id: str, request: Request, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
     tm: TrainingManager = request.app.state.training_manager
-    if not tm.has(train_id):
+    if not tm.has(train_id, project_id):
         raise HTTPException(status_code=404, detail="No active training process with given id")
-    t = tm.get(train_id)
+    t = tm.get(train_id, project_id)
     return Training(**t.__dict__)
 
 # Get all active training processes
 @router.get("/ongoing", response_model=List[Training])
 async def trained_model(request: Request, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
     tm: TrainingManager = request.app.state.training_manager
-    return [ Training(**t.__dict__) for t in tm.all() ]
+    return [ Training(**t.__dict__) for t in tm.all(project_id) ]
 
 class TrainBody(BaseModel):
     model_id: int

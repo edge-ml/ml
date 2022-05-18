@@ -18,14 +18,15 @@ class TrainingManager:
         self.executor = ProcessPoolExecutor()
         self.trainers = dict()
 
-    def all(self) -> List[Trainer]:
-        return self.trainers.values()
+    def all(self, project_id: str) -> List[Trainer]:
+        return filter(lambda t: t.project_id == project_id, self.trainers.values())
 
-    def has(self, id: str) -> bool:
-        return id in self.trainers
+    def has(self, id: str, project_id: str) -> bool:
+        return (id in self.trainers and self.trainers[id].project_id == project_id)
 
-    def get(self, id: str) -> Trainer:
-        assert self.has(id)
+    def get(self, id: str, project_id: str) -> Trainer:
+        if not self.has(id, project_id):
+            raise KeyError("Trainer with id doesn't exist")
         return self.trainers[id]
 
     def destroy(self):

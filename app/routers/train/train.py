@@ -24,7 +24,7 @@ class Training(BaseModel):
 
 # Get an active training process
 @router.get("/ongoing/{train_id}", response_model=Training)
-async def trained_model(train_id: str, request: Request, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
+async def trained_model(train_id: str, request: Request, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
     tm: TrainingManager = request.app.state.training_manager
     if not tm.has(train_id):
         raise HTTPException(status_code=404, detail="No active training process with given id")
@@ -33,7 +33,7 @@ async def trained_model(train_id: str, request: Request, user_id=Depends(validat
 
 # Get all active training processes
 @router.get("/ongoing", response_model=List[Training])
-async def trained_model(request: Request, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
+async def trained_model(request: Request, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
     tm: TrainingManager = request.app.state.training_manager
     return [ Training(**t.__dict__) for t in tm.all() ]
 
@@ -50,7 +50,7 @@ class TrainBody(BaseModel):
 # Create an edge model with given model id and hyperparameters
 # Return the created model('s id)
 @router.post("/")
-async def models_train(request: Request, body: TrainBody, background_tasks: BackgroundTasks, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
+async def models_train(request: Request, body: TrainBody, background_tasks: BackgroundTasks, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
     model_id = body.model_id
     model_name = body.model_name
     if not model_name:
@@ -64,8 +64,8 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     target_labeling = body.target_labeling
     labels = body.labels
     selected_timeseries = body.selected_timeseries
-    token = user_id[1]
-    
+    token = user_data[1]
+    sub_level = user_data[2]
     if not selected_timeseries:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No timeseries is selected")
     
@@ -84,7 +84,13 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Dataset not in requested project")
     
     filtered_datasets = filter_by_timeseries(datasets, selected_timeseries)
-    t = Trainer(model_name, project_id, target_labeling, labels, filtered_datasets, selected_timeseries, window_size, sliding_step, use_unlabelled, unlabelled_name, selected_model, hyperparameters)
+    t = Trainer(
+        model_name, project_id, 
+        target_labeling, labels, filtered_datasets, selected_timeseries, 
+        window_size, sliding_step, 
+        use_unlabelled, unlabelled_name, 
+        selected_model, hyperparameters, 
+        sub_level)
     
     background_tasks.add_task(request.app.state.training_manager.start, t)
 

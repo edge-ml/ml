@@ -6,6 +6,7 @@ import asyncio
 import time
 from app.db.models import add_model
 from app.db.models.model import Model
+from app.ml.subscription_level import SubscriptionLevel
 
 from app.ml.trainer import Trainer
 from app.ml.training_state import TrainingState
@@ -31,16 +32,25 @@ class TrainingManager:
     def destroy(self):
         self.pool.close()
 
-    def handle_timeout(self, t: Trainer):
+    def handle_error(self, t: Trainer, error_msg: str):
         t.training_state = TrainingState.TRAINING_FAILED
-        t.error_msg = "Task took too long and cancelled!"
+        t.error_msg = error_msg
         time.sleep(60)
         del self.trainers[t.id]
+
+    def handle_timeout(self, t: Trainer):
+        self.handle_error(t, "Task took too long and cancelled!")
+
+    @staticmethod
+    def _calculate_time_left(time_left: float, time_passed: float):
+        if time_left is not None:
+            return time_left - time_passed
+        return None
 
     # TODO: implement caching for each intermeditary variable
     def start(self, t: Trainer):
         self.trainers[t.id] = t
-        time_left = 35
+        time_left = SubscriptionLevel.corresponding_timer(t.sub_level)
         t.training_state = TrainingState.TRAINING_INITIATED
         
         print("PHASE 1 Begin")
@@ -52,7 +62,8 @@ class TrainingManager:
             print("Task took too long in phase 1")
             self.handle_timeout(t)
             return
-        time_left -= time.perf_counter() - start
+        end = time.perf_counter()
+        time_left = self._calculate_time_left(time_left, end - start)
         print('PHASE 1 End: ', time_left)
         
         print("PHASE 2")
@@ -65,7 +76,8 @@ class TrainingManager:
             print("Task took too long in phase 2")
             self.handle_timeout(t)
             return
-        time_left -= time.perf_counter() - start
+        end = time.perf_counter()
+        time_left = self._calculate_time_left(time_left, end - start)
         print('PHASE 2 End: ', time_left)
 
         print("PHASE 3")
@@ -78,10 +90,10 @@ class TrainingManager:
             print("Task took too long in phase 3")
             self.handle_timeout(t)
             return
-        time_left -= time.perf_counter() - start
+        end = time.perf_counter()
+        time_left = self._calculate_time_left(time_left, end - start)
         print('PHASE 3 End: ', time_left)
 
-        # print(time.perf_counter() - start)
         t.training_state = TrainingState.TRAINING_SUCCESSFUL
         
         asyncio.run(add_model(Model(

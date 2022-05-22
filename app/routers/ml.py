@@ -22,5 +22,5 @@ router.include_router(
 # TODO: /models?user={user}
 # Return a list of models that were trained before by the user
 @router.get("/userModels")  # userTrained / trained / created
-async def models_user_created(user_id=Depends(validate_user)):
+async def models_user_created(user_data=Depends(validate_user)):
     return "List of models"

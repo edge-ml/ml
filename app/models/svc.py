@@ -179,7 +179,7 @@ class SVC(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        # return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.ARDUINO_CPP]
+        # return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP]
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT]
 
     def export(self, platform: InferenceFormats, window_size, labels, timeseries):
@@ -194,7 +194,7 @@ class SVC(EdgeModel):
         elif platform == InferenceFormats.JAVASCRIPT:
             return m2c.export_to_javascript(self.clf)
         # FIXME: This suffers from the same error as above
-        # elif platform == InferenceFormats.ARDUINO_CPP:
+        # elif platform == InferenceFormats.CPP:
         #     return convertMCU(self, window_size, labels, timeseries)
         else:
             print(platform)

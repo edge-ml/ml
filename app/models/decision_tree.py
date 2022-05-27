@@ -165,7 +165,7 @@ class DecisionTree(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.C_EMBEDDED, InferenceFormats.ARDUINO_CPP]
+        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP]
 
     def export(self, platform: InferenceFormats, window_size, labels, timeseries):
         if platform == InferenceFormats.PYTHON:
@@ -176,7 +176,7 @@ class DecisionTree(EdgeModel):
             return m2c.export_to_c(self.clf)
         elif platform == InferenceFormats.JAVASCRIPT:
             return m2c.export_to_javascript(self.clf)
-        elif platform == InferenceFormats.ARDUINO_CPP:
+        elif platform == InferenceFormats.CPP:
             return convertMCU(self, window_size, labels, timeseries)
         else:
             print(platform)

@@ -5,7 +5,7 @@ class InferenceFormats(Enum):
     PYTHON = 'python', 'Model as python code' # https://github.com/BayesWitnesses/m2cgen
     C = 'c', 'Model as C code' # https://github.com/BayesWitnesses/m2cgen
     C_EMBEDDED = 'c-embedded', 'Model as C code, low memory usage' # https://github.com/eloquentarduino/micromlgen
-    ARDUINO_CPP ="arduino_cpp", "Model as Arduino Header file"
+    CPP ="cpp", "Model as C++ Header file"
 
     def __new__(cls, *args, **kwds):
         obj = object.__new__(cls)

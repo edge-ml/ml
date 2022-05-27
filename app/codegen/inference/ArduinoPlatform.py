@@ -6,10 +6,10 @@ from app.codegen.inference.InferenceFormats import InferenceFormats
 class ArduinoPlatform(BasePlatform):
     @property
     def name(self) -> str:
-        return "arduino_cpp"
+        return "cpp"
 
     def supported_formats(self):
-        return [InferenceFormats.C_EMBEDDED, InferenceFormats.ARDUINO_CPP]
+        return [InferenceFormats.C_EMBEDDED, InferenceFormats.CPP]
 
     def codegen(self, window_size, timeseries, labels, format):
         temp = []

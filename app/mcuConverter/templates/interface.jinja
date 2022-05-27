@@ -25,27 +25,34 @@ THE SOFTWARE.
 
 #ifndef EDGE_ML_PREDICTOR
 #define EDGE_ML_PREDICTOR
+
 #include <cstdint>
-
-#include "Edge-fel.h"
-
 #include <vector>
+#include <cmath>
+#include <cstring>
+#include <algorithm>
+
+#ifndef Arduino_h
+    #include <string>
+    #define str string
+#else
+    #define str String
+#endif
 
 using namespace std;
-using namespace ex;
 
 /*
 ---- Usable functions ----
 bool add_datapoint(const char *sensor, float value);
 int predict();
-int class_to_label(int class, String & label);
+int class_to_label(int class, str & label);
 */
 
 class EdgeMlClassifier
 {
 
 public:
-    int class_to_label(int pred_class, String & label) {
+    int class_to_label(int pred_class, str & label) {
     {% for i, ts in data.f.enumerate(data.labels) %}
         if (pred_class == {{i}}) {
             label = "{{ts}}";
@@ -68,7 +75,7 @@ public:
             if (strcmp(sensor, "{{ts}}")) {
                 values_{{ts}}[c_idx_{{ts}} * NUM_SENSORS] = value;
                 c_idx_{{ts}} = (c_idx_{{ts}} + 1) % (WINDOW_SIZE * NUM_SENSORS);
-                values_collected_{{ts}} = max(values_collected_{{ts}}, {{data.window_size}});
+                values_collected_{{ts}} = std::max(values_collected_{{ts}}, {{data.window_size}});
                 return 0;
             }
         {% endfor %}
@@ -88,23 +95,109 @@ private:
 
     vector<float> features = vector<float>({{data.num_features * data.num_sensors}});
 
-    Extractor *ext = new Extractor();
+    float sum(vector<float>& values) {
+        float sum = 0;
+        for (auto value : values) {
+            sum += value;
+        }
+
+        return sum;
+    }
+
+    float mean(vector<float>& values) {
+        float sum = 0;
+        for (auto& value : values) {
+            sum += value;
+        }
+        return sum / values.size();
+    }
+
+    float median(vector<float> values) {
+        sort(values.begin(), values.end());
+        int size = values.size();
+        if (size % 2 == 0) {
+            int mid = size / 2 - 1;
+        
+            return (values.at(mid) + values.at(mid + 1)) / 2;
+        }
+
+        return values.at(size / 2);
+    }
+
+    float std_dev(vector<float>& values, float my_var) {
+        return sqrt(my_var);
+    }
+
+    float var(vector<float>& values, float my_mean) {
+        float q_dev = 0;
+        for (auto& value : values) {
+            q_dev += (value - my_mean) * (value - my_mean);
+            //q_dev += pow(value - my_mean, 2);
+        }
+
+        return q_dev / values.size();
+    }
+
+    float abs_energy(vector<float>& values) {
+        float sum = 0;
+        for (auto& value : values) {
+            sum += (value * value);
+        }
+
+        return sum;
+    }
+
+    float root_mean_square(vector<float>& values, float energy) {
+        return sqrt(energy / values.size());
+    }
+
+    float max(vector<float>& values) {
+        float max = values.at(0);
+        for (auto& value : values) {
+            if (value > max) {
+            max = value;
+            }
+        }
+        return max;
+    }
+
+    float abs_max(vector<float>& values) {
+        float max = abs(values.at(0));
+        for (auto& value : values) {
+            if (abs(value) > max) {
+            max = abs(value);
+            }
+        }
+
+        return max;
+    }
+
+    float min(vector<float>& values) {
+        float min = values.at(0);
+        for (auto& value : values) {
+            if (value < min) {
+            min = value;
+            }
+        }
+
+        return min;
+    }
 
     void computeFeatures()
     {
 
         {% for i, ts in data.f.enumerate(data.timeSeries) %}
 
-        features[{{i}} * NUM_FEATURES] = ext->sum(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 1] = ext->median(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 2] = ext->mean(values_{{ts}});
+        features[{{i}} * NUM_FEATURES] = sum(values_{{ts}});
+        features[{{i}} * NUM_FEATURES + 1] = median(values_{{ts}});
+        features[{{i}} * NUM_FEATURES + 2] = mean(values_{{ts}});
         features[{{i}} * NUM_FEATURES + 3] = (float) values_collected_{{ts}};
-        features[{{i}} * NUM_FEATURES + 4] = ext->std_dev(values_{{ts}}, ext->var(values_{{ts}}, ext->mean(values_{{ts}})));
-        features[{{i}} * NUM_FEATURES + 5] = ext->var(values_{{ts}}, ext->mean(values_{{ts}}));
-        features[{{i}} * NUM_FEATURES + 6] = ext->root_mean_square(values_{{ts}}, ext->abs_energy(values_{{ts}}));
-        features[{{i}} * NUM_FEATURES + 7] = ext->max(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 8] = ext->abs_max(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 9] = ext->min(values_{{ts}});
+        features[{{i}} * NUM_FEATURES + 4] = std_dev(values_{{ts}}, var(values_{{ts}}, mean(values_{{ts}})));
+        features[{{i}} * NUM_FEATURES + 5] = var(values_{{ts}}, mean(values_{{ts}}));
+        features[{{i}} * NUM_FEATURES + 6] = root_mean_square(values_{{ts}}, abs_energy(values_{{ts}}));
+        features[{{i}} * NUM_FEATURES + 7] = max(values_{{ts}});
+        features[{{i}} * NUM_FEATURES + 8] = abs_max(values_{{ts}});
+        features[{{i}} * NUM_FEATURES + 9] = min(values_{{ts}});
 
         {% endfor %}
     }

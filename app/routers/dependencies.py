@@ -16,22 +16,16 @@ async def validate_user(Authorization: str = Header(...), project_id=Depends(ext
         if "exp" not in decoded:
             raise jwt.ExpiredSignatureError
         user_id = ObjectId(decoded["id"])
+        sub_level = decoded["subscriptionLevel"]
         project = await get_project(project_id)
-        # print("AUTH is:", Authorization)
-        # print(user_id)
-        # print(project)
-        # print(project.admin)
-        # print(project.users)
         if project.admin != user_id and user_id not in project.users:
             print('not in db')
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="User unauthorized on project")
-        return (user_id, token)
+        return (user_id, token, sub_level)
     except jwt.ExpiredSignatureError:
        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
 
-async def validate_model(model_id: str, user_id=Depends(validate_user), project_id=Depends(extract_project_id)):
-    # print('validate model')
-    # print(model_id)
+async def validate_model(model_id: str, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
     try:
         model = await get_model(model_id)
         if model.project_id != project_id:

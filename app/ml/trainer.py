@@ -41,6 +41,7 @@ class Trainer:
     unlabelled_name: Any
     selected_model: Any
     hyperparameters: Any
+    sub_level: Any
 
     training_state: TrainingState = field(default=None)
     id: str = field(default=None)

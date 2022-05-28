@@ -66,6 +66,10 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     selected_timeseries = body.selected_timeseries
     token = user_data[1]
     sub_level = user_data[2]
+
+    if not labels:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No label is selected")
+
     if not selected_timeseries:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No timeseries is selected")
     

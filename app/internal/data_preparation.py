@@ -73,6 +73,8 @@ def label_dataset(df, labels, label_map, use_unlabelled, unlabelled_name):
     df_labeled_temp = df_labeled.reset_index()
     for interval in labels:
         label = interval["label_id"]
+        if label not in label_map:
+            continue
         start = pd.to_datetime(interval["start"], unit="ms")
         end = pd.to_datetime(interval["end"], unit="ms")
         df_interval = df_labeled_temp[

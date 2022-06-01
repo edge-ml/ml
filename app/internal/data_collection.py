@@ -1,18 +1,25 @@
-import aiohttp
+import requests
 
 from app.internal.config import API_URI
 
-async def fetch_project_datasets(project_id, token):
+# TODO handle exceptions more informatively
+def fetch_project_datasets(project_id, token):
     url = API_URI + "/datasets/"
-    headers={"Authorization": "Bearer " + token, "project": project_id}
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as res:
-            return [x["_id"] for x in await res.json()]
+    try:
+        samples = requests.get(
+            url, headers={"Authorization": "Bearer " + token, "project": project_id}
+        )
+    except:
+        return []
+    return [x["_id"] for x in samples.json()]
 
 
-async def fetch_dataset(project_id, token, dataset_id):
+def fetch_dataset(project_id, token, dataset_id):
     url = API_URI + "/datasets/" + dataset_id
-    headers={"Authorization": "Bearer " + token, "project": project_id}
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as dataset:
-            return await dataset.json()
+    try:
+        dataset = requests.get(
+            url, headers={"Authorization": "Bearer " + token, "project": project_id}
+        )
+    except:
+        return []
+    return dataset.json()

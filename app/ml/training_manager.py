@@ -11,6 +11,9 @@ from app.ml.subscription_level import SubscriptionLevel
 from app.ml.trainer import Trainer
 from app.ml.training_state import TrainingState
 
+from app.internal.data_collection import fetch_dataset, fetch_project_datasets
+from app.internal.data_preparation import filter_by_timeseries, format_hyperparameters
+
 class TrainingManager:
     pool: ProcessPool
     trainers: Dict[str, Trainer]
@@ -48,11 +51,44 @@ class TrainingManager:
             return time_left - time_passed
         return None
 
+    def initiate(
+                self, token, 
+                model_name, project_id, 
+                target_labeling, labels, selected_timeseries,
+                window_size, sliding_step, 
+                use_unlabelled, unlabelled_name, 
+                selected_model, raw_hyperparams, 
+                sub_level):
+        
+        t = Trainer(
+            model_name, project_id, 
+            target_labeling, labels, selected_timeseries, 
+            window_size, sliding_step, 
+            use_unlabelled, unlabelled_name, 
+            selected_model, 
+            sub_level)
+
+        self.trainers[t.id] = t
+        t.training_state = TrainingState.TRAINING_INITIATED
+        dataset_ids = fetch_project_datasets(project_id, token)
+        if not dataset_ids:
+            self.handle_error("No dataset is available")
+        
+        datasets = [fetch_dataset(project_id, token, id) for id in dataset_ids]
+        if any(hasattr(d, "error") for d in datasets):
+            self.handle_error("Requested dataset cannot be found in the project")
+
+        hyperparameters = format_hyperparameters(raw_hyperparams)
+        filtered_datasets = filter_by_timeseries(datasets, selected_timeseries)
+        
+        t.hyperparameters = hyperparameters
+        t.datasets = filtered_datasets
+        
+        self.start(t)
+
     # TODO: implement caching for each intermeditary variable
     def start(self, t: Trainer):
-        self.trainers[t.id] = t
         time_left = SubscriptionLevel.corresponding_timer(t.sub_level)
-        t.training_state = TrainingState.TRAINING_INITIATED
         
         print("PHASE 1 Begin")
         start = time.perf_counter()

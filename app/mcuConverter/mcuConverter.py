@@ -10,14 +10,15 @@ templateLoader = FileSystemLoader("app/mcuConverter/templates")
 templateEnv = Environment(loader=templateLoader,
                           trim_blocks=True, lstrip_blocks=True)
 
-def convertMCU(model: EdgeModel, window_size, labels, timeseries):
-
+def convertMCU(model: EdgeModel, window_size, labels, timeseries, scaler):
+    print("scaler: ", scaler)
     params = {"window_size": window_size,
         "num_sensors": len(timeseries),
         "num_classes": len(labels),
         "num_features": 10, # This is hardcoded for now
         "timeSeries": timeseries,
-        "labels": labels}
+        "labels": labels,
+        "scaler": scaler}
 
     functions = {"f": {
         "enumerate": enumerate,

@@ -221,7 +221,7 @@ class RandomForest(EdgeModel):
     def get_platforms():
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP]
 
-    def export(self, platform: InferenceFormats, window_size, labels, timeseries):
+    def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
         if platform == InferenceFormats.PYTHON:
             return m2c.export_to_python(self.clf)
         elif platform == InferenceFormats.C_EMBEDDED:
@@ -231,7 +231,7 @@ class RandomForest(EdgeModel):
         elif platform == InferenceFormats.JAVASCRIPT:
             return m2c.export_to_javascript(self.clf)
         elif platform == InferenceFormats.CPP:
-            return convertMCU(self, window_size, labels, timeseries)
+            return convertMCU(self, window_size, labels, timeseries, scaler)
         else:
             print(platform)
             raise NotImplementedError

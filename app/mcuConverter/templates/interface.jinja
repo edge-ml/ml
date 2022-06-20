@@ -188,16 +188,16 @@ private:
 
         {% for i, ts in data.f.enumerate(data.timeSeries) %}
 
-        features[{{i}} * NUM_FEATURES] = sum(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 1] = median(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 2] = mean(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 3] = (float) values_collected_{{ts}};
-        features[{{i}} * NUM_FEATURES + 4] = std_dev(values_{{ts}}, var(values_{{ts}}, mean(values_{{ts}})));
-        features[{{i}} * NUM_FEATURES + 5] = var(values_{{ts}}, mean(values_{{ts}}));
-        features[{{i}} * NUM_FEATURES + 6] = root_mean_square(values_{{ts}}, abs_energy(values_{{ts}}));
-        features[{{i}} * NUM_FEATURES + 7] = max(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 8] = abs_max(values_{{ts}});
-        features[{{i}} * NUM_FEATURES + 9] = min(values_{{ts}});
+        features[{{i}} * NUM_FEATURES] = (sum(values_{{ts}}) - {{data.scaler["center"][i * data.num_features]}}) / {{data.scaler["scale"][i * data.num_features]}};
+        features[{{i}} * NUM_FEATURES + 1] = (median(values_{{ts}}) - {{data.scaler["center"][i * data.num_features + 1]}}) / {{data.scaler["scale"][i * data.num_features + 1]}};
+        features[{{i}} * NUM_FEATURES + 2] = (mean(values_{{ts}}) - {{data.scaler["center"][i * data.num_features + 2]}}) / {{data.scaler["scale"][i * data.num_features + 2]}};;
+        features[{{i}} * NUM_FEATURES + 3] = (((float) values_collected_{{ts}}) - {{data.scaler["center"][i * data.num_features + 3]}}) / {{data.scaler["scale"][i * data.num_features + 3]}};
+        features[{{i}} * NUM_FEATURES + 4] = (std_dev(values_{{ts}}, var(values_{{ts}}, mean(values_{{ts}}))) - {{data.scaler["center"][i * data.num_features + 4]}}) / {{data.scaler["scale"][i * data.num_features + 4]}};
+        features[{{i}} * NUM_FEATURES + 5] = (var(values_{{ts}}, mean(values_{{ts}})) - {{data.scaler["center"][i * data.num_features + 5]}}) / {{data.scaler["scale"][i * data.num_features + 5]}};
+        features[{{i}} * NUM_FEATURES + 6] = (root_mean_square(values_{{ts}}, abs_energy(values_{{ts}})) - {{data.scaler["center"][i * data.num_features + 6]}}) / {{data.scaler["scale"][i * data.num_features + 6]}};
+        features[{{i}} * NUM_FEATURES + 7] = (max(values_{{ts}}) - {{data.scaler["center"][i * data.num_features + 7]}}) / {{data.scaler["scale"][i * data.num_features + 7]}};
+        features[{{i}} * NUM_FEATURES + 8] = (abs_max(values_{{ts}}) - {{data.scaler["center"][i * data.num_features + 8]}}) / {{data.scaler["scale"][i * data.num_features + 8]}};
+        features[{{i}} * NUM_FEATURES + 9] = (min(values_{{ts}}) - {{data.scaler["center"][i * data.num_features + 9]}}) / {{data.scaler["scale"][i * data.num_features + 9]}};
 
         {% endfor %}
     }

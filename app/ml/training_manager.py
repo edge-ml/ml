@@ -42,7 +42,7 @@ class TrainingManager:
             t.training_state = TrainingState.FEATURE_EXTRACTION
             data_x, data_y = await asyncio.get_running_loop().run_in_executor(self.executor, t.feature_extraction, df_labeled_each_dataset)
             t.training_state = TrainingState.MODEL_TRAINING
-            model, metrics = await asyncio.get_running_loop().run_in_executor(self.executor, t.train, data_x, data_y)
+            model, metrics, scaler = await asyncio.get_running_loop().run_in_executor(self.executor, t.train, data_x, data_y)
             t.training_state = TrainingState.TRAINING_SUCCESSFUL
         except ValueError as err:
             t.training_state = TrainingState.TRAINING_FAILED
@@ -60,6 +60,7 @@ class TrainingManager:
             precision_score=metrics['precision_score'],
             f1_score=metrics['f1_score'],
             recall_score=metrics['recall_score'],
+            scaler=scaler,
             labels=list(labels),
             timeseries=t.selected_timeseries,
             window_size=t.window_size,

@@ -182,7 +182,7 @@ class SVC(EdgeModel):
         # return [InferenceFormats.PYTHON, InferenceFormats.C, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP]
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT]
 
-    def export(self, platform: InferenceFormats, window_size, labels, timeseries):
+    def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
         if platform == InferenceFormats.PYTHON:
             return m2c.export_to_python(self.clf)
         # FIXME: gives error: You probably didn't set an explicit value for gamma: 0.001 is a good default

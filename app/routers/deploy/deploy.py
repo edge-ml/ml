@@ -27,4 +27,5 @@ async def export(format: str, model: Model = Depends(validate_model)):
 
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(format: str, model=Depends(validate_model)):
-    return Response(content=model.edge_model.export(InferenceFormats.from_str(format), model.window_size, model.labels, model.timeseries), media_type="text/plain")
+    print(model)
+    return Response(content=model.edge_model.export(InferenceFormats.from_str(format), model.window_size, model.labels, model.timeseries, model.scaler), media_type="text/plain")

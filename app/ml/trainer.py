@@ -97,8 +97,11 @@ class Trainer:
         print('precision', precision_score(y_test, y_pred, average='weighted'))
         print('recall', recall_score(y_test, y_pred, average='weighted'))
         print('f1', f1_score(y_test, y_pred, average='weighted'))
+
+        scaler_serialized = {"scale": list(scaler.scale_), "center": list(scaler.center_), "name": RobustScaler.__name__}
+
         ############# TRAINING_SUCCESSFUL
-        return (self.selected_model, self._calculate_model_metrics(y_test, y_pred))
+        return (self.selected_model, self._calculate_model_metrics(y_test, y_pred), scaler_serialized)
 
     
     def get_df_labeled_each_dataset(self):

@@ -1,3 +1,4 @@
+from curses import has_key
 from dataclasses import dataclass, field
 from typing import List
 from app.models.edge_model import EdgeModel
@@ -20,6 +21,7 @@ class Model():
     confusion_matrix: str
     classification_report: str
     edge_model: EdgeModel
+    scaler: dict
 
     size: int = field(default=None)
     pickled_edge_model: bytes = field(default=None)
@@ -44,7 +46,8 @@ class Model():
             'sliding_step': that.sliding_step,
             'confusion_matrix': that.confusion_matrix,
             'classification_report': that.classification_report,
-            'edge_model': pickle.dumps(that.edge_model)
+            'edge_model': pickle.dumps(that.edge_model),
+            'scaler': that.scaler
         }
 
     @staticmethod
@@ -68,4 +71,5 @@ class Model():
 
             size=len(data['edge_model']),
             pickled_edge_model=data['edge_model'],
+            scaler=data['scaler']
         )

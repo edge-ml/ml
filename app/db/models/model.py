@@ -71,5 +71,5 @@ class Model():
 
             size=len(data['edge_model']),
             pickled_edge_model=data['edge_model'],
-            scaler=data['scaler']
+            scaler=data['scaler'] if "scaler" in data else None
         )

@@ -16,7 +16,7 @@ async def validate_user(Authorization: str = Header(...), project_id=Depends(ext
         if "exp" not in decoded:
             raise jwt.ExpiredSignatureError
         user_id = ObjectId(decoded["id"])
-        sub_level = decoded["subscriptionLevel"]
+        sub_level = decoded.get("subscriptionLevel")
         project = await get_project(project_id)
         if project.admin != user_id and user_id not in project.users:
             print('not in db')

@@ -33,15 +33,16 @@ class Trainer:
     project_id: str
     target_labeling: Any
     labels: Any
-    datasets: Any
     selected_timeseries: Any
     window_size: Any
     sliding_step: Any
     use_unlabelled: Any
     unlabelled_name: Any
     selected_model: Any
-    hyperparameters: Any
+    sub_level: Any
 
+    datasets: Any = field(init=False)
+    hyperparameters: Any = field(init=False)
     training_state: TrainingState = field(default=None)
     id: str = field(default=None)
     error_msg: str = field(default="")

@@ -72,9 +72,9 @@ public:
     bool add_datapoint(const char *sensor, float value)
     {
         {% for ts in data.timeSeries %}
-            if (strcmp(sensor, "{{ts}}")) {
-                values_{{ts}}[c_idx_{{ts}} * NUM_SENSORS] = value;
-                c_idx_{{ts}} = (c_idx_{{ts}} + 1) % (WINDOW_SIZE * NUM_SENSORS);
+            if (strcmp(sensor, "{{ts}}") == 0) {
+                values_{{ts}}[c_idx_{{ts}}] = value;
+                c_idx_{{ts}} = (c_idx_{{ts}} + 1) % (WINDOW_SIZE);
                 values_collected_{{ts}} = std::max(values_collected_{{ts}}, {{data.window_size}});
                 return 0;
             }

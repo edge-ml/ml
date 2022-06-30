@@ -39,7 +39,7 @@ class Trainer:
     use_unlabelled: Any
     unlabelled_name: Any
     selected_model: Any
-    sub_level: Any
+    sub_level: Any = field(default="standard")
 
     datasets: Any = field(init=False)
     hyperparameters: Any = field(init=False)

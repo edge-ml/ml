@@ -57,7 +57,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     labels = body.labels
     selected_timeseries = body.selected_timeseries
     token = user_data[1]
-    sub_level = user_data[2]
+    sub_level = user_data[2] if user_data[2] else "standard"
    
     if not model_name:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="No name is given")

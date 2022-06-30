@@ -8,9 +8,9 @@ class SubscriptionLevel(str, Enum):
     @staticmethod
     def corresponding_timer(sub_level):
         if sub_level == SubscriptionLevel.STANDARD:
-            return 20
+            return 86400 # 24 hours
         elif sub_level == SubscriptionLevel.UPGRADED:
-            return 60
+            return 86400
         elif sub_level == SubscriptionLevel.UNLIMITED:
             return None
         else:

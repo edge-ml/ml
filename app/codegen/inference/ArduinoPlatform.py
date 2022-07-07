@@ -11,7 +11,7 @@ class ArduinoPlatform(BasePlatform):
     def supported_formats(self):
         return [InferenceFormats.C_EMBEDDED, InferenceFormats.CPP]
 
-    def codegen(self, window_size, timeseries, labels, format):
+    def codegen(self, window_size, timeseries, labels, format, scaler):
         temp = []
         temp.append(f'#include "___DOWNLOADED_MODEL_BASENAME___.hpp"')
         temp.append("")

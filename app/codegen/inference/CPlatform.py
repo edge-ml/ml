@@ -9,5 +9,5 @@ class CPlatform(BasePlatform):
     def supported_formats(self):
         return [InferenceFormats.C, InferenceFormats.C_EMBEDDED]
 
-    def codegen(self, window_size, timeseries, labels, format):
+    def codegen(self, window_size, timeseries, labels, format, scaler):
         return "here's c code"

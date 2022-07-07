@@ -29,6 +29,7 @@ async def export(format: str, model: Model = Depends(validate_model), user_data=
         timeseries = timeseries,
         labels = label_names,
         format = form,
+        scaler = model.scaler
     )
 
 @router.get("/{model_id}/download/{format}")

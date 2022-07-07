@@ -9,7 +9,7 @@ class JavascriptPlatform(BasePlatform):
     def supported_formats(self):
         return [InferenceFormats.JAVASCRIPT]
 
-    def codegen(self, window_size, timeseries, labels, format):
+    def codegen(self, window_size, timeseries, labels, format, scaler):
         tadd = ""
         for ts in timeseries:
             tadd = tadd + '\n    p.addDatapoint(\'{ts}\', get{ts}())'.format(ts = ts)
@@ -21,7 +21,8 @@ const p = new Predictor(
     (input) => score(input),
     {timeseries_list},
     {wsize},
-    {labels}
+    {labels},
+    {scaler}
 )
 
 setInterval(() => {{{timeseries_add}
@@ -35,4 +36,5 @@ setInterval(() => {{{timeseries_add}
             timeseries_list=str(timeseries),
             labels=str(labels),
             timeseries_add=tadd,
+            scaler=scaler
         )

@@ -1,3 +1,4 @@
+from app.codegen.export_javascript import export_javascript
 from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
 from app.models.edge_model import EdgeModel
@@ -175,7 +176,7 @@ class DecisionTree(EdgeModel):
         elif platform == InferenceFormats.C:
             return m2c.export_to_c(self.clf)
         elif platform == InferenceFormats.JAVASCRIPT:
-            return m2c.export_to_javascript(self.clf)
+            return export_javascript(self)
         elif platform == InferenceFormats.CPP:
             return convertMCU(self, window_size, labels, timeseries)
         else:

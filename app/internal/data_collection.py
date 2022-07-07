@@ -23,3 +23,10 @@ def fetch_dataset(project_id, token, dataset_id):
     except:
         return []
     return dataset.json()
+
+def fetch_label_definition(project_id, token):
+    url = API_URI + "/labelDefinitions"
+    label_definitions = requests.get(
+        url, headers={"Authorization": "Bearer " + token, "project": project_id}
+    )
+    return label_definitions.json()

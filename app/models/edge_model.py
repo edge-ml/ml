@@ -1,13 +1,16 @@
 from app.codegen.inference import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
 
+SAMPLE_BASED_WINDOWING = "sample based"
+TIME_BASED_WINDOWING = "time based (in ms)"
+
 class EdgeModel:
     # static methods
     @staticmethod
     def get_hyperparameters():
         pb = ParameterBuilder()
         pb.add_number(
-            "window_size", "Window Size", "Sets the window size (in samples)", 0, 60000, 100, 1, True, False, False
+            "window_size", "Window Size", "Sets the window size.", 0, 60000, 100, 1, True, False, False
         )
         pb.add_number(
             "sliding_step",
@@ -19,6 +22,16 @@ class EdgeModel:
             1,
             True,
             False,
+            False
+        )
+        pb.add_selection(
+            "windowing_mode",
+            "Windowing Mode",
+            "Controls the interpretation of window size and sliding step parameters. With sample based windowing they are interpreted as number of samples, with time based windowing as time interval in milliseconds.",
+            [SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING],
+            SAMPLE_BASED_WINDOWING,
+            False,
+            True,
             False
         )
         return pb.parameters

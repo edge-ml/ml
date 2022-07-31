@@ -36,6 +36,7 @@ class Trainer:
     selected_timeseries: Any
     window_size: Any
     sliding_step: Any
+    windowing_mode: str
     use_unlabelled: Any
     unlabelled_name: Any
     selected_model: Any

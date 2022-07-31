@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from app.models.edge_model import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
+
 def filter_by_timeseries(datasets, timeseries):
     filtered_dataset = []
     for dataset in datasets:
@@ -87,20 +89,34 @@ def label_dataset(df, labels, label_map, use_unlabelled, unlabelled_name):
     return df_labeled
 
 
-def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_size):
+def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_size, mode=SAMPLE_BASED_WINDOWING):
+    if mode == TIME_BASED_WINDOWING:
+        window_size = pd.Timedelta(milliseconds = window_size)
+        step_size = pd.Timedelta(milliseconds = step_size)
+
     id = 0
     data_y = []
     df_sliding_window = pd.DataFrame()
     for df in df_labeled_each_dataset:
-        for i in range(0, df.shape[0], step_size):
-            window_start = i
-            window_end = i + window_size
-            if window_end > df.shape[0]:
+        maxbound = None
+        starts = None
+        if mode == SAMPLE_BASED_WINDOWING:
+            maxbound = df.shape[0]
+            starts = range(0, maxbound, step_size)
+        elif mode == TIME_BASED_WINDOWING:
+            maxbound = df.index.max()
+            starts = pd.date_range(df.index.min(), maxbound, freq=step_size)
+
+        for window_start in starts:
+            window_end = window_start + window_size
+            if window_end > maxbound:
                 break
-            most_voted = df.iloc[window_start:window_end, col_size].mode()
+            window = df[window_start:window_end]
+
+            most_voted = window.iloc[:, col_size].mode()
             if most_voted.empty:
                 continue
-            df_segment = df.iloc[window_start:window_end, :col_size]
+            df_segment = window.iloc[:, :col_size]
             df_segment["id"] = id
             id = id + 1
             df_sliding_window = pd.concat([df_sliding_window, df_segment])

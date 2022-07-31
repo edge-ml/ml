@@ -15,7 +15,7 @@ async def export(format: str, model: Model = Depends(validate_model), user_data=
     token = user_data[1]
 
     timeseries = model.timeseries if model.timeseries else ["Sensor_A", "Sensor_B", "Sensor_C"]
-    labels = model.labels if model.labels else []
+    labels = model.labels if model.labels else ["label1", "label2"]
     wsize =  model.window_size if model.window_size else "<WINDOW_SIZE>"
 
     form = InferenceFormats.from_str(format)
@@ -29,7 +29,8 @@ async def export(format: str, model: Model = Depends(validate_model), user_data=
         timeseries = timeseries,
         labels = label_names,
         format = form,
-        scaler = model.scaler
+        scaler = model.scaler,
+        windowing_mode = model.windowing_mode
     )
 
 @router.get("/{model_id}/download/{format}")

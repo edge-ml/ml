@@ -15,6 +15,7 @@ from sklearn.metrics import (
     f1_score,
     classification_report
 )
+from app.internal.consts import SAMPLE_BASED_WINDOWING
 
 from app.internal.data_preparation import (
     extract_labels,
@@ -26,7 +27,6 @@ from app.internal.data_preparation import (
 )
 
 from app.ml.training_state import TrainingState
-from app.models.edge_model import SAMPLE_BASED_WINDOWING
 
 @dataclass
 class Trainer:

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from app.models.edge_model import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
+from app.internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
 
 def filter_by_timeseries(datasets, timeseries):
     filtered_dataset = []

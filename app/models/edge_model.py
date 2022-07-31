@@ -1,8 +1,6 @@
 from app.codegen.inference import InferenceFormats
+from app.internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
 from app.utils.parameter_builder import ParameterBuilder
-
-SAMPLE_BASED_WINDOWING = "sample based"
-TIME_BASED_WINDOWING = "time based (in ms)"
 
 class EdgeModel:
     # static methods

@@ -1,7 +1,8 @@
 from curses import has_key
 from dataclasses import dataclass, field
 from typing import List
-from app.models.edge_model import SAMPLE_BASED_WINDOWING, EdgeModel
+from app.internal.consts import SAMPLE_BASED_WINDOWING
+from app.models.edge_model import EdgeModel
 import pickle
 
 @dataclass

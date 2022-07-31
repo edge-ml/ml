@@ -22,7 +22,7 @@ class PythonPlatform(BasePlatform):
     def supported_formats(self):
         return [InferenceFormats.PYTHON]
 
-    def codegen(self, window_size, timeseries, labels, format, scaler):
+    def codegen(self, window_size, timeseries, labels, format, scaler, windowing_mode):
         tadd = ""
         for ts in timeseries:
             tadd = tadd + '\n    p.add_datapoint(\'{ts}\', get{ts}())'.format(ts = ts)

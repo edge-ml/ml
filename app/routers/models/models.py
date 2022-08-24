@@ -34,14 +34,14 @@ edge_models = [
         "model": RandomForest(),
         "platforms": RandomForest.get_platforms()
     },
-    {
-        "name": KNeighbours.get_name(),
-        "description": KNeighbours.get_description(),
-        "id": 1,
-        "hyperparameters": KNeighbours.get_hyperparameters(),
-        "model": KNeighbours(),
-        "platforms": KNeighbours.get_platforms()
-    },
+    # {
+    #     "name": KNeighbours.get_name(),
+    #     "description": KNeighbours.get_description(),
+    #     "id": 1,
+    #     "hyperparameters": KNeighbours.get_hyperparameters(),
+    #     "model": KNeighbours(),
+    #     "platforms": KNeighbours.get_platforms()
+    # },
     {
         "name": DecisionTree.get_name(),
         "description": DecisionTree.get_description(),
@@ -50,15 +50,15 @@ edge_models = [
         "model": DecisionTree(),
         "platforms": DecisionTree.get_platforms()
     },
-    {
-        "name": SVC.get_name(),
-        "description": SVC.get_description(),
-        "id": 3,
-        "hyperparameters": SVC.get_hyperparameters(),
-        "model": SVC(),
-        "platforms": SVC.get_platforms()
-    },
     # {
+    #     "name": SVC.get_name(),
+    #     "description": SVC.get_description(),
+    #     "id": 3,
+    #     "hyperparameters": SVC.get_hyperparameters(),
+    #     "model": SVC(),
+    #     "platforms": SVC.get_platforms()
+    # },
+    # # {
     #     "name": MLP.get_name(),
     #     "description": MLP.get_description(),
     #     "id": 4,

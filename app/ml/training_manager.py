@@ -55,7 +55,7 @@ class TrainingManager:
                 self, token, 
                 model_name, project_id, 
                 target_labeling, labels, selected_timeseries,
-                window_size, sliding_step, 
+                window_size, sliding_step, windowing_mode,
                 use_unlabelled, unlabelled_name, 
                 selected_model, raw_hyperparams, 
                 sub_level):
@@ -63,7 +63,7 @@ class TrainingManager:
         t = Trainer(
             model_name, project_id, 
             target_labeling, labels, selected_timeseries, 
-            window_size, sliding_step, 
+            window_size, sliding_step, windowing_mode,
             use_unlabelled, unlabelled_name, 
             selected_model, 
             sub_level)
@@ -147,6 +147,7 @@ class TrainingManager:
             timeseries=t.selected_timeseries,
             window_size=t.window_size,
             sliding_step=t.sliding_step,
+            windowing_mode=t.windowing_mode,
             confusion_matrix=metrics['confusion_matrix'],
             classification_report=metrics['classification_report'],
             edge_model=model

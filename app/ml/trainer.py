@@ -15,6 +15,7 @@ from sklearn.metrics import (
     f1_score,
     classification_report
 )
+from app.internal.consts import SAMPLE_BASED_WINDOWING
 
 from app.internal.data_preparation import (
     extract_labels,
@@ -36,6 +37,7 @@ class Trainer:
     selected_timeseries: Any
     window_size: Any
     sliding_step: Any
+    windowing_mode: str
     use_unlabelled: Any
     unlabelled_name: Any
     selected_model: Any
@@ -67,9 +69,10 @@ class Trainer:
         return metrics
 
     def feature_extraction(self, df_labeled_each_dataset):
-        (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, self.window_size, self.sliding_step, len(self.selected_timeseries))
-        if df_sliding_window.shape[0] // self.window_size <= 1:
-            raise ValueError("Not enough features to extract, try setting the window size to a lower value")
+        (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, self.window_size, self.sliding_step, len(self.selected_timeseries), mode=self.windowing_mode)
+        if self.windowing_mode == SAMPLE_BASED_WINDOWING:
+            if df_sliding_window.shape[0] // self.window_size <= 1:
+                raise ValueError("Not enough features to extract, try setting the window size to a lower value")
         ############# FEATURE_EXTRACTION
         settings = tsfresh.feature_extraction.settings.MinimalFCParameters()
         data_x = tsfresh.extract_features(

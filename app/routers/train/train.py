@@ -50,6 +50,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     model_name = body.model_name
     window_size = next((param for param in body.hyperparameters if param["parameter_name"] == "window_size"), None)["state"]
     sliding_step = next((param for param in body.hyperparameters if param["parameter_name"] == "sliding_step"), None)["state"]
+    windowing_mode = next((param for param in body.hyperparameters if param["parameter_name"] == "windowing_mode"), None)["state"]["value"]
     selected_model = next((model for model in edge_models if model["id"] == model_id), None)["model"]
     use_unlabelled = body.use_unlabelled
     unlabelled_name = body.unlabelled_name
@@ -77,7 +78,7 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
     background_tasks.add_task(request.app.state.training_manager.initiate,
                                 token, model_name, project_id, 
                                 target_labeling, labels, selected_timeseries,
-                                window_size, sliding_step, 
+                                window_size, sliding_step, windowing_mode,
                                 use_unlabelled, unlabelled_name, 
                                 selected_model, body.hyperparameters, 
                                 sub_level)

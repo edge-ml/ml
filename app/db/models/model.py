@@ -1,6 +1,7 @@
 from curses import has_key
 from dataclasses import dataclass, field
 from typing import List
+from app.internal.consts import SAMPLE_BASED_WINDOWING
 from app.models.edge_model import EdgeModel
 import pickle
 
@@ -18,6 +19,7 @@ class Model():
     timeseries: List[str]
     window_size: int
     sliding_step: int
+    windowing_mode: str
     confusion_matrix: str
     classification_report: str
     edge_model: EdgeModel
@@ -44,6 +46,7 @@ class Model():
             'timeseries': that.timeseries,
             'window_size': that.window_size,
             'sliding_step': that.sliding_step,
+            'windowing_mode': that.windowing_mode,
             'confusion_matrix': that.confusion_matrix,
             'classification_report': that.classification_report,
             'edge_model': pickle.dumps(that.edge_model),
@@ -65,6 +68,7 @@ class Model():
             timeseries=data.get('timeseries'),
             window_size=data.get('window_size'),
             sliding_step=data.get('sliding_step'),
+            windowing_mode=data.get('windowing_mode') if data.get('windowing_mode') else SAMPLE_BASED_WINDOWING, # Backwards compability: sample based windowing was the first and only mode before this parameter
             confusion_matrix=data['confusion_matrix'],
             classification_report=data['classification_report'],
             edge_model=pickle.loads(data['edge_model']),

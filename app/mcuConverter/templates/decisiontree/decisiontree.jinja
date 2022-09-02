@@ -1,4 +1,8 @@
-{% extends 'interface.jinja' %}
+{% if data.language == "CPP" %}
+    {% extends 'interface_cpp.jinja' %}
+{% elif data.language == "C" %}
+    {% extends 'interface_c.jinja' %}
+{% endif %}
 
 {% block predict %}
     {% include 'decisiontree/tree.jinja' %}

@@ -5,7 +5,7 @@ from app.models.edge_model import EdgeModel
 from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
-from app.mcuConverter.mcuConverter import convertMCU
+from app.mcuConverter.mcuConverter import McuLanguage, convertMCU
 
 import copy
 
@@ -166,19 +166,21 @@ class DecisionTree(EdgeModel):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP]
+        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
 
     def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
         if platform == InferenceFormats.PYTHON:
             return m2c.export_to_python(self.clf)
         elif platform == InferenceFormats.C_EMBEDDED:
-            return port(self.clf)
-        elif platform == InferenceFormats.C:
+        #     return port(self.clf)
+        # elif platform == InferenceFormats.C:
             return m2c.export_to_c(self.clf)
         elif platform == InferenceFormats.JAVASCRIPT:
             return export_javascript(self)
         elif platform == InferenceFormats.CPP:
-            return convertMCU(self, window_size, labels, timeseries)
+            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.CPP)
+        elif platform == InferenceFormats.C:
+            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.C)
         else:
             print(platform)
             raise NotImplementedError

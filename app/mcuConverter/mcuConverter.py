@@ -4,13 +4,18 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from jinja2 import FileSystemLoader, Environment
+from enum import Enum
 
+
+class McuLanguage(Enum):
+    CPP = 1
+    C = 2
 
 templateLoader = FileSystemLoader("app/mcuConverter/templates")
 templateEnv = Environment(loader=templateLoader,
                           trim_blocks=True, lstrip_blocks=True)
 
-def convertMCU(model: EdgeModel, window_size, labels, timeseries, scaler):
+def convertMCU(model: EdgeModel, window_size, labels, timeseries, scaler, language: McuLanguage):
     print("scaler: ", scaler)
     params = {"window_size": window_size,
         "num_sensors": len(timeseries),
@@ -18,7 +23,8 @@ def convertMCU(model: EdgeModel, window_size, labels, timeseries, scaler):
         "num_features": 10, # This is hardcoded for now
         "timeSeries": timeseries,
         "labels": labels,
-        "scaler": scaler}
+        "scaler": scaler,
+        "language": language.name}
 
     functions = {"f": {
         "enumerate": enumerate,

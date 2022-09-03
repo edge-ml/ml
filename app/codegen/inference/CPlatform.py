@@ -10,7 +10,7 @@ class CPlatform(BasePlatform):
         return [InferenceFormats.C, InferenceFormats.C_EMBEDDED]
 
 
-    def codegen(self, window_size, timeseries, labels, format, scaler):
+    def codegen(self, window_size, timeseries, labels, format, scaler, windowing_mode):
         temp = []
         temp.append(f'#include "___DOWNLOADED_MODEL_BASENAME___.h"')
         temp.append("")

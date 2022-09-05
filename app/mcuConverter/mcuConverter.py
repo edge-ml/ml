@@ -16,7 +16,6 @@ templateEnv = Environment(loader=templateLoader,
                           trim_blocks=True, lstrip_blocks=True)
 
 def convertMCU(model: EdgeModel, window_size, labels, timeseries, scaler, language: McuLanguage):
-    print("scaler: ", scaler)
     params = {"window_size": window_size,
         "num_sensors": len(timeseries),
         "num_classes": len(labels),

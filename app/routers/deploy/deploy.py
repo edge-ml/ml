@@ -33,7 +33,11 @@ async def export(format: str, model: Model = Depends(validate_model), user_data=
         windowing_mode = model.windowing_mode
     )
 
+
 @router.get("/{model_id}/download/{format}")
-async def dlmodel(format: str, model=Depends(validate_model)):
-    print(model)
-    return Response(content=model.edge_model.export(InferenceFormats.from_str(format), model.window_size, model.labels, model.timeseries, model.scaler), media_type="text/plain")
+async def dlmodel(format: str, model=Depends(validate_model), user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
+    token = user_data[1]
+    labels = model.labels
+    label_defs = fetch_label_definition(project_id, token)
+    label_names = [ (next(x for x in label_defs["labelTypes"] if x["_id"] == labelId))["name"] for labelId in labels ]
+    return Response(content=model.edge_model.export(InferenceFormats.from_str(format), model.window_size, label_names, model.timeseries, model.scaler), media_type="text/plain")

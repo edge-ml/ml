@@ -27,6 +27,7 @@ from app.internal.data_preparation import (
 )
 
 from app.ml.training_state import TrainingState
+from app.validation import ValidationBody
 
 @dataclass
 class Trainer:
@@ -41,6 +42,7 @@ class Trainer:
     use_unlabelled: Any
     unlabelled_name: Any
     selected_model: Any
+    validation: ValidationBody
     sub_level: Any = field(default="standard")
 
     datasets: Any = field(init=False)
@@ -68,8 +70,8 @@ class Trainer:
         metrics['classification_report'] = classification_report(y_test, y_pred, labels=num_labels, zero_division=0, target_names=target_names)
         return metrics
 
-    def feature_extraction(self, df_labeled_each_dataset):
-        (df_sliding_window, data_y) = roll_sliding_window(df_labeled_each_dataset, self.window_size, self.sliding_step, len(self.selected_timeseries), mode=self.windowing_mode)
+    def feature_extraction(self, df_labeled_each_dataset, dataset_metadatas):
+        (df_sliding_window, data_y, metadatas) = roll_sliding_window(df_labeled_each_dataset, self.window_size, self.sliding_step, len(self.selected_timeseries), dataset_metadatas=dataset_metadatas, mode=self.windowing_mode)
         if self.windowing_mode == SAMPLE_BASED_WINDOWING:
             if df_sliding_window.shape[0] // self.window_size <= 1:
                 raise ValueError("Not enough features to extract, try setting the window size to a lower value")
@@ -79,12 +81,10 @@ class Trainer:
             df_sliding_window, column_id="id", default_fc_parameters=settings
         )
 
-        return data_x, data_y
+        return data_x, data_y, metadatas
     
-    def train(self, data_x, data_y):
-        x_train, x_test, y_train, y_test = train_test_split(
-            data_x, data_y, random_state=5, test_size=0.33
-        )  # TODO fix hardcoded
+    def train(self, data_x, data_y, metadatas):
+        x_train, x_test, y_train, y_test, metadatas_train, _ = self.validation.train_test_split.train_test_split(data_x, data_y, metadatas)
         ############### MODEL_TRAINING
         scaler = RobustScaler()
         scaler.fit(x_train)
@@ -104,8 +104,9 @@ class Trainer:
 
         scaler_serialized = {"scale": list(scaler.scale_), "center": list(scaler.center_), "name": RobustScaler.__name__}
 
+        cross_val_res = [ c_val.cross_validate(self.selected_model, x_train, y_train, metadatas_train) for c_val in self.validation.cross_validation ]
         ############# TRAINING_SUCCESSFUL
-        return (self.selected_model, self._calculate_model_metrics(y_test, y_pred), scaler_serialized)
+        return (self.selected_model, self._calculate_model_metrics(y_test, y_pred), scaler_serialized, cross_val_res)
 
     
     def get_df_labeled_each_dataset(self):
@@ -127,4 +128,4 @@ class Trainer:
         return (list(label_map.keys()), [
             label_dataset(df, labels_with_intervals[idx], label_map, self.use_unlabelled, self.unlabelled_name)
             for idx, df in enumerate(df_interpolated_each_dataset)
-        ])
+        ], [ x['metaData'] for x in filtered_datasets ])

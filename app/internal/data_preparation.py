@@ -89,15 +89,16 @@ def label_dataset(df, labels, label_map, use_unlabelled, unlabelled_name):
     return df_labeled
 
 
-def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_size, mode=SAMPLE_BASED_WINDOWING):
+def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_size, dataset_metadatas, mode=SAMPLE_BASED_WINDOWING):
     if mode == TIME_BASED_WINDOWING:
         window_size = pd.Timedelta(milliseconds = window_size)
         step_size = pd.Timedelta(milliseconds = step_size)
 
     id = 0
     data_y = []
+    metadatas = []
     df_sliding_window = pd.DataFrame()
-    for df in df_labeled_each_dataset:
+    for df_idx, df in enumerate(df_labeled_each_dataset):
         maxbound = None
         starts = None
         if mode == SAMPLE_BASED_WINDOWING:
@@ -121,8 +122,8 @@ def roll_sliding_window(df_labeled_each_dataset, window_size, step_size, col_siz
             id = id + 1
             df_sliding_window = pd.concat([df_sliding_window, df_segment])
             data_y.append(most_voted.iloc[0])
-    print(data_y)
-    return (df_sliding_window, data_y)
+            metadatas.append(dataset_metadatas[df_idx])
+    return (df_sliding_window, data_y, metadatas)
 
 
 # TODO handle multiple choice

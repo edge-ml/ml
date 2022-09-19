@@ -13,6 +13,7 @@ from app.ml.training_state import TrainingState
 
 from app.internal.data_collection import fetch_dataset, fetch_project_datasets
 from app.internal.data_preparation import filter_by_timeseries, format_hyperparameters
+from app.validation import ValidationBody
 
 class TrainingManager:
     pool: ProcessPool
@@ -58,15 +59,19 @@ class TrainingManager:
                 window_size, sliding_step, windowing_mode,
                 use_unlabelled, unlabelled_name, 
                 selected_model, raw_hyperparams, 
-                sub_level):
-        
+                sub_level,
+                validation: ValidationBody):
+
+
         t = Trainer(
             model_name, project_id, 
             target_labeling, labels, selected_timeseries, 
             window_size, sliding_step, windowing_mode,
             use_unlabelled, unlabelled_name, 
             selected_model, 
-            sub_level)
+            validation,
+            sub_level,
+        )
 
         self.trainers[t.id] = t
         t.training_state = TrainingState.TRAINING_INITIATED
@@ -94,7 +99,7 @@ class TrainingManager:
         start = time.perf_counter()
         initiate_training = self.pool.schedule(t.get_df_labeled_each_dataset, timeout=time_left)
         try:
-            labels, df_labeled_each_dataset = initiate_training.result()
+            labels, df_labeled_each_dataset, dataset_metadatas = initiate_training.result()
         except TimeoutError:
             print("Task took too long in phase 1")
             self.handle_timeout(t)
@@ -102,13 +107,13 @@ class TrainingManager:
         end = time.perf_counter()
         time_left = self._calculate_time_left(time_left, end - start)
         print('PHASE 1 End: ', time_left)
-        
+
         print("PHASE 2")
         start = time.perf_counter()
         t.training_state = TrainingState.FEATURE_EXTRACTION
-        feature_extraction = self.pool.schedule(t.feature_extraction, args=[df_labeled_each_dataset], timeout=time_left)
+        feature_extraction = self.pool.schedule(t.feature_extraction, args=[df_labeled_each_dataset, dataset_metadatas], timeout=time_left)
         try:
-            data_x, data_y = feature_extraction.result()
+            data_x, data_y, metadatas = feature_extraction.result()
         except TimeoutError:
             print("Task took too long in phase 2")
             self.handle_timeout(t)
@@ -120,9 +125,9 @@ class TrainingManager:
         print("PHASE 3")
         start = time.perf_counter()
         t.training_state = TrainingState.MODEL_TRAINING
-        training = self.pool.schedule(t.train, args=[data_x, data_y], timeout=time_left)
+        training = self.pool.schedule(t.train, args=[data_x, data_y, metadatas], timeout=time_left)
         try:
-            model, metrics, scaler = training.result()
+            model, metrics, scaler, cross_val = training.result()
         except TimeoutError:
             print("Task took too long in phase 3")
             self.handle_timeout(t)
@@ -142,6 +147,7 @@ class TrainingManager:
             precision_score=metrics['precision_score'],
             f1_score=metrics['f1_score'],
             recall_score=metrics['recall_score'],
+            cross_validation=cross_val,
             scaler=scaler,
             labels=list(labels),
             timeseries=t.selected_timeseries,

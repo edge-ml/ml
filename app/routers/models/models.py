@@ -1,4 +1,3 @@
-import time
 from typing import List, Optional
 from uuid import uuid4
 from fastapi import APIRouter, Depends
@@ -93,6 +92,7 @@ class ModelMetrics(TrainedModel):
     labels: List[str]
     confusion_matrix: str
     classification_report: str
+    cross_validation: List[dict]
     platforms: List[InferenceFormats]
 
 # Get a trained model
@@ -109,6 +109,7 @@ async def trained_model(model=Depends(validate_model)):
         'size': model.size,
         'labels': model.labels if model.labels else [],
         'confusion_matrix': model.confusion_matrix,
+        'cross_validation': model.cross_validation,
         'classification_report': model.classification_report,
         'hyperparameters': model.edge_model.hyperparameters,
         'window_size': model.window_size,

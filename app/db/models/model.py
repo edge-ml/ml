@@ -1,4 +1,3 @@
-from curses import has_key
 from dataclasses import dataclass, field
 from typing import List
 from app.internal.consts import SAMPLE_BASED_WINDOWING
@@ -24,6 +23,7 @@ class Model():
     classification_report: str
     edge_model: EdgeModel
     scaler: dict
+    cross_validation: dict
 
     size: int = field(default=None)
     pickled_edge_model: bytes = field(default=None)
@@ -50,7 +50,8 @@ class Model():
             'confusion_matrix': that.confusion_matrix,
             'classification_report': that.classification_report,
             'edge_model': pickle.dumps(that.edge_model),
-            'scaler': that.scaler
+            'scaler': that.scaler,
+            'cross_validation': that.cross_validation
         }
 
     @staticmethod
@@ -75,5 +76,6 @@ class Model():
 
             size=len(data['edge_model']),
             pickled_edge_model=data['edge_model'],
-            scaler=data['scaler'] if "scaler" in data else None
+            scaler=data['scaler'] if "scaler" in data else None,
+            cross_validation=data['cross_validation'] if "cross_validation" in data else [],
         )

@@ -27,6 +27,7 @@ from app.internal.data_preparation import (
 )
 
 from app.ml.training_state import TrainingState
+from app.validation import ValidationBody
 
 @dataclass
 class Trainer:
@@ -41,6 +42,7 @@ class Trainer:
     use_unlabelled: Any
     unlabelled_name: Any
     selected_model: Any
+    validation: ValidationBody
     sub_level: Any = field(default="standard")
 
     datasets: Any = field(init=False)
@@ -82,9 +84,7 @@ class Trainer:
         return data_x, data_y, metadatas
     
     def train(self, data_x, data_y, metadatas):
-        x_train, x_test, y_train, y_test = train_test_split(
-            data_x, data_y, random_state=5, test_size=0.33
-        )  # TODO fix hardcoded
+        x_train, x_test, y_train, y_test, metadatas_train, _ = self.validation.train_test_split.train_test_split(data_x, data_y, metadatas)
         ############### MODEL_TRAINING
         scaler = RobustScaler()
         scaler.fit(x_train)
@@ -104,8 +104,9 @@ class Trainer:
 
         scaler_serialized = {"scale": list(scaler.scale_), "center": list(scaler.center_), "name": RobustScaler.__name__}
 
+        cross_val_res = [ c_val.cross_validate(self.selected_model, x_train, y_train, metadatas_train) for c_val in self.validation.cross_validation ]
         ############# TRAINING_SUCCESSFUL
-        return (self.selected_model, self._calculate_model_metrics(y_test, y_pred), scaler_serialized)
+        return (self.selected_model, self._calculate_model_metrics(y_test, y_pred), scaler_serialized, cross_val_res)
 
     
     def get_df_labeled_each_dataset(self):

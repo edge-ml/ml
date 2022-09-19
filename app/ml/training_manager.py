@@ -13,6 +13,7 @@ from app.ml.training_state import TrainingState
 
 from app.internal.data_collection import fetch_dataset, fetch_project_datasets
 from app.internal.data_preparation import filter_by_timeseries, format_hyperparameters
+from app.validation import ValidationBody
 
 class TrainingManager:
     pool: ProcessPool
@@ -58,15 +59,19 @@ class TrainingManager:
                 window_size, sliding_step, windowing_mode,
                 use_unlabelled, unlabelled_name, 
                 selected_model, raw_hyperparams, 
-                sub_level):
-        
+                sub_level,
+                validation: ValidationBody):
+
+
         t = Trainer(
             model_name, project_id, 
             target_labeling, labels, selected_timeseries, 
             window_size, sliding_step, windowing_mode,
             use_unlabelled, unlabelled_name, 
             selected_model, 
-            sub_level)
+            validation,
+            sub_level,
+        )
 
         self.trainers[t.id] = t
         t.training_state = TrainingState.TRAINING_INITIATED
@@ -122,7 +127,7 @@ class TrainingManager:
         t.training_state = TrainingState.MODEL_TRAINING
         training = self.pool.schedule(t.train, args=[data_x, data_y, metadatas], timeout=time_left)
         try:
-            model, metrics, scaler = training.result()
+            model, metrics, scaler, cross_val = training.result()
         except TimeoutError:
             print("Task took too long in phase 3")
             self.handle_timeout(t)
@@ -142,6 +147,7 @@ class TrainingManager:
             precision_score=metrics['precision_score'],
             f1_score=metrics['f1_score'],
             recall_score=metrics['recall_score'],
+            cross_validation=cross_val,
             scaler=scaler,
             labels=list(labels),
             timeseries=t.selected_timeseries,

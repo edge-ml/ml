@@ -8,6 +8,7 @@ from app.ml.training_state import TrainingState
 from app.routers.dependencies import extract_project_id, validate_user
 
 from app.routers.models.models import edge_models
+from app.validation import ValidationBody
 
 router = APIRouter()
 
@@ -41,6 +42,7 @@ class TrainBody(BaseModel):
     labels: List[str]
     use_unlabelled: bool
     unlabelled_name: str
+    validation: ValidationBody
 
 # Create an edge model with given model id and hyperparameters
 # Return the created model('s id)
@@ -81,5 +83,6 @@ async def models_train(request: Request, body: TrainBody, background_tasks: Back
                                 window_size, sliding_step, windowing_mode,
                                 use_unlabelled, unlabelled_name, 
                                 selected_model, body.hyperparameters, 
-                                sub_level)
+                                sub_level,
+                                validation=body.validation)
     return "success"

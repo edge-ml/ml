@@ -1,0 +1,176 @@
+#include "Arduino_BHY2"
+#include "Nicla_System.h"
+#include "src/edge_ml_model_cpp.hpp"
+
+String label;
+EdgeMlClassifier *cls;
+bool valueChanged = false;
+
+{# gen Sensor objects #}
+{ % for sensor in sensors % }
+  { % if sensor == 'accelerometer' % }
+    SensorXYZ accelerometer(SENSOR_ID_ACC);
+  { % endif % }
+  { % if sensor == 'gyroscope' % }
+    SensorXYZ gyroscope(SENSOR_ID_GYRO);
+  { % endif % }
+  { % if sensor == 'magnetometer' % }
+    SensorXYZ magnetometer(SENSOR_ID_MAG);
+  { % endif % }
+  { % if sensor == 'orientation' % }
+    SensorOrientation orientation(SENSOR_ID_ORI);
+  { % endif % }
+  { % if sensor == 'temperature % }
+    Sensor temperature(SENSOR_ID_TEMP);
+  { % endif % }
+  { % if sensor == 'barometer' % }
+    Sensor barometer(SENSOR_ID_BARO);
+  { % endif % }
+  { % if sensor == 'humidity' % }
+    Sensor humidity(SENSOR_ID_HUM);
+  { % endif % }
+  { % if sensor == 'gas' % }
+    Sensor gas(SENSOR_ID_GAS);
+  { % endif % }
+{ % endfor %}
+
+ { % for sensor in sensors % }
+    static auto lastCheck_{{sensor}} = 0; 
+ { % endfor % }
+
+
+void setup {
+  cls = new EdgeMLClassifier();
+  Serial.begin(115200);
+  BHY2.begin();
+  nicla::leds.begin();
+
+  { # configure and start sensor streams #}
+  { % for sensor in sensors % }
+    {{sensor}}.begin();
+    {{sensor}}.configure({{sample_rate}}.get('{{sensor}}'), 0);
+  { % endfor %}
+
+  Serial.print("Startup");
+}
+
+void loop() {
+  BHY2.update();
+  valueChanged = false;
+  static auto currentMillis = millis();
+
+  { % for sensor in sensors % }
+  { % if sensor == 'accelerometer' % }
+    if(currentMillis - lastCheck_accelerometer >= (1000/sample_rate['accelerometer'])) {
+      lastCheck_accelerometer = currentMillis;
+      valueChanged = true;
+      { % for sensorProperty in sensorProperties['accelerometer'] % }
+        { % if sensorProperty == 'x' % }
+         cls -> add_datapoint("ACC_x", accelerometer.x());
+        { % endif % }
+        { % if sensorProperty == 'y' % }
+         cls -> add_datapoint("ACC_y", accelerometer.y());
+        { % endif % }
+        { % if sensorProperty == 'z' % }
+         cls -> add_datapoint("ACC_z", accelerometer.z());
+        { % endif % }
+      { % endfor % }
+    }
+  { % endif % }
+  { % if sensor == 'gyroscope' % }
+    if(currentMillis - lastCheck_gyroscope >= (1000/sample_rate['gyroscope'])) {
+      lastCheck_gyroscope = currentMillis;
+      valueChanged = true;
+        { % for sensorProperty in sensorProperties['gyroscope'] % }
+        { % if sensorProperty == 'x' % }
+         cls -> add_datapoint("GYRO_x", gyroscope.x());
+        { % endif % }
+        { % if sensorProperty == 'y' % }
+         cls -> add_datapoint("GYRO_y", gyroscope.y());
+        { % endif % }
+        { % if sensorProperty == 'z' % }
+         cls -> add_datapoint("GYRO_z", gyroscope.z());
+        { % endif % }
+      { % endfor % }
+    }
+  { % endif % }
+  { % if sensor == 'magnetometer' % }
+     if(currentMillis - lastCheck_magnetometer >= (1000/sample_rate['magnetometer'])) {
+      lastCheck_magnetometer = currentMillis;
+      valueChanged = true;
+        { % for sensorProperty in sensorProperties['magnetometer'] % }
+        { % if sensorProperty == 'x' % }
+         cls -> add_datapoint("MAGNET_x", magnetometer.x());
+        { % endif % }
+        { % if sensorProperty == 'y' % }
+         cls -> add_datapoint("MAGNET_y", magnetometer.y());
+        { % endif % }
+        { % if sensorProperty == 'z' % }
+         cls -> add_datapoint("MAGNET_z", magnetometer.z());
+        { % endif % }
+      { % endfor % }
+     }
+  { % endif % }
+  { % if sensor == 'orientation' % }
+     if(currentMillis - lastCheck_orientation >= (1000/sample_rate['orientation'])) {
+      lastCheck_orientation = currentMillis;
+      valueChanged = true;
+        { % for sensorProperty in sensorProperties['orientation'] % }
+        { % if sensorProperty == 'pitch' % }
+         cls -> add_datapoint("ORIENTATION_pitch", orientation.pitch());
+        { % endif % }
+        { % if sensorProperty == 'roll' % }
+         cls -> add_datapoint("ORIENTATION_roll", orientation.roll());
+        { % endif % }
+        { % if sensorProperty == 'heading' % }
+         cls -> add_datapoint("ORIENTATION_heading", orientation.heading());
+        { % endif % }
+      { % endfor % }
+      }
+  { % endif % }
+  { % if sensor == 'temperature % }
+    if(currentMillis - lastCheck_temperature >= (1000/sample_rate['temperature'])) {
+      lastCheck_temperature = currentMillis;
+      valueChanged = true;
+      cls -> add_datapoint("TEMPERATURE_val", temperature.value());
+    }
+  { % endif % }
+  { % if sensor == 'barometer' % }
+    if(currentMillis - lastCheck_barometer >= (1000/sample_rate['barometer'])) {
+      lastCheck_barometer = currentMillis;
+      valueChanged = true;
+      cls -> add_datapoint("BAROMETER_val", barometer.value());
+    }
+  { % endif % }
+  { % if sensor == 'humidity' % }
+    if(currentMillis - lastCheck_humidity >= (1000/sample_rate['humidity'])) {
+      lastCheck_humidity = currentMillis;
+      valueChanged = true;
+      cls -> add_datapoint("HUMIDITY_val", humidity.value());
+    }
+  { % endif % }
+  { % if sensor == 'gas' % }
+    if(currentMillis - lastCheck_gas >= (1000/sample_rate['gas'])) {
+      lastCheck_gas = currentMillis;
+      valueChanged = true;
+      cls -> add_datapoint("GAS_val", gas.value());
+    }
+  { % endif % }
+  { % endfor % }
+  if(valueChanged) {
+    evaluate();
+  }
+}
+
+void evaluate() {
+  int predicted_class = cls -> predict();
+  if(cls -> class_to_label(predicted_class, label)) {
+    Serial.print("\nClass: ");
+    Serial.print(cls_res);
+    Serial.print("; );
+    Serial.print(label);
+    { # gen shwowing led color of label # }
+    delay(1000);
+    nicla::leds.setColor(off);
+    }
+}

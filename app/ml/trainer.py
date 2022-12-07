@@ -5,6 +5,12 @@ from dataclasses import dataclass, field
 import pandas as pd
 from numpy import array2string
 import tsfresh
+from tsflex.features import FeatureCollection, MultipleFeatureDescriptors
+from tsflex.features.integrations import tsfresh_settings_wrapper
+from app.internal.consts import TIME_BASED_WINDOWING
+
+import numpy as np 
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler
 from sklearn.metrics import ( 
@@ -77,10 +83,32 @@ class Trainer:
                 raise ValueError("Not enough features to extract, try setting the window size to a lower value")
         ############# FEATURE_EXTRACTION
         settings = tsfresh.feature_extraction.settings.MinimalFCParameters()
-        data_x = tsfresh.extract_features(
-            df_sliding_window, column_id="id", default_fc_parameters=settings
-        )
-
+        # {'sum_values': None, 'median': None, 'mean': None, 'length': None, 'standard_deviation': None, 'variance': None, 'root_mean_square': None, 'maximum': None, 'absolute_maximum': None, 'minimum': None}
+        
+        ############# tsfresh
+        # data_x = tsfresh.extract_features(
+        #     df_sliding_window, column_id="id", default_fc_parameters=settings
+        # )
+        
+        ############# tsflex (this implementation only works with a single data)
+        fc_window = self.window_size
+        fc_stride = self.sliding_step
+        if self.windowing_mode == TIME_BASED_WINDOWING:
+            fc_window = str(fc_window) + 'ms'
+            fc_stride = str(fc_stride) + 'ms'
+        
+        fc = FeatureCollection(MultipleFeatureDescriptors(
+            functions=tsfresh_settings_wrapper(settings),
+            series_names=list(df_sliding_window.columns)[:-1],
+            windows=fc_window,
+            strides=fc_stride
+        ))
+        
+        data_x = fc.calculate(data=df_labeled_each_dataset, return_df=True, show_progress=True)
+        # data_x = pd.concat(data_x, axis=1) # return_df has the same result
+        
+        
+        
         return data_x, data_y, metadatas
     
     def train(self, data_x, data_y, metadatas):

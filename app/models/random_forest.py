@@ -208,6 +208,8 @@ class RandomForest(EdgeModel):
             False,
         )
 
+        print(pb.parameters)
+
         return pb.parameters
 
     @staticmethod

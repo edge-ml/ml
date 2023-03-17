@@ -1,5 +1,5 @@
 class ParameterBuilder:
-    def __init__(self, parameters = {}):
+    def __init__(self, parameters = []):
         self.parameters = parameters
         return
 
@@ -8,7 +8,8 @@ class ParameterBuilder:
 
         # self.__validateParameterName(self.parameters, parameter_name)
 
-        self.parameters[parameter_name] = {
+        self.parameters.append({
+            'name': [parameter_name],
             'parameter_type': 'number',
             'display_name': display_name,
             'parameter_name': parameter_name,
@@ -20,7 +21,7 @@ class ParameterBuilder:
             'required': required,
             'log': log,
             'is_advanced': is_advanced
-        }
+        })
         return self
 
     def add_selection(self, parameter_name, display_name, description, options, default, multi_select=False, required=True, is_advanced=True):
@@ -28,7 +29,8 @@ class ParameterBuilder:
 
         # self.__validateParameterName(self.parameters, parameter_name)
 
-        self.parameters[parameter_name] = {
+        self.parameters.append({
+            'name': [parameter_name],
             'parameter_type': 'selection',
             'display_name': display_name,
             'parameter_name': parameter_name,
@@ -38,7 +40,7 @@ class ParameterBuilder:
             'multi_select': multi_select,
             'required': required,
             'is_advanced': is_advanced
-        }
+        })
         return self
 
     def add_boolean(self, parameter_name, display_name, description, default, required=True, is_advanced=True):

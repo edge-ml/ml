@@ -6,10 +6,15 @@ from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
 from app.mcuConverter.mcuConverter import McuLanguage, convertMCU
+from sklearn.tree import DecisionTreeClassifier
 
 import copy
 
 class DecisionTree(EdgeModel):
+
+    id = 1
+
+
     # static methods
     @staticmethod
     def get_hyperparameters():
@@ -194,3 +199,13 @@ class DecisionTree(EdgeModel):
         if not self.is_fit:
             return
             # TODO: throw error
+
+    @staticmethod
+    def config():
+        return {
+        "name": DecisionTree.get_name(),
+        "description": DecisionTree.get_description(),
+        "id": DecisionTree.id,
+        "hyperparameters": DecisionTree.get_hyperparameters(),
+        "platforms": DecisionTree.get_platforms()
+        }

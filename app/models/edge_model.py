@@ -45,6 +45,10 @@ class EdgeModel:
     @staticmethod
     def get_platforms():
         return []
+    
+    @staticmethod
+    def config():
+        raise NotImplementedError()
 
     # class methods
     def __init__(self, hyperparameters={}):

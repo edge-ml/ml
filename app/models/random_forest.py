@@ -11,6 +11,7 @@ import copy
 
 
 class RandomForest(EdgeModel):
+    id = 2
     # static methods
     @staticmethod
     def get_hyperparameters():
@@ -250,3 +251,13 @@ class RandomForest(EdgeModel):
         if not self.is_fit:
             return
             # TODO: throw error
+    
+    @staticmethod
+    def config():
+        return {
+        "name": RandomForest.get_name(),
+        "description": RandomForest.get_description(),
+        "id": RandomForest.id,
+        "hyperparameters": RandomForest.get_hyperparameters(),
+        "platforms": RandomForest.get_platforms()
+        }

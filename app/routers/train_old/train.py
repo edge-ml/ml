@@ -1,66 +1,64 @@
-from fastapi import APIRouter, Depends, BackgroundTasks, Header
-from pydantic import BaseModel, Field
-from typing import List
-from fastapi import status, HTTPException, Response
-from starlette.requests import Request
-from app.ml.training_manager import TrainingManager
-from app.ml.training_state import TrainingState
-from app.routers.dependencies import extract_project_id, validate_user
+# from fastapi import APIRouter, Depends, BackgroundTasks, Header
+# from pydantic import BaseModel, Field
+# from typing import List
+# from fastapi import status, HTTPException, Response
+# from starlette.requests import Request
+# from app.routers.dependencies import extract_project_id, validate_user
 
-from app.routers.models.models import edge_models
-from app.validation import ValidationBody
-from app.utils.PyObjectId import PyObjectId
+# from app.routers.models.models import edge_models
+# from app.validation import ValidationBody
+# from app.utils.PyObjectId import PyObjectId
 
-import json
-import orjson
-from app.utils.jsonEncoder import JSONEncoder
+# import json
+# import orjson
+# from app.utils.jsonEncoder import JSONEncoder
 
-from app.ml.trainer import train
+# from app.ml.trainer import train
 
-router = APIRouter()
+# router = APIRouter()
 
-class Training(BaseModel):
-    id: str
-    name: str
-    training_state: TrainingState
-    error_msg: str
+# class Training(BaseModel):
+#     id: str
+#     name: str
+#     training_state: TrainingState
+#     error_msg: str
 
-class ModelInfo(BaseModel):
-    hyperparameters: List
-    classifier: str
+# class ModelInfo(BaseModel):
+#     hyperparameters: List
+#     classifier: str
 
-class TrainDatasetModel(BaseModel):
-    id : PyObjectId = Field(alias="_id")
-    timeSeries: List[PyObjectId]
+# class TrainDatasetModel(BaseModel):
+#     id : PyObjectId = Field(alias="_id")
+#     timeSeries: List[PyObjectId]
 
-class TrainRequest(BaseModel):
-    name: str
-    datasets: List[TrainDatasetModel]
-    labeling: PyObjectId
-    name: str
-    modelInfo: ModelInfo
+# class TrainRequest(BaseModel):
+#     name: str
+#     datasets: List[TrainDatasetModel]
+#     labeling: PyObjectId
+#     name: str
+#     modelInfo: ModelInfo
 
 
 
-@router.post("/")
-async def models_train(body: TrainRequest, background_tasks: BackgroundTasks, project: str = Header(...), user_data=Depends(validate_user)):
-    id = await train(body, project=project, background_tasks = background_tasks)
-    return Response(json.dumps(id, cls=JSONEncoder), media_type="application/json")
+# @router.post("/")
+# async def models_train(body: TrainRequest, background_tasks: BackgroundTasks, project: str = Header(...), user_data=Depends(validate_user)):
+#     id = await train(body, project=project, background_tasks = background_tasks)
+#     return Response(json.dumps(id, cls=JSONEncoder), media_type="application/json")
 
-# Get an active training process
-@router.get("/ongoing/{train_id}", response_model=Training)
-async def trained_model(train_id: str, request: Request, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
-    tm: TrainingManager = request.app.state.training_manager
-    if not tm.has(train_id, project_id):
-        raise HTTPException(status_code=404, detail="No active training process with given id")
-    t = tm.get(train_id, project_id)
-    return Training(**t.__dict__)
+# # Get an active training process
+# @router.get("/ongoing/{train_id}", response_model=Training)
+# async def trained_model(train_id: str, request: Request, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
+#     tm: TrainingManager = request.app.state.training_manager
+#     if not tm.has(train_id, project_id):
+#         raise HTTPException(status_code=404, detail="No active training process with given id")
+#     t = tm.get(train_id, project_id)
+#     return Training(**t.__dict__)
 
-# Get all active training processes
-@router.get("/ongoing", response_model=List[Training])
-async def trained_model(request: Request, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
-    tm: TrainingManager = request.app.state.training_manager
-    return [ Training(**t.__dict__) for t in tm.all(project_id) ]
+# # Get all active training processes
+# @router.get("/ongoing", response_model=List[Training])
+# async def trained_model(request: Request, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
+#     tm: TrainingManager = request.app.state.training_manager
+#     return [ Training(**t.__dict__) for t in tm.all(project_id) ]
 
 
 # Create an edge model with given model id and hyperparameters

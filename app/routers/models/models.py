@@ -10,9 +10,10 @@ from app.models.edge_model import EdgeModel
 from app.models.kneighbours import KNeighbours
 from app.models.mlp import MLP
 from app.models.random_forest import RandomForest
-from app.models.svc import SVC
 from app.models.decision_tree import DecisionTree
 from app.models.random_forest import RandomForest
+from app.models.svc import SVC
+
 from app.db.models import delete_model as db_delete_model
 
 router = APIRouter()

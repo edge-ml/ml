@@ -4,8 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.db import setup_db_connection
-from app.ml.training_manager import TrainingManager
-from app.routers import ml
+from app.routers import router
 
 app = FastAPI()
 
@@ -19,7 +18,7 @@ app.add_middleware(
 )
 
 app.include_router(
-    ml.router,
+    router,
     prefix="/ml"
 )
 
@@ -31,11 +30,6 @@ async def root():
 @app.on_event("startup")
 async def startup():
     setup_db_connection()
-    app.state.training_manager = TrainingManager()
-
-@app.on_event("shutdown")
-async def shutdown():
-    app.state.training_manager.destroy()
 
 mp.set_start_method("forkserver", force=True)
 if __name__ == "__main__":

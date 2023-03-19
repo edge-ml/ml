@@ -9,3 +9,5 @@ def get_classifier_by_name(name):
         if cls.get_name() == name:
             return cls
     raise Exception()
+
+CLASSIFIER_CONFIG = [x.config() for x in CLASSIFIERS]

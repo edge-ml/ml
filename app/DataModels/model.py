@@ -1,6 +1,6 @@
 from app.utils.PyObjectId import PyObjectId
 from bson.objectid import ObjectId
-from typing import List
+from typing import List, Dict
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -24,7 +24,5 @@ class Model(BaseModel):
     id : PyObjectId = Field(default_factory=ObjectId, alias="_id")
     projectId: PyObjectId = Field(default_factory=ObjectId)
     name: str
-    hyperparameters: List[Hyperparameter]
-    classifier: str
-    datasets: List[TrainingDataset]
+    trainRequest: Dict
     status: ModelStatus = ModelStatus.waiting

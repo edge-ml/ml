@@ -18,3 +18,9 @@ class EvaluationStrategy():
     def train_eval(self):
         raise NotImplementedError
     
+    @staticmethod
+    def config(self):
+        raise NotImplementedError()
+
+    def persist():
+        raise NotImplementedError()

@@ -7,3 +7,6 @@ def get_normalizer_by_name(name):
     for norm in NORMALIZERS:
         if (norm.get_name() == name):
             return norm
+        
+
+NORMALIZER_CONFIG = [x.config() for x in NORMALIZERS]

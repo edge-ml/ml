@@ -5,19 +5,27 @@ class MinMaxNormalizer(Normalizer):
 
     def __init__(self, parameters):
         super().__init__(parameters)
+        self.min = None
+        self.max = None
 
     @staticmethod
     def get_name():
         return "MinMaxNormalizer"
     
-    def normalize(self, data):
-        min = np.min(data, axis=0)
-        max = np.max(data, axis=0)
+    @staticmethod
+    def config():
+        return {"name": MinMaxNormalizer.get_name(), "parameters": {}}
+    
+    def fit_normalize(self, data):
+        self.min = np.min(data, axis=0)
+        self.max = np.max(data, axis=0)
         data = (data - min) / (max - min)
-        settings = {"min": min, "max": max}
-        return data, settings
+        return data
 
-    def normalize_with(self, data, settings):
-        min = settings["min"]
-        max = settings["max"]
-        return (data - min) / (max - min)
+    def normalize_with(self, data):
+        if self.min is None or self.max is None:
+            raise Exception()
+        return (data - self.min) / (self.max - self.min)
+    
+    def get_state(self):
+        return {"name": MinMaxNormalizer.get_name(), "min": self.min, "max": self.max}

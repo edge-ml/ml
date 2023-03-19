@@ -15,3 +15,5 @@ def get_eval_by_name(name):
         return eval_map[name]
     else:
         raise Exception()
+    
+EVALUATION_CONFIG = [x.config() for x in EVALAUTIONS]

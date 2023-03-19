@@ -18,10 +18,9 @@ async def get_model(id: str, project_id: str) -> Model:
         raise RuntimeError("Model with given id doesn't exist")
     return Model.unmarshal(obj)
 
-async def get_project_models(project_id: str) -> List[Model]:
+async def get_project_models(project_id: str):
     # TODO number of models that can be returned is limited by 10000
     objs = await _models().find({'projectId': ObjectId(project_id)}).to_list(length=10000)
-    objs =  [Model.unmarshal(obj) for obj in objs]
     return objs
 
 async def delete_model(id: str) -> None:
@@ -30,4 +29,7 @@ async def delete_model(id: str) -> None:
 
 async def update_model_status(id: str, project_id: str, status: ModelStatus):
     print(id, project_id, status.value)
-    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": {status: status.value}})
+    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": {"status": status.value}})
+
+async def set_model_data(id: str, project_id: str, data):
+    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": data})

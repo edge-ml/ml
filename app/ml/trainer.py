@@ -2,14 +2,12 @@ import numpy as np
 
 
 from app.DataModels.model import Model
-from app.db.models import add_model, update_model_status, ModelStatus
+from app.db.models import add_model, update_model_status, ModelStatus, set_model_data
 from app.db.labelings import get_labeling
 from app.db.datasets import get_dataset
-from time import sleep
 
-from app.models.random_forest import RandomForest
 
-from app.DataProcessor.DataPreProcessor import getDatasetWindows, extract_features, calculateFeatures
+from app.DataProcessor.DataPreProcessor import getDatasetWindows, calculateFeatures
 from app.DataProcessor.DataLoader.DataLoader import processDataset
 from app.ml.Evaluation import get_eval_by_name
 from app.DataModels.trainRequest import TrainRequest
@@ -28,6 +26,7 @@ from app.ml.Normalizer import get_normalizer_by_name
 
 
 async def init_train(trainReq : TrainRequest, id, project):
+    print("init training")
     await update_model_status(id, project, ModelStatus.preprocessing)
 
     # Get the datasets and lableings used for training
@@ -59,16 +58,16 @@ async def init_train(trainReq : TrainRequest, id, project):
     normalizer = get_normalizer_by_name(trainReq.normalizer.name)(trainReq.normalizer.parameters)
     evaluator = get_eval_by_name(trainReq.evaluation["name"])(train_x, train_y, clf, normalizer, trainReq.evaluation["parameters"])
     evaluator.train_eval()
-    
+    model_config = evaluator.persist()
+    await set_model_data(id, project, {"model": model_config})
+    await update_model_status(id, project, ModelStatus.done)
 
 
-
-    return clf
 
 async def train(trainReq, project, background_tasks):
     data = trainReq.dict(by_alias=True)
     storedHyperparameters = [{"name": str(x["name"]), "value": str(x["value"])} for x in trainReq.modelInfo.hyperparameters]
-    model = Model(name = trainReq.name, hyperparameters=storedHyperparameters, classifier=trainReq.modelInfo.classifier, labeling=trainReq.labeling, datasets=data["datasets"], projectId=project)
+    model = Model(name = trainReq.name, trainRequest=data, projectId=project)
     id = await add_model(model=model.dict(by_alias=True))
     background_tasks.add_task(init_train, trainReq, id, project)
     return id

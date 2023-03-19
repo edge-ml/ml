@@ -10,6 +10,10 @@ from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 import copy
 from app.ml.Classifier.utils import reshapeSklearn
+from bson.objectid import ObjectId
+from app.internal.config import CLASSIFIER_STORE
+import pickle
+import os
 
 class DecisionTree(Classifier):
 
@@ -216,6 +220,16 @@ class DecisionTree(Classifier):
         "name": DecisionTree.get_name(),
         "description": DecisionTree.get_description(),
         "id": DecisionTree.id,
-        "hyperparameters": DecisionTree.get_hyperparameters(),
+        "parameters": DecisionTree.get_hyperparameters(),
         "platforms": DecisionTree.get_platforms()
         }
+    
+    def get_state(self):
+        data_id = ObjectId()
+        path = f'{CLASSIFIER_STORE}/{data_id}'
+        isExist = os.path.exists(path)
+        if not isExist:
+            os.makedirs(path)
+        with open(path + "/clf.pkl", 'wb') as f:
+            pickle.dump(self.clf, f)  
+        return {"name": DecisionTree.get_name(), "id": DecisionTree.id, "parameter": self._hyperparameters, "data_id": str(data_id)}

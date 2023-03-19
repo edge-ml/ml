@@ -20,7 +20,7 @@ class TestTrainSplitEvaluation(EvaluationStrategy):
         pb = ParameterBuilder()
         pb.parameters = []
         pb.add_number("Train_test_split", "split", "Ratio between training and testing data", 0, 100, 80, 1, required=True)
-        return pb.parameters
+        return {"name": TestTrainSplitEvaluation.name(), "parameters": pb.parameters}
 
     def train_eval(self):
         print(self.train_x.shape, self.train_y.shape)
@@ -34,17 +34,18 @@ class TestTrainSplitEvaluation(EvaluationStrategy):
         train_y = random_train_y[:part]
         test_x = random_train_x[part:]
         test_y = random_train_y[part:]
-
-        train_x, normalizer_settings = self.normalizer.normalize(train_x)
-        test_x = self.normalizer.normalize_with(test_x, normalizer_settings)
+        print(train_x.shape)
+        train_x = self.normalizer.fit_normalize(train_x)
+        test_x = self.normalizer.normalize(test_x)
 
         self.classifier.fit(train_x, train_y)
 
         metrics = calculateMetrics(test_y, self.classifier.predict(test_x))
-        print(metrics)
-        # train_x, test_x, y_train, y_test = train_test_split(self.train_x, self.train_y, self.getParameter("Train_test_split"))
-        print(train_x.shape)
-        print(test_x.shape)
-        print(train_y.shape)
-        print(test_y.shape)
-        print(self.getParameter("Train_test_split"))
+        self.metrics = metrics
+
+
+    def persist(self):
+        normalizer_state = self.normalizer.get_state()
+        classifier_state = self.classifier.get_state()
+        evaluation_state = {"name": TestTrainSplitEvaluation.name(), "parameter": self.parameters}
+        return {"normalizer": normalizer_state, "classifier": classifier_state, "evaluation": evaluation_state, "metrics": self.metrics}

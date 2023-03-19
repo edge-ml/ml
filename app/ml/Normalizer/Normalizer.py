@@ -8,8 +8,15 @@ class Normalizer():
     def get_name():
         raise NotImplementedError()
 
-    def normalize(self, data):
+    @staticmethod
+    def config():
+        raise NotImplementedError()
+    
+    def fit_normalize(self, data):
         raise NotImplementedError()
 
-    def normalize_with(self, data, settings):
+    def normalize(self, data):
+        raise NotImplementedError()
+    
+    def get_state(self):
         raise NotImplementedError()

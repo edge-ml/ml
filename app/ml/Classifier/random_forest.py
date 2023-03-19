@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from micromlgen import port
 import m2cgen as m2c
 from app.mcuConverter.mcuConverter import convertMCU, McuLanguage
+from app.ml.Classifier.utils import reshapeSklearn
 
 import copy
 
@@ -247,6 +248,14 @@ class RandomForest(EdgeModel):
         super().__init__(hyperparameters)
         self.clf = RandomForestClassifier()
 
+    def fit(self, X_train, y_train):
+        X_train_reshaped = reshapeSklearn(X_train)
+        self.clf.fit(X_train_reshaped, y_train)
+
+    def predict(self, X_test):
+        X_train_reshaped = reshapeSklearn(X_test)
+        return self.clf.predict(X_train_reshaped)
+
     def compile(self):
         if not self.is_fit:
             return
@@ -258,6 +267,6 @@ class RandomForest(EdgeModel):
         "name": RandomForest.get_name(),
         "description": RandomForest.get_description(),
         "id": RandomForest.id,
-        "hyperparameters": RandomForest.get_hyperparameters(),
+        "parameters": RandomForest.get_hyperparameters(),
         "platforms": RandomForest.get_platforms()
         }

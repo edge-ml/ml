@@ -1,4 +1,4 @@
-from app.models.decision_tree import DecisionTree
-from app.models.random_forest import RandomForest
+# from ml.app.ml.Classifier.decision_tree import DecisionTree
+# from app.models.random_forest import RandomForest
 
-EDGE_MODELS = [DecisionTree, RandomForest]
+EDGE_MODELS = []

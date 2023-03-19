@@ -9,14 +9,14 @@ class ParameterBuilder:
         # self.__validateParameterName(self.parameters, parameter_name)
 
         self.parameters.append({
-            'name': [parameter_name],
+            'name': parameter_name,
             'parameter_type': 'number',
             'display_name': display_name,
             'parameter_name': parameter_name,
             'description': description,
             'number_min': number_min,
             'number_max': number_max,
-            'default': default,
+            'value': default,
             'step_size': step_size, # either 'float' or 'int'
             'required': required,
             'log': log,
@@ -30,13 +30,13 @@ class ParameterBuilder:
         # self.__validateParameterName(self.parameters, parameter_name)
 
         self.parameters.append({
-            'name': [parameter_name],
+            'name': parameter_name,
             'parameter_type': 'selection',
             'display_name': display_name,
             'parameter_name': parameter_name,
             'description': description,
             'options': options,
-            'default': default,
+            'value': default,
             'multi_select': multi_select,
             'required': required,
             'is_advanced': is_advanced

@@ -9,7 +9,7 @@ class ModelStatus(str, Enum):
     waiting = "waiting"
     preprocessing = "preprocessing"
     fitting_model = "fitting model"
-    evaluating = "evaluating"
+    done = "done"
 
 
 class Hyperparameter(BaseModel):

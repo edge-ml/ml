@@ -1,8 +1,10 @@
+
+
 from app.codegen.inference import InferenceFormats
 from app.internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
 from app.utils.parameter_builder import ParameterBuilder
 
-class EdgeModel:
+class Classifier:
     # static methods
     @staticmethod
     def get_hyperparameters():
@@ -51,15 +53,16 @@ class EdgeModel:
         raise NotImplementedError()
 
     # class methods
-    def __init__(self, hyperparameters={}):
+    def __init__(self, hyperparameters=[]):
         self.is_fit = False
         self._hyperparameters = hyperparameters
 
+
     def fit(self, X_train, y_train):
-        self.clf.fit(X_train, y_train)
+        raise NotImplementedError
 
     def predict(self, X_test):
-        return self.clf.predict(X_test)
+        raise NotImplementedError
 
     def compile(self):
         if not self.is_fit:

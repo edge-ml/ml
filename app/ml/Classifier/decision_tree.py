@@ -1,16 +1,17 @@
 from app.codegen.export_javascript import export_javascript
 from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel
+from app.ml.Classifier import Classifier
 from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
 from app.mcuConverter.mcuConverter import McuLanguage, convertMCU
 from sklearn.tree import DecisionTreeClassifier
-
+import numpy as np
 import copy
+from app.ml.Classifier.utils import reshapeSklearn
 
-class DecisionTree(EdgeModel):
+class DecisionTree(Classifier):
 
     id = 1
 
@@ -19,7 +20,7 @@ class DecisionTree(EdgeModel):
     @staticmethod
     def get_hyperparameters():
         pb = copy.deepcopy(
-            ParameterBuilder(EdgeModel.get_hyperparameters())
+            ParameterBuilder(Classifier.get_hyperparameters())
         )  # get base parameter
 
         pb.add_selection(
@@ -161,6 +162,7 @@ class DecisionTree(EdgeModel):
 
         return pb.parameters
 
+
     @staticmethod
     def get_name():
         return "Decision Tree Classifier"
@@ -194,6 +196,14 @@ class DecisionTree(EdgeModel):
     def __init__(self, hyperparameters={}):
         super().__init__(hyperparameters)
         self.clf = DecisionTreeClassifier()
+
+    def fit(self, X_train, y_train):
+        X_train_reshaped = reshapeSklearn(X_train)
+        self.clf.fit(X_train_reshaped, y_train)
+
+    def predict(self, X_test):
+        X_train_reshaped = reshapeSklearn(X_test)
+        return self.clf.predict(X_train_reshaped)
 
     def compile(self):
         if not self.is_fit:

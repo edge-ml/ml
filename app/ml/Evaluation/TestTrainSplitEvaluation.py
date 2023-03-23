@@ -8,8 +8,8 @@ import numpy as np
 from app.ml.Classifier import Classifier
 
 class TestTrainSplitEvaluation(EvaluationStrategy):
-    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: Normalizer, parameters):
-        super().__init__(train_x, train_y, classifier, normalizer, parameters)
+    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: Normalizer, labels, parameters):
+        super().__init__(train_x, train_y, classifier, normalizer, labels, parameters)
 
     @staticmethod
     def name():
@@ -40,12 +40,15 @@ class TestTrainSplitEvaluation(EvaluationStrategy):
 
         self.classifier.fit(train_x, train_y)
 
-        metrics = calculateMetrics(test_y, self.classifier.predict(test_x))
+        metrics = calculateMetrics(test_y, self.classifier.predict(test_x), self.labels)
         self.metrics = metrics
 
 
     def persist(self):
         normalizer_state = self.normalizer.get_state()
+        print("normalizer: ")
+        print(self.normalizer)
+        print(normalizer_state)
         classifier_state = self.classifier.get_state()
         evaluation_state = {"name": TestTrainSplitEvaluation.name(), "parameter": self.parameters}
         return {"normalizer": normalizer_state, "classifier": classifier_state, "evaluation": evaluation_state, "metrics": self.metrics}

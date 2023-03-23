@@ -41,6 +41,6 @@ def processDataset(dataset, labeling_id, labelMap):
                 arr[i][-1] = labelMap[str(l.type)]
                 break
             else:
-                arr[i][-1] = 0
+                arr[i][-1] = 100000
     
     return arr

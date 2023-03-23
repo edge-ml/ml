@@ -1,6 +1,6 @@
 from app.ml.Classifier.Classifier import Classifier
 from app.ml.Classifier.decision_tree import DecisionTree
-
+from app.ml.Classifier.random_forest import RandomForest
 
 CLASSIFIERS = [DecisionTree]
 

@@ -3,11 +3,12 @@ from app.ml.Normalizer.Normalizer import Normalizer
 
 class EvaluationStrategy():
 
-    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: Normalizer, parameters):
+    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: Normalizer, labels, parameters):
         self.train_x = train_x
         self.train_y = train_y
         self.classifier = classifier
         self.normalizer = normalizer
+        self.labels = labels
         self.parameters = parameters
 
     def getParameter(self, name):

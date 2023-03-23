@@ -1,5 +1,7 @@
 from app.ml.Normalizer.Normalizer import Normalizer
 import numpy as np
+import json
+from app.utils.jsonEncoder import JSONEncoder
 
 class ZNormalizer(Normalizer):
 
@@ -28,4 +30,4 @@ class ZNormalizer(Normalizer):
         return (data - self.mean) / self.std
     
     def get_state(self):
-        {"name": ZNormalizer.get_name(), "mean": self.mean, "std": self.std}
+        return {"name": ZNormalizer.get_name(), "mean": json.dumps(self.mean, cls=JSONEncoder), "std": json.dumps(self.std, cls=JSONEncoder)}

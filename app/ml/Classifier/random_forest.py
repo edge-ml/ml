@@ -3,15 +3,20 @@ from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
 from app.models.edge_model import EdgeModel
 from sklearn.ensemble import RandomForestClassifier
+from app.ml.Classifier.Classifier import Classifier
 from micromlgen import port
 import m2cgen as m2c
 from app.mcuConverter.mcuConverter import convertMCU, McuLanguage
 from app.ml.Classifier.utils import reshapeSklearn
+from bson.objectid import ObjectId
+from app.internal.config import CLASSIFIER_STORE
+import pickle
+import os
 
 import copy
 
 
-class RandomForest(EdgeModel):
+class RandomForest(Classifier):
     id = 2
     # static methods
     @staticmethod
@@ -268,3 +273,13 @@ class RandomForest(EdgeModel):
         "parameters": RandomForest.get_hyperparameters(),
         "platforms": RandomForest.get_platforms()
         }
+    
+    def get_state(self):
+        data_id = ObjectId()
+        path = f'{CLASSIFIER_STORE}/{data_id}'
+        isExist = os.path.exists(path)
+        if not isExist:
+            os.makedirs(path)
+        with open(path + "/clf.pkl", 'wb') as f:
+            pickle.dump(self.clf, f)  
+        return {"name": RandomForest.get_name(), "id": RandomForest.id, "parameter": self._hyperparameters, "data_id": str(data_id)}

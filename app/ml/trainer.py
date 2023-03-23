@@ -34,7 +34,7 @@ async def init_train(trainReq : TrainRequest, id, project):
     datasets = [await get_dataset(x.id, project) for x in trainReq.datasets]
     labeling = await get_labeling(trainReq.labeling, project)
     
-    labelMap = {str(x.id): i+1 for i, x in enumerate(labeling.labels)}
+    labelMap = {str(x.id): i for i, x in enumerate(labeling.labels)}
 
     print("datasets: ", len(datasets))
 
@@ -52,15 +52,19 @@ async def init_train(trainReq : TrainRequest, id, project):
     print(windows.shape)
 
     # TODO: Need to select the correct labels, based on user selection
-    filter = np.array([x > 0 for x in labels])
+    filter = np.array([x != 100000 for x in labels])
     print(filter.shape)
     train_x = windows[filter]
     train_y = labels[filter]
 
+    print(list(train_y).count(1), list(train_y).count(2))
+
+
     await update_model_status(id, project, ModelStatus.fitting_model)
     clf = get_classifier_by_name(trainReq.classifier.name)(trainReq.classifier.parameters)
     normalizer = get_normalizer_by_name(trainReq.normalizer.name)(trainReq.normalizer.parameters)
-    evaluator = get_eval_by_name(trainReq.evaluation["name"])(train_x, train_y, clf, normalizer, trainReq.evaluation["parameters"])
+    labels = [x.name for x in labeling.labels]
+    evaluator = get_eval_by_name(trainReq.evaluation["name"])(train_x, train_y, clf, normalizer, labels, trainReq.evaluation["parameters"])
     evaluator.train_eval()
     model_config = evaluator.persist()
     await set_model_data(id, project, {"model": model_config})

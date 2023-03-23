@@ -1,5 +1,7 @@
 from app.ml.Normalizer.Normalizer import Normalizer
 import numpy as np
+import json
+from app.utils.jsonEncoder import JSONEncoder
 
 class MinMaxNormalizer(Normalizer):
 
@@ -28,4 +30,4 @@ class MinMaxNormalizer(Normalizer):
         return (data - self.min) / (self.max - self.min)
     
     def get_state(self):
-        return {"name": MinMaxNormalizer.get_name(), "min": self.min, "max": self.max}
+        return {"name": MinMaxNormalizer.get_name(), "min": json.dumps(self.min, cls=JSONEncoder), "max": json.dumps(self.max, cls=JSONEncoder)}

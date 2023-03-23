@@ -16,9 +16,7 @@ class RandomForest(EdgeModel):
     # static methods
     @staticmethod
     def get_hyperparameters():
-        pb = copy.deepcopy(
-            ParameterBuilder(EdgeModel.get_hyperparameters())
-        )  # get base parameter
+        pb = ParameterBuilder()
 
         pb.add_number(
             "n_estimators",

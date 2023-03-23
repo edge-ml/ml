@@ -6,7 +6,7 @@ from app.DataModels.trainRequest import TrainRequest
 from app.ml.Normalizer import NORMALIZER_CONFIG
 from app.ml.Classifier import CLASSIFIER_CONFIG
 from app.ml.Evaluation import EVALUATION_CONFIG
-
+from app.ml.Windowing import WIDNOWING_CONFIG
 
 import json
 
@@ -19,7 +19,8 @@ async def models():
     data  = {
         "classifier": CLASSIFIER_CONFIG,
         "normalizer": NORMALIZER_CONFIG,
-        "evaluation": EVALUATION_CONFIG
+        "evaluation": EVALUATION_CONFIG,
+        "windowing": WIDNOWING_CONFIG
     }
     return data
 

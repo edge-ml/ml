@@ -23,7 +23,7 @@ def get_db() -> AsyncIOMotorDatabase:
 
 def get_datastore_db() -> AsyncIOMotorDatabase:
     if _datastore_db is None:
-        raise RuntimeError("Database is not connected")
+        raise RuntimeError("Database for  is not connected")
     return _datastore_db
 
 def get_auth_db() -> AsyncIOMotorDatabase:

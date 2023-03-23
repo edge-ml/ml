@@ -23,9 +23,7 @@ class DecisionTree(Classifier):
     # static methods
     @staticmethod
     def get_hyperparameters():
-        pb = copy.deepcopy(
-            ParameterBuilder(Classifier.get_hyperparameters())
-        )  # get base parameter
+        pb = ParameterBuilder()
 
         pb.add_selection(
             "criterion",

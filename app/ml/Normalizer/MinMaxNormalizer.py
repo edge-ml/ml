@@ -19,10 +19,10 @@ class MinMaxNormalizer(Normalizer):
     def fit_normalize(self, data):
         self.min = np.min(data, axis=0)
         self.max = np.max(data, axis=0)
-        data = (data - min) / (max - min)
+        data = (data - self.min) / (self.max - self.min)
         return data
 
-    def normalize_with(self, data):
+    def normalize(self, data):
         if self.min is None or self.max is None:
             raise Exception()
         return (data - self.min) / (self.max - self.min)

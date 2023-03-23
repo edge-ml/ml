@@ -14,6 +14,7 @@ from app.DataModels.trainRequest import TrainRequest
 
 from app.ml.Classifier import get_classifier_by_name
 from app.ml.Normalizer import get_normalizer_by_name
+from app.ml.Windowing import get_windower_by_name
 
 
 
@@ -35,26 +36,29 @@ async def init_train(trainReq : TrainRequest, id, project):
     
     labelMap = {str(x.id): i+1 for i, x in enumerate(labeling.labels)}
 
-    all_windows = []
-    all_labels = []
-    for dataset in datasets:
-        arr = processDataset(dataset, trainReq.labeling, labelMap)
-        windows, labels = getDatasetWindows(arr, window_size=50, stride=20)
-        windows = calculateFeatures(windows)
-        print(windows.shape)
-        all_windows.append(windows)
-        all_labels.extend(labels)
+    print("datasets: ", len(datasets))
 
-    all_windows = np.concatenate(all_windows, axis=0)
-    all_labels = np.array(all_labels)
+    arrs = []
+    for dataset in datasets:
+        arrs.append(processDataset(dataset, trainReq.labeling, labelMap))
+
+    
+    windower = get_windower_by_name(trainReq.windowing.name)(trainReq.windowing.parameters)
+    print(len(arrs))
+    windows, labels = windower.window(arrs)
+
+
+    windows = calculateFeatures(windows)
+    print(windows.shape)
 
     # TODO: Need to select the correct labels, based on user selection
-    filter = np.array([x > 0 for x in all_labels])
-    train_x = all_windows[filter]
-    train_y = all_labels[filter]
+    filter = np.array([x > 0 for x in labels])
+    print(filter.shape)
+    train_x = windows[filter]
+    train_y = labels[filter]
 
     await update_model_status(id, project, ModelStatus.fitting_model)
-    clf = get_classifier_by_name(trainReq.modelInfo.classifier)(trainReq.modelInfo.hyperparameters)
+    clf = get_classifier_by_name(trainReq.classifier.name)(trainReq.classifier.parameters)
     normalizer = get_normalizer_by_name(trainReq.normalizer.name)(trainReq.normalizer.parameters)
     evaluator = get_eval_by_name(trainReq.evaluation["name"])(train_x, train_y, clf, normalizer, trainReq.evaluation["parameters"])
     evaluator.train_eval()
@@ -66,7 +70,6 @@ async def init_train(trainReq : TrainRequest, id, project):
 
 async def train(trainReq, project, background_tasks):
     data = trainReq.dict(by_alias=True)
-    storedHyperparameters = [{"name": str(x["name"]), "value": str(x["value"])} for x in trainReq.modelInfo.hyperparameters]
     model = Model(name = trainReq.name, trainRequest=data, projectId=project)
     id = await add_model(model=model.dict(by_alias=True))
     background_tasks.add_task(init_train, trainReq, id, project)

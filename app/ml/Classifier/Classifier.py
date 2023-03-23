@@ -8,33 +8,7 @@ class Classifier:
     # static methods
     @staticmethod
     def get_hyperparameters():
-        pb = ParameterBuilder()
-        pb.add_number(
-            "window_size", "Window Size", "Sets the window size.", 0, 60000, 100, 1, True, False, False
-        )
-        pb.add_number(
-            "sliding_step",
-            "Sliding Step",
-            "Sets how many steps the sliding window will slide. If it's set less than the window size, the windows will overlap.",
-            1,
-            60000,
-            50,
-            1,
-            True,
-            False,
-            False
-        )
-        pb.add_selection(
-            "windowing_mode",
-            "Windowing Mode",
-            "Controls the interpretation of window size and sliding step parameters. With sample based windowing they are interpreted as number of samples, with time based windowing as time interval in milliseconds.",
-            [SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING],
-            SAMPLE_BASED_WINDOWING,
-            False,
-            True,
-            False
-        )
-        return pb.parameters
+        raise NotImplementedError()
 
     @staticmethod
     def get_name():

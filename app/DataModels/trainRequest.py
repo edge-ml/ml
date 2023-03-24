@@ -20,6 +20,10 @@ class Windower(BaseModel):
     description: str
     parameters: List[Dict]
 
+class Features(BaseModel):
+    name: str
+    parameters: List[Dict]
+
 class TrainRequest(BaseModel):
     name: str
     datasets: List[TrainDatasetModel]
@@ -29,3 +33,4 @@ class TrainRequest(BaseModel):
     evaluation: Dict
     windowing: Windower
     normalizer: Normalizer
+    featureExtractor: Features

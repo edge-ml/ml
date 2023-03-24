@@ -1,9 +1,9 @@
-from app.ml.Normalizer.Normalizer import Normalizer
+from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
 import numpy as np
 import json
 from app.utils.jsonEncoder import JSONEncoder
 
-class ZNormalizer(Normalizer):
+class ZNormalizer(BaseNormalizer):
 
     def __init__(self, parameters):
         super().__init__(parameters)
@@ -13,6 +13,10 @@ class ZNormalizer(Normalizer):
     @staticmethod
     def get_name():
         return "ZNormalizer"
+
+    @staticmethod
+    def get_description():
+        return "Data will have mean of 0 and std of 1"
     
     @staticmethod
     def config():

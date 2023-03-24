@@ -282,4 +282,4 @@ class RandomForest(Classifier):
             os.makedirs(path)
         with open(path + "/clf.pkl", 'wb') as f:
             pickle.dump(self.clf, f)  
-        return {"name": RandomForest.get_name(), "id": RandomForest.id, "parameter": self._hyperparameters, "data_id": str(data_id)}
+        return {"name": RandomForest.get_name(), "id": RandomForest.id, "parameters": self._hyperparameters, "data_id": str(data_id)}

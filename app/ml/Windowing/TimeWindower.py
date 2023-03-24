@@ -1,10 +1,10 @@
-from app.ml.Windowing.BaseWindower import BasicWindower
+from app.ml.Windowing.BaseWindower import BaseWindower
 from app.utils.parameter_builder import ParameterBuilder
 
-class TimeWindower(BasicWindower):
+class TimeWindower(BaseWindower):
 
-    def __init__(self, hyperparameters):
-        super().__init__(hyperparameters)
+    def __init__(self, parameters):
+        super().__init__(parameters)
 
     @staticmethod
     def get_name():
@@ -18,17 +18,17 @@ class TimeWindower(BasicWindower):
     def get_description():
         return "Windowing, where each window has the same length in the temporal dimension"
 
-    @staticmethod
-    def config():
-        return {
-        "name": TimeWindower.get_name(),
-        "description": TimeWindower.get_description(),
-        "parameters": TimeWindower.get_hyperparameters(),
-        "platforms": TimeWindower.get_platforms()
-        }
+    # @staticmethod
+    # def config():
+    #     return {
+    #     "name": TimeWindower.get_name(),
+    #     "description": TimeWindower.get_description(),
+    #     "parameters": TimeWindower.get_hyperparameters(),
+    #     "platforms": TimeWindower.get_platforms()
+    #     }
 
     @staticmethod
-    def get_hyperparameters():
+    def get_parameters():
         pb = ParameterBuilder()
         print(pb.parameters)
         pb.add_number(

@@ -1,9 +1,9 @@
 from app.ml.Classifier import Classifier
-from app.ml.Normalizer.Normalizer import Normalizer
+from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
 
 class EvaluationStrategy():
 
-    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: Normalizer, labels, parameters):
+    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: BaseNormalizer, labels, parameters):
         self.train_x = train_x
         self.train_y = train_y
         self.classifier = classifier

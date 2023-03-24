@@ -1,9 +1,9 @@
-from app.ml.Normalizer.Normalizer import Normalizer
+from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
 import numpy as np
 import json
 from app.utils.jsonEncoder import JSONEncoder
 
-class MinMaxNormalizer(Normalizer):
+class MinMaxNormalizer(BaseNormalizer):
 
     def __init__(self, parameters):
         super().__init__(parameters)
@@ -13,6 +13,10 @@ class MinMaxNormalizer(Normalizer):
     @staticmethod
     def get_name():
         return "MinMaxNormalizer"
+
+    @staticmethod
+    def get_description():
+        return "Normalizing the data to be in [0,1]"
     
     @staticmethod
     def config():

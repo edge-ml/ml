@@ -1,11 +1,11 @@
-from app.ml.Windowing.BaseWindower import BasicWindower
+from app.ml.Windowing.BaseWindower import BaseWindower
 from app.utils.parameter_builder import ParameterBuilder
 import numpy as np
 
-class SampleWindower(BasicWindower):
+class SampleWindower(BaseWindower):
 
-    def __init__(self, hyperparameters):
-        super().__init__(hyperparameters)
+    def __init__(self, parameters):
+        super().__init__(parameters)
 
     @staticmethod
     def get_name():
@@ -19,17 +19,9 @@ class SampleWindower(BasicWindower):
     def get_description():
         return "Sample based windowing using a sliding window approach"
 
-    @staticmethod
-    def config():
-        return {
-        "name": SampleWindower.get_name(),
-        "description": SampleWindower.get_description(),
-        "parameters": SampleWindower.get_hyperparameters(),
-        "platforms": SampleWindower.get_platforms()
-        }
 
     @staticmethod
-    def get_hyperparameters():
+    def get_parameters():
         pb = ParameterBuilder()
         pb.parameters = []
         pb.add_number(
@@ -51,8 +43,8 @@ class SampleWindower(BasicWindower):
 
 
     def window(self, datasets):
-        window_size = self.hyperparameters[0]["value"]
-        stride = self.hyperparameters[1]["value"]
+        window_size = self.get_param_value_by_name("window_size")
+        stride = self.get_param_value_by_name("sliding_step")
         all_windows = []
         all_labels = []
         for dataset in datasets:

@@ -15,6 +15,7 @@ from app.DataModels.trainRequest import TrainRequest
 from app.ml.Classifier import get_classifier_by_name
 from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Windowing import get_windower_by_name
+from app.ml.FeatureExtraction import get_feature_extractor_by_name
 
 
 
@@ -47,8 +48,8 @@ async def init_train(trainReq : TrainRequest, id, project):
     print(len(arrs))
     windows, labels = windower.window(arrs)
 
-
-    windows = calculateFeatures(windows)
+    feature_extractor = get_feature_extractor_by_name(trainReq.featureExtractor.name)()
+    windows, labels = feature_extractor.extract_features(windows, labels)
     print(windows.shape)
 
     # TODO: Need to select the correct labels, based on user selection
@@ -67,6 +68,7 @@ async def init_train(trainReq : TrainRequest, id, project):
     evaluator = get_eval_by_name(trainReq.evaluation["name"])(train_x, train_y, clf, normalizer, labels, trainReq.evaluation["parameters"])
     evaluator.train_eval()
     model_config = evaluator.persist()
+    model_config["windower"] = windower.persist()
     await set_model_data(id, project, {"model": model_config})
     await update_model_status(id, project, ModelStatus.done)
 

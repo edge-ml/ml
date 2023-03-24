@@ -2,13 +2,13 @@ from app.ml.Evaluation.EvaluationStrategy import EvaluationStrategy
 from app.utils.parameter_builder import ParameterBuilder
 from sklearn.model_selection import train_test_split
 from app.ml.Evaluation.utils import calculateMetrics
-from app.ml.Normalizer.Normalizer import Normalizer
+from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
 import numpy as np
 
 from app.ml.Classifier import Classifier
 
 class TestTrainSplitEvaluation(EvaluationStrategy):
-    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: Normalizer, labels, parameters):
+    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: BaseNormalizer, labels, parameters):
         super().__init__(train_x, train_y, classifier, normalizer, labels, parameters)
 
     @staticmethod
@@ -50,5 +50,5 @@ class TestTrainSplitEvaluation(EvaluationStrategy):
         print(self.normalizer)
         print(normalizer_state)
         classifier_state = self.classifier.get_state()
-        evaluation_state = {"name": TestTrainSplitEvaluation.name(), "parameter": self.parameters}
+        evaluation_state = {"name": TestTrainSplitEvaluation.name(), "parameters": self.parameters}
         return {"normalizer": normalizer_state, "classifier": classifier_state, "evaluation": evaluation_state, "metrics": self.metrics}

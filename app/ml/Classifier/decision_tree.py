@@ -230,4 +230,4 @@ class DecisionTree(Classifier):
             os.makedirs(path)
         with open(path + "/clf.pkl", 'wb') as f:
             pickle.dump(self.clf, f)  
-        return {"name": DecisionTree.get_name(), "id": DecisionTree.id, "parameter": self._hyperparameters, "data_id": str(data_id)}
+        return {"name": DecisionTree.get_name(), "id": DecisionTree.id, "parameters": self._hyperparameters, "data_id": str(data_id)}

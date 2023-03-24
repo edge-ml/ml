@@ -5,6 +5,7 @@ Number = Union[int, float]
 
 class NumberParameter(BaseModel):
     name: str
+    parameter_type: str
     display_name: str
     parameter_name: str
     description: str
@@ -19,6 +20,7 @@ class NumberParameter(BaseModel):
 
 class SelectionParameter(BaseModel):
     name: str
+    parameter_type: str
     display_name: str
     parameter_name: str
     description: str

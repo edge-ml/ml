@@ -7,7 +7,7 @@ from app.ml.Normalizer import NORMALIZER_CONFIG
 from app.ml.Classifier import CLASSIFIER_CONFIG
 from app.ml.Evaluation import EVALUATION_CONFIG
 from app.ml.Windowing import WIDNOWING_CONFIG
-
+from app.ml.FeatureExtraction import FEATURES_CONFIG
 import json
 
 router = APIRouter()
@@ -20,7 +20,8 @@ async def models():
         "classifier": CLASSIFIER_CONFIG,
         "normalizer": NORMALIZER_CONFIG,
         "evaluation": EVALUATION_CONFIG,
-        "windowing": WIDNOWING_CONFIG
+        "windowing": WIDNOWING_CONFIG,
+        "featureExtractors": FEATURES_CONFIG
     }
     return data
 

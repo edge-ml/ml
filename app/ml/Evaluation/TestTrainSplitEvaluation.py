@@ -1,4 +1,4 @@
-from app.ml.Evaluation.EvaluationStrategy import EvaluationStrategy
+from app.ml.Evaluation.BaseEvaluation import BaseEvaluation
 from app.utils.parameter_builder import ParameterBuilder
 from sklearn.model_selection import train_test_split
 from app.ml.Evaluation.utils import calculateMetrics
@@ -7,25 +7,29 @@ import numpy as np
 
 from app.ml.Classifier import Classifier
 
-class TestTrainSplitEvaluation(EvaluationStrategy):
-    def __init__(self, train_x, train_y, classifier: Classifier, normalizer: BaseNormalizer, labels, parameters):
-        super().__init__(train_x, train_y, classifier, normalizer, labels, parameters)
+class TestTrainSplitEvaluation(BaseEvaluation):
+    def __init__(self, train_x, train_y, classifier: Classifier, classifier_parameters, normalizer: BaseNormalizer, normalizer_parameters, labels, parameters):
+        super().__init__(train_x, train_y, classifier, classifier_parameters, normalizer, normalizer_parameters, labels, parameters)
+        self.clf = classifier(classifier_parameters)
+        self.norm = normalizer(normalizer_parameters)
 
     @staticmethod
-    def name():
+    def get_name():
         return "TestTrainSplit"
 
     @staticmethod
-    def config():
+    def get_description():
+        return "Evaluates a model by splitting the datast into a training / testing - set"
+
+    @staticmethod
+    def get_parameters():
         pb = ParameterBuilder()
         pb.parameters = []
         pb.add_number("Train_test_split", "split", "Ratio between training and testing data", 0, 100, 80, 1, required=True)
-        return {"name": TestTrainSplitEvaluation.name(), "parameters": pb.parameters}
+        return pb.parameters
 
     def train_eval(self):
-        print(self.train_x.shape, self.train_y.shape)
-
-        part = int(self.getParameter("Train_test_split")["value"] / 100 * len(self.train_x))
+        part = int(self.get_param_value_by_name("Train_test_split") / 100 * len(self.train_x))
         p = np.random.permutation(len(self.train_x))
         random_train_x = self.train_x[p]
         random_train_y = self.train_y[p]
@@ -34,21 +38,17 @@ class TestTrainSplitEvaluation(EvaluationStrategy):
         train_y = random_train_y[:part]
         test_x = random_train_x[part:]
         test_y = random_train_y[part:]
-        print(train_x.shape)
-        train_x = self.normalizer.fit_normalize(train_x)
-        test_x = self.normalizer.normalize(test_x)
+        train_x = self.norm.fit_normalize(train_x)
+        test_x = self.norm.normalize(test_x)
 
-        self.classifier.fit(train_x, train_y)
+        self.clf.fit(train_x, train_y)
 
-        metrics = calculateMetrics(test_y, self.classifier.predict(test_x), self.labels)
+        metrics = calculateMetrics(test_y, self.clf.predict(test_x), self.labels)
         self.metrics = metrics
 
 
     def persist(self):
-        normalizer_state = self.normalizer.get_state()
-        print("normalizer: ")
-        print(self.normalizer)
-        print(normalizer_state)
-        classifier_state = self.classifier.get_state()
-        evaluation_state = {"name": TestTrainSplitEvaluation.name(), "parameters": self.parameters}
+        normalizer_state = self.norm.get_state()
+        classifier_state = self.clf.get_state()
+        evaluation_state = {"name": self.get_name(), "parameters": [x.dict(by_alias=True) for x in self.parameters]}
         return {"normalizer": normalizer_state, "classifier": classifier_state, "evaluation": evaluation_state, "metrics": self.metrics}

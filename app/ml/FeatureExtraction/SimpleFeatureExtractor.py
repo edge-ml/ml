@@ -13,20 +13,12 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         return "SimpleFeatureExtractor"
 
     @staticmethod
-    def config():
-        return {"name": SimpleFeatureExtractor.get_name(), "parameters": []}
-
-    @staticmethod
     def get_platforms():
-        raise NotImplementedError()
+        return []
 
     @staticmethod
     def get_description():
-        raise "Extracts simple features form the incomming time-series windows"
-
-    @staticmethod
-    def get_Hyperparameters():
-        return []
+        return "Extracts simple features form the incomming time-series windows"
 
     def persist(self):
         return {}

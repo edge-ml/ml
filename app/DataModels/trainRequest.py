@@ -1,36 +1,24 @@
 from typing import Dict, List
 from pydantic import BaseModel, Field
 from app.utils.PyObjectId import PyObjectId
+from app.DataModels.parameter import Parameter
 
-class Classififer(BaseModel):
+class ConfigObj(BaseModel):
     name: str
     description: str
-    parameters: List
+    parameters: List[Parameter]
 
 class TrainDatasetModel(BaseModel):
     id : PyObjectId = Field(alias="_id")
     timeSeries: List[PyObjectId]
-
-class Normalizer(BaseModel):
-    name: str
-    parameters: Dict
-
-class Windower(BaseModel):
-    name: str
-    description: str
-    parameters: List[Dict]
-
-class Features(BaseModel):
-    name: str
-    parameters: List[Dict]
 
 class TrainRequest(BaseModel):
     name: str
     datasets: List[TrainDatasetModel]
     labeling: PyObjectId
     name: str
-    classifier: Classififer
-    evaluation: Dict
-    windowing: Windower
-    normalizer: Normalizer
-    featureExtractor: Features
+    classifier: ConfigObj
+    evaluation: ConfigObj
+    windowing: ConfigObj
+    normalizer: ConfigObj
+    featureExtractor: ConfigObj

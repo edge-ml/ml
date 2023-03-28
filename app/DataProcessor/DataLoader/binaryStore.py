@@ -89,9 +89,13 @@ class BinaryStore():
         self.time_arr = self.time_arr[inds]
         self.data_arr = self.data_arr[inds]
         self.saveSeries()
+        time_diff = np.diff(self.time_arr)
+        sampling_rate = np.mean(time_diff)
+        sampling_rate_var = np.var(time_diff)
+        print(sampling_rate, sampling_rate_var)
         if len(self.time_arr) == 0:
-            return None, None
-        return int(self.time_arr[0]), int(self.time_arr[-1]) # Return start and end
+            return None, None, -1, 0
+        return int(self.time_arr[0]), int(self.time_arr[-1]), sampling_rate, len(self.time_arr) # start, end
 
 
     def delete(self):

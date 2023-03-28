@@ -1,19 +1,18 @@
-from app.ml.Evaluation import EvaluationStrategy
+from app.ml.Evaluation.BaseEvaluation import BaseEvaluation
 from app.ml.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
+from typing import List
 
-EVALAUTIONS = [
+EVALAUTIONS : List[BaseEvaluation] = [
     TestTrainSplitEvaluation
 ]
-
-eval_map = {x.name(): x for x in EVALAUTIONS}
 
 def getConfig():
     return [{"name": x.name(), "parameters": x.config()} for x in EVALAUTIONS]
 
 def get_eval_by_name(name):
-    if name in eval_map:
-        return eval_map[name]
-    else:
-        raise Exception()
+    for evl in EVALAUTIONS:
+        if evl.get_name() == name:
+            return evl
+    raise KeyError(f"Evlaluation {name} not found")
     
-EVALUATION_CONFIG = [x.config() for x in EVALAUTIONS]
+EVALUATION_CONFIG = [x.get_train_config() for x in EVALAUTIONS]

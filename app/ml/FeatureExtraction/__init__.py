@@ -1,9 +1,9 @@
 from app.ml.FeatureExtraction.BaseFeatureExtractor import BaseFeatureExtractor
 from app.ml.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
 from app.ml.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
+from typing import List
 
-
-FEATURE_EXTRACTORS = [SimpleFeatureExtractor, NoFeatureExtractor]
+FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor]
 
 def get_feature_extractor_by_name(name):
     for ext in FEATURE_EXTRACTORS:
@@ -12,4 +12,4 @@ def get_feature_extractor_by_name(name):
     raise KeyError(f"Feature extractor with name {name} not found")
 
 
-FEATURES_CONFIG = [x.config() for x in FEATURE_EXTRACTORS]
+FEATURES_CONFIG = [x.get_train_config() for x in FEATURE_EXTRACTORS]

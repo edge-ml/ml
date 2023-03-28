@@ -1,8 +1,8 @@
-
+from app.DataModels.parameter import Parameter
 
 class BaseConfig():
 
-    def __init__(self, parameters = []):
+    def __init__(self, parameters : Parameter = []):
         self.parameters = parameters
 
     @staticmethod
@@ -22,9 +22,6 @@ class BaseConfig():
     def get_parameters():
         return []
 
-    # Current state of the config
-    def get_config():
-        raise NotImplementedError()
 
     def get_state(self):
         return {"name": self.get_name(), "description": self.get_desciption(), "config": self.get_config()}
@@ -43,8 +40,9 @@ class BaseConfig():
         }
 
     def get_param_value_by_name(self, name):
+        print(self.parameters)
         for param in self.parameters:
-            if param["parameter_name"] == name:
-                return param["value"]
+            if param.parameter_name == name:
+                return param.value
         raise KeyError(f"Parameter with name {name} not found")
         

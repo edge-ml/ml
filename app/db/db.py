@@ -1,6 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from app.internal.config import AUTH_DATABASE_NAME, DATABASE_URI, DATABASE_NAME, DATASTORE_DB_NAME
 import asyncio
+from app.DataModels.Encoder import codec_options
 
 _db = None
 _auth_db = None
@@ -12,7 +13,7 @@ def setup_db_connection():
     global _datastore_db
     _client = AsyncIOMotorClient(DATABASE_URI)
     _client.get_io_loop = asyncio.get_running_loop
-    _db = _client[DATABASE_NAME]
+    _db = _client.get_database(DATABASE_NAME, codec_options=codec_options)
     _auth_db = _client[AUTH_DATABASE_NAME]
     _datastore_db = _client[DATASTORE_DB_NAME]
 

@@ -12,20 +12,16 @@ class NoFeatureExtractor(BaseFeatureExtractor):
         return "None"
 
     @staticmethod
-    def config():
-        return {"name": NoFeatureExtractor.get_name(), "parameters": []}
+    def get_desciption():
+        return "Extracts no features and returns the raw time-series"
 
     @staticmethod
     def get_platforms():
-        raise NotImplementedError()
+        return []
 
     @staticmethod
     def get_description():
-        raise "Does not extract any feature and returns the time-series as is."
-
-    @staticmethod
-    def get_Hyperparameters():
-        return []
+        return "Does not extract any feature and returns the time-series as is."
 
     def persist(self):
         return {}

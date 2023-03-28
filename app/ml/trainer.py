@@ -62,10 +62,10 @@ async def init_train(trainReq : TrainRequest, id, project):
 
 
     await update_model_status(id, project, ModelStatus.fitting_model)
-    clf = get_classifier_by_name(trainReq.classifier.name)(trainReq.classifier.parameters)
-    normalizer = get_normalizer_by_name(trainReq.normalizer.name)(trainReq.normalizer.parameters)
+    clf = get_classifier_by_name(trainReq.classifier.name)
+    normalizer = get_normalizer_by_name(trainReq.normalizer.name)
     labels = [x.name for x in labeling.labels]
-    evaluator = get_eval_by_name(trainReq.evaluation["name"])(train_x, train_y, clf, normalizer, labels, trainReq.evaluation["parameters"])
+    evaluator = get_eval_by_name(trainReq.evaluation.name)(train_x, train_y, clf, trainReq.classifier.parameters,  normalizer, trainReq.normalizer.parameters, labels, trainReq.evaluation.parameters)
     evaluator.train_eval()
     model_config = evaluator.persist()
     model_config["windower"] = windower.persist()

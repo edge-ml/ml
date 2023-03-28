@@ -32,3 +32,4 @@ class SelectionParameter(BaseModel):
 
 
 Parameter = Union[NumberParameter, SelectionParameter]
+

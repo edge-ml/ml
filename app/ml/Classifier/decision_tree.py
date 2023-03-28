@@ -222,7 +222,7 @@ class DecisionTree(Classifier):
         "platforms": DecisionTree.get_platforms()
         }
     
-    def get_state(self):
+    def persist(self):
         data_id = ObjectId()
         path = f'{CLASSIFIER_STORE}/{data_id}'
         isExist = os.path.exists(path)

@@ -1,18 +1,6 @@
-from fastapi import APIRouter, Request, Header, Response, BackgroundTasks
-from fastapi.param_functions import Depends
-from app.routers.dependencies import validate_user
-from app.models import EDGE_MODELS
-from app.utils.PyObjectId import PyObjectId
-from typing import List
-from pydantic import BaseModel, Field
-from app.utils.jsonEncoder import JSONEncoder
-from app.ml.trainer import train
-from app.models import EDGE_MODELS
-
-
-import traceback
-import json
-import orjson
+from fastapi import APIRouter, Header
+from app.db.models import get_model
+from app.Deploy.Base import deployModel
 
 router = APIRouter()
 
@@ -42,7 +30,6 @@ async def export(format: str):
     # )
 
 @router.get("/{model_id}/download/{format}")
-async def dlmodel(format: str):
-    pass
-    # print(model)
-    # return Response(content=model.edge_model.export(InferenceFormats.from_str(format), model.window_size, model.labels, model.timeseries, model.scaler), media_type="text/plain")
+async def dlmodel(model_id: str, format: str, project: str = Header(...)):
+    model = await get_model(model_id, project)
+    deployModel(model)

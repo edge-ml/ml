@@ -68,7 +68,10 @@ async def init_train(trainReq : TrainRequest, id, project):
     evaluator = get_eval_by_name(trainReq.evaluation.name)(train_x, train_y, clf, trainReq.classifier.parameters,  normalizer, trainReq.normalizer.parameters, labels, trainReq.evaluation.parameters)
     evaluator.train_eval()
     model_config = evaluator.persist()
-    model_config["windower"] = windower.persist()
+    model_config["featureExtractor"] = feature_extractor.persist() 
+    model_config["windower"] = windower.persist() 
+    print(feature_extractor.persist() )
+
     await set_model_data(id, project, {"model": model_config})
     await update_model_status(id, project, ModelStatus.done)
 

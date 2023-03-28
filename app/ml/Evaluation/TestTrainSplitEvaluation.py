@@ -48,7 +48,7 @@ class TestTrainSplitEvaluation(BaseEvaluation):
 
 
     def persist(self):
-        normalizer_state = self.norm.get_state()
-        classifier_state = self.clf.get_state()
-        evaluation_state = {"name": self.get_name(), "parameters": [x.dict(by_alias=True) for x in self.parameters]}
+        normalizer_state = self.norm.persist()
+        classifier_state = self.clf.persist()
+        evaluation_state = {"name": self.get_name(), "parameters": self.parameters}
         return {"normalizer": normalizer_state, "classifier": classifier_state, "evaluation": evaluation_state, "metrics": self.metrics}

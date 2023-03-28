@@ -16,7 +16,7 @@ async def get_model(id: str, project_id: str) -> Model:
     obj = await _models().find_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)})
     if obj is None:
         raise RuntimeError("Model with given id doesn't exist")
-    return Model.unmarshal(obj)
+    return Model.parse_obj(obj)
 
 async def get_project_models(project_id: str):
     # TODO number of models that can be returned is limited by 10000

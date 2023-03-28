@@ -49,12 +49,3 @@ class Classifier:
     @property
     def hyperparameters(self):
         return self._hyperparameters
-
-    @hyperparameters.setter
-    def hyperparameters(self, value):
-        self._hyperparameters = value
-        params = {x["name"]: x["value"] for x in self._hyperparameters}
-        self.clf.set_params(**params)
-
-    def get_state():
-        raise NotImplementedError()

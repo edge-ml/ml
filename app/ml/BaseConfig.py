@@ -1,4 +1,9 @@
 from app.DataModels.parameter import Parameter
+from enum import Enum
+
+class Platforms(Enum):
+    C = "C"
+
 
 class BaseConfig():
 
@@ -21,13 +26,15 @@ class BaseConfig():
     @staticmethod
     def get_parameters():
         return []
-
-
-    def get_state(self):
-        return {"name": self.get_name(), "description": self.get_desciption(), "config": self.get_config()}
     
     def persist(self):
-        return {"name": self.get_name(), "parameters": self.parameters}
+        return {"name": self.get_name(), "parameters": self.parameters, "state": self.get_state()}
+    
+    def get_state(self):
+        return {}
+
+    def restore(self):
+        raise NotImplementedError()
 
     @classmethod
     def get_train_config(cls):

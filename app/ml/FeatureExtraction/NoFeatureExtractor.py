@@ -4,8 +4,8 @@ import numpy as np
 
 class NoFeatureExtractor(BaseFeatureExtractor):
 
-    def __init__(self, hyperparameters=[]):
-        self._hyperparameters = hyperparameters
+    def __init__(self, parameters=[]):
+        super().__init__(parameters)
 
     @staticmethod
     def get_name():

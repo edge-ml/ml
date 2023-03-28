@@ -1,8 +1,10 @@
 from app.utils.PyObjectId import PyObjectId
 from bson.objectid import ObjectId
-from typing import List, Dict
+from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 from enum import Enum
+from app.DataModels.trainRequest import TrainRequest
+from app.DataModels.parameter import Parameter
 
 
 class ModelStatus(str, Enum):
@@ -20,9 +22,44 @@ class TrainingDataset(BaseModel):
     id : PyObjectId = Field(alias="_id")
     timeSeries: List[PyObjectId]
 
+class ConfigObj(BaseModel):
+    name: str
+
+    parameters: List[Parameter]
+    state: Optional[Dict]
+
+class TrainDatasetModel(BaseModel):
+    id : PyObjectId = Field(alias="_id")
+    timeSeries: List[PyObjectId]
+
+class TrainRequest(BaseModel):
+    name: str
+    datasets: List[TrainDatasetModel]
+    labeling: PyObjectId
+    name: str
+    classifier: ConfigObj
+    evaluation: ConfigObj
+    windowing: ConfigObj
+    normalizer: ConfigObj
+    featureExtractor: ConfigObj
+
+class ModelStoreObj(BaseModel):
+    name: str
+    parameters: List[Parameter]
+    state: Optional[Dict]
+
+class ModelConfig(BaseModel):
+    classifier: ModelStoreObj
+    evaluation: ModelStoreObj
+    windower: ModelStoreObj
+    normalizer: ModelStoreObj
+    featureExtractor: ModelStoreObj
+
+
 class Model(BaseModel):
     id : PyObjectId = Field(default_factory=ObjectId, alias="_id")
     projectId: PyObjectId = Field(default_factory=ObjectId)
     name: str
-    trainRequest: Dict
+    trainRequest: TrainRequest
     status: ModelStatus = ModelStatus.waiting
+    model: Optional[ModelConfig]

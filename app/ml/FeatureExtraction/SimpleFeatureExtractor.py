@@ -4,8 +4,8 @@ import numpy as np
 
 class SimpleFeatureExtractor(BaseFeatureExtractor):
 
-    def __init__(self, hyperparameters=[]):
-        self._hyperparameters = hyperparameters
+    def __init__(self, parameters=[]):
+        super().__init__(parameters)
         self._FEATURES = [np.sum, np.median, np.mean, np.std, np.var, np.max, lambda x : np.abs(np.max(x)), np.min, lambda x : np.abs(np.min(x))]
 
     @staticmethod
@@ -19,9 +19,6 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
     @staticmethod
     def get_description():
         return "Extracts simple features form the incomming time-series windows"
-
-    def persist(self):
-        return {}
 
     def _extract_features(self, data):
         return np.array([f(data) for f in self._FEATURES])

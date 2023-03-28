@@ -1,7 +1,9 @@
 from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
+from app.ml.BaseConfig import Platforms
 import numpy as np
 import json
 from app.utils.jsonEncoder import JSONEncoder
+from jinja2 import Template, FileSystemLoader
 
 class MinMaxNormalizer(BaseNormalizer):
 
@@ -34,4 +36,49 @@ class MinMaxNormalizer(BaseNormalizer):
         return (data - self.min) / (self.max - self.min)
     
     def get_state(self):
-        return {"name": MinMaxNormalizer.get_name(), "min": json.dumps(self.min, cls=JSONEncoder), "max": json.dumps(self.max, cls=JSONEncoder)}
+        return {"min": json.dumps(self.min, cls=JSONEncoder), "max": json.dumps(self.max, cls=JSONEncoder)}
+
+    def restore(self, dict):
+        self.min = json.loads(dict.state["min"])
+        self.max = json.loads(dict.state["max"])
+        self.parameters = dict.parameters
+    
+    def export(self, platforms: Platforms):
+        return self.exportC()
+
+    @staticmethod
+    def load(self, config):
+        print(config)
+
+    def _matrix_to_vector(self, data):
+        code = "{\n"
+        for row in data:
+            code += "    {"
+            code += ", ".join(str(x) for x in row)
+            code += "},\n"
+        code += "};"
+        return code
+    
+    def exportC(self):
+        template = '''
+
+        Matrix mins = {{min}}
+        Matrix maxs = {{max}}
+
+        void normalize(Matrix input)
+        {
+            for (int i = 0; i < num_sensors; i++)
+            {
+                for (int j = 0; j < feature_size; j++)
+                {
+                    input[i][j] = (input[i][j] - mins[i][j]) / (maxs[i][j] - mins[i][j]);
+                }
+            }
+        }
+        '''
+
+        data = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max)}
+
+        print(data)
+        template = Template(template)
+        print(template.render(data))

@@ -274,7 +274,7 @@ class RandomForest(Classifier):
         "platforms": RandomForest.get_platforms()
         }
     
-    def get_state(self):
+    def persisit(self):
         data_id = ObjectId()
         path = f'{CLASSIFIER_STORE}/{data_id}'
         isExist = os.path.exists(path)

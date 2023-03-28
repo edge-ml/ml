@@ -5,7 +5,7 @@ from typing import List
 
 NORMALIZERS : List[BaseNormalizer]  = [MinMaxNormalizer, ZNormalizer]
 
-def get_normalizer_by_name(name):
+def get_normalizer_by_name(name) -> BaseNormalizer:
     for norm in NORMALIZERS:
         if (norm.get_name() == name):
             return norm

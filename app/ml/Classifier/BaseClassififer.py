@@ -4,7 +4,7 @@ from app.codegen.inference import InferenceFormats
 from app.internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
 from app.utils.parameter_builder import ParameterBuilder
 
-class Classifier:
+class BaseClassififer:
     # static methods
     @staticmethod
     def get_hyperparameters():

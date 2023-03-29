@@ -1,7 +1,7 @@
 from app.codegen.export_javascript import export_javascript
 from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Classifier import Classifier
+from app.ml.Classifier import BaseClassififer
 from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
@@ -15,7 +15,7 @@ from app.internal.config import CLASSIFIER_STORE
 import pickle
 import os
 
-class DecisionTree(Classifier):
+class DecisionTree(BaseClassififer):
 
     id = 1
 

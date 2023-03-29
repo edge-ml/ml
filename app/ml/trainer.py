@@ -9,13 +9,14 @@ from app.db.datasets import get_dataset
 
 from app.DataProcessor.DataPreProcessor import getDatasetWindows, calculateFeatures
 from app.DataProcessor.DataLoader.DataLoader import processDataset
-from app.ml.Evaluation import get_eval_by_name
+from app.ml.Evaluation import get_eval_by_name, BaseEvaluation
 from app.DataModels.trainRequest import TrainRequest
 
 from app.ml.Classifier import get_classifier_by_name
 from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Windowing import get_windower_by_name
 from app.ml.FeatureExtraction import get_feature_extractor_by_name
+from app.ml.Pipeline import Pipeline
 
 
 
@@ -29,8 +30,8 @@ from app.ml.FeatureExtraction import get_feature_extractor_by_name
 
 async def init_train(trainReq : TrainRequest, id, project):
     print("init training")
+    feature_extractor = get_feature_extractor_by_name(trainReq.featureExtractor.name)
     await update_model_status(id, project, ModelStatus.preprocessing)
-
     # Get the datasets and lableings used for training
     datasets = [await get_dataset(x.id, project) for x in trainReq.datasets]
     labeling = await get_labeling(trainReq.labeling, project)
@@ -39,42 +40,44 @@ async def init_train(trainReq : TrainRequest, id, project):
 
     print("datasets: ", len(datasets))
 
-    arrs = []
-    for dataset in datasets:
-        arrs.append(processDataset(dataset, trainReq.labeling, labelMap))
+    datasets_processed = [processDataset(dataset, trainReq.labeling, labelMap) for dataset in datasets]
+    labels = [x.name for x in labeling.labels]
 
-    
-    windower = get_windower_by_name(trainReq.windowing.name)(trainReq.windowing.parameters)
-    print(len(arrs))
-    windows, labels = windower.window(arrs)
+    # print(len(arrs))
+    # windows, labels = windower.window(arrs)
+    # windows, labels = feature_extractor.extract_features(windows, labels)
+    # print(windows.shape)
 
-    feature_extractor = get_feature_extractor_by_name(trainReq.featureExtractor.name)()
-    windows, labels = feature_extractor.extract_features(windows, labels)
-    print(windows.shape)
+    # # TODO: Need to select the correct labels, based on user selection
+    # filter = np.array([x != 100000 for x in labels])
+    # print(filter.shape)
+    # train_x = windows[filter]
+    # train_y = labels[filter]
 
-    # TODO: Need to select the correct labels, based on user selection
-    filter = np.array([x != 100000 for x in labels])
-    print(filter.shape)
-    train_x = windows[filter]
-    train_y = labels[filter]
+    # print(list(train_y).count(1), list(train_y).count(2))
 
-    print(list(train_y).count(1), list(train_y).count(2))
 
+    # await update_model_status(id, project, ModelStatus.fitting_model)
+    # clf = get_classifier_by_name(trainReq.classifier.name)
+    # normalizer = get_normalizer_by_name(trainReq.normalizer.name)
+    # labels = [x.name for x in labeling.labels]
+    # evaluator = get_eval_by_name(trainReq.evaluation.name)(train_x, train_y, clf, trainReq.classifier.parameters,  normalizer, trainReq.normalizer.parameters, labels, trainReq.evaluation.parameters)
+    # evaluator.train_eval()
+    # model_config = evaluator.persist()
+    # model_config["featureExtractor"] = feature_extractor.persist() 
+    # model_config["windower"] = windower.persist() 
+    # print(feature_extractor.persist() )
+
+    # await set_model_data(id, project, {"model": model_config})
+    # await update_model_status(id, project, ModelStatus.done)
 
     await update_model_status(id, project, ModelStatus.fitting_model)
-    clf = get_classifier_by_name(trainReq.classifier.name)
-    normalizer = get_normalizer_by_name(trainReq.normalizer.name)
-    labels = [x.name for x in labeling.labels]
-    evaluator = get_eval_by_name(trainReq.evaluation.name)(train_x, train_y, clf, trainReq.classifier.parameters,  normalizer, trainReq.normalizer.parameters, labels, trainReq.evaluation.parameters)
-    evaluator.train_eval()
-    model_config = evaluator.persist()
-    model_config["featureExtractor"] = feature_extractor.persist() 
-    model_config["windower"] = windower.persist() 
-    print(feature_extractor.persist() )
+    evaluator = get_eval_by_name(trainReq.evaluation.name)(trainReq.windowing, trainReq.featureExtractor, trainReq.normalizer, trainReq.classifier, datasets_processed, labels, trainReq.evaluation)
+    pipeline : Pipeline = evaluator.train_eval()
 
-    await set_model_data(id, project, {"model": model_config})
+    
+    await set_model_data(id, project, {"pipeline": pipeline.persist(), "evaluator": evaluator.persist()})
     await update_model_status(id, project, ModelStatus.done)
-
 
 
 async def train(trainReq, project, background_tasks):

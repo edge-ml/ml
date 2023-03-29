@@ -62,4 +62,3 @@ class Model(BaseModel):
     name: str
     trainRequest: TrainRequest
     status: ModelStatus = ModelStatus.waiting
-    model: Optional[ModelConfig]

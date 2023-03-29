@@ -3,7 +3,7 @@ from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
 from app.models.edge_model import EdgeModel
 from sklearn.ensemble import RandomForestClassifier
-from app.ml.Classifier.Classifier import Classifier
+from app.ml.Classifier.BaseClassififer import BaseClassififer
 from micromlgen import port
 import m2cgen as m2c
 from app.mcuConverter.mcuConverter import convertMCU, McuLanguage
@@ -16,7 +16,7 @@ import os
 import copy
 
 
-class RandomForest(Classifier):
+class RandomForest(BaseClassififer):
     id = 2
     # static methods
     @staticmethod

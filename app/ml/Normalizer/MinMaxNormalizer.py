@@ -82,3 +82,4 @@ class MinMaxNormalizer(BaseNormalizer):
         print(data)
         template = Template(template)
         print(template.render(data))
+        return template.render(data)

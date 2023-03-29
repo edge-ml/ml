@@ -17,8 +17,11 @@ import copy
 
 
 class RandomForest(BaseClassififer):
-    id = 2
-    # static methods
+
+    def __init__(self, parameters):
+        super().__init__(parameters)
+        self.data_id = None
+
     @staticmethod
     def get_hyperparameters():
         pb = ParameterBuilder()
@@ -264,22 +267,27 @@ class RandomForest(BaseClassififer):
             return
             # TODO: throw error
     
-    @staticmethod
-    def config():
-        return {
-        "name": RandomForest.get_name(),
-        "description": RandomForest.get_description(),
-        "id": RandomForest.id,
-        "parameters": RandomForest.get_hyperparameters(),
-        "platforms": RandomForest.get_platforms()
-        }
+    # @staticmethod
+    # def config():
+    #     return {
+    #     "name": RandomForest.get_name(),
+    #     "description": RandomForest.get_description(),
+    #     "parameters": RandomForest.get_hyperparameters(),
+    #     "platforms": RandomForest.get_platforms()
+    #     }
+
+    def get_state(self):
+        return {"data_id": self.data_id}
+
+    def restore(self, dict):
+        self.data_id = dict["data_id"]
     
     def persisit(self):
-        data_id = ObjectId()
-        path = f'{CLASSIFIER_STORE}/{data_id}'
+        self.data_id = ObjectId()
+        path = f'{CLASSIFIER_STORE}/{self.data_id}'
         isExist = os.path.exists(path)
         if not isExist:
             os.makedirs(path)
         with open(path + "/clf.pkl", 'wb') as f:
             pickle.dump(self.clf, f)  
-        return {"name": RandomForest.get_name(), "id": RandomForest.id, "parameters": self._hyperparameters, "data_id": str(data_id)}
+        return super().persist()

@@ -12,4 +12,4 @@ def get_classifier_by_name(name):
             return cls
     raise Exception()
 
-CLASSIFIER_CONFIG = [x.config() for x in CLASSIFIERS]
+CLASSIFIER_CONFIG = [x.get_train_config() for x in CLASSIFIERS]

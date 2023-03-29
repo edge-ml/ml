@@ -3,33 +3,13 @@
 from app.codegen.inference import InferenceFormats
 from app.internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
 from app.utils.parameter_builder import ParameterBuilder
+from app.ml.BaseConfig import BaseConfig
 
-class BaseClassififer:
-    # static methods
-    @staticmethod
-    def get_hyperparameters():
-        raise NotImplementedError()
+class BaseClassififer(BaseConfig):
 
-    @staticmethod
-    def get_name():
-        return "Edge Model Base"
-
-    @staticmethod
-    def get_description():
-        return "Basic model that defines hyperparameters. Predicts random results based on class probability."
-
-    @staticmethod
-    def get_platforms():
-        return []
-    
-    @staticmethod
-    def config():
-        raise NotImplementedError()
-
-    # class methods
-    def __init__(self, hyperparameters=[]):
+    def __init__(self, parameters):
         self.is_fit = False
-        self._hyperparameters = hyperparameters
+        self.parameters = parameters
 
 
     def fit(self, X_train, y_train):
@@ -37,15 +17,3 @@ class BaseClassififer:
 
     def predict(self, X_test):
         raise NotImplementedError
-
-    def compile(self):
-        if not self.is_fit:
-            return
-            # TODO: throw error
-
-    def export(self, platform: InferenceFormats): # https://github.com/nok/sklearn-porter#estimators (maybe?)
-        raise NotImplementedError
-
-    @property
-    def hyperparameters(self):
-        return self._hyperparameters

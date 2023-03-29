@@ -17,8 +17,9 @@ import os
 
 class DecisionTree(BaseClassififer):
 
-    id = 1
-
+    def __init__(self, parameters):
+        super().__init__(parameters)
+        self.data_id = None
 
     # static methods
     @staticmethod
@@ -212,22 +213,27 @@ class DecisionTree(BaseClassififer):
             return
             # TODO: throw error
 
-    @staticmethod
-    def config():
-        return {
-        "name": DecisionTree.get_name(),
-        "description": DecisionTree.get_description(),
-        "id": DecisionTree.id,
-        "parameters": DecisionTree.get_hyperparameters(),
-        "platforms": DecisionTree.get_platforms()
-        }
+    # @staticmethod
+    # def config():
+    #     return {
+    #     "name": DecisionTree.get_name(),
+    #     "description": DecisionTree.get_description(),
+    #     "parameters": DecisionTree.get_hyperparameters(),
+    #     "platforms": DecisionTree.get_platforms()
+    #     }
     
+    def get_state(self):
+        return {"data_id": self.data_id}
+
+    def restore(self, dict):
+        self.data_id = dict["data_id"]
+
     def persist(self):
-        data_id = ObjectId()
-        path = f'{CLASSIFIER_STORE}/{data_id}'
+        self.data_id = ObjectId()
+        path = f'{CLASSIFIER_STORE}/{self.data_id}'
         isExist = os.path.exists(path)
         if not isExist:
             os.makedirs(path)
         with open(path + "/clf.pkl", 'wb') as f:
             pickle.dump(self.clf, f)  
-        return {"name": DecisionTree.get_name(), "id": DecisionTree.id, "parameters": self._hyperparameters, "data_id": str(data_id)}
+        return super().persist()

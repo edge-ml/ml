@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from app.DataModels.trainRequest import TrainRequest
 from app.DataModels.parameter import Parameter
+from app.DataModels.PipeLine import PipelineModel
 
 
 class ModelStatus(str, Enum):
@@ -61,4 +62,5 @@ class Model(BaseModel):
     projectId: PyObjectId = Field(default_factory=ObjectId)
     name: str
     trainRequest: TrainRequest
+    pipeline: Optional[PipelineModel]
     status: ModelStatus = ModelStatus.waiting

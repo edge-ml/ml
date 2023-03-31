@@ -1,0 +1,25 @@
+#include <vector>
+{% for include in includes %}
+    {{ include }}
+{% endfor %}
+
+#define Matrix vector<vector<float> >
+
+
+{% for global in globals %}
+    {{ global }}
+{% endfor %}
+
+{{ classifier }}
+
+{{ featureExtractor }}
+
+{{ normalizer }}
+
+{{ windower }}
+
+int predict() {
+    extract_features(raw_data, features);
+    normalize(features);
+    return predict(features);
+}

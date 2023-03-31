@@ -63,4 +63,5 @@ class Model(BaseModel):
     name: str
     trainRequest: TrainRequest
     pipeline: Optional[PipelineModel]
+    timeSeries: Optional[List[str]]
     status: ModelStatus = ModelStatus.waiting

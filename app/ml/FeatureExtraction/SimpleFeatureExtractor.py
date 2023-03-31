@@ -1,6 +1,6 @@
 from app.ml.FeatureExtraction import BaseFeatureExtractor
 import numpy as np
-from jinja2 import Template
+from app.Deploy.CPP.cPart import CPart
 
 
 class SimpleFeatureExtractor(BaseFeatureExtractor):
@@ -35,11 +35,11 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         return np.array(window_features), labels
 
     def exportC(self):
-        template = '''
-        void extract_features(Matrix inputs, Matrix outputs)
+        code = '''
+        void extract_features(Matrix &inputs, Matrix &outputs)
         {
 
-            for (int i = 0; i < NUM_SENSORS; i++)
+            for (int i = 0; i < {{num_sensors}}; i++)
             {
                 outputs[i][0] = sum(inputs[i]);
                 outputs[i][1] = median(inputs[i]);
@@ -54,7 +54,5 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         }
         '''
 
-        data = {}
+        return CPart(['#include "feature_extractor.cpp"'], ["Matrix features({{num_sensors}}, std::vector<float>({{num_features}}));"], code, {"num_features": len(self._FEATURES)})
 
-        template = Template(template)
-        return template.render(data)

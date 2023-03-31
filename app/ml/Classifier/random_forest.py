@@ -6,7 +6,6 @@ from sklearn.ensemble import RandomForestClassifier
 from app.ml.Classifier.BaseClassififer import BaseClassififer
 from micromlgen import port
 import m2cgen as m2c
-from app.mcuConverter.mcuConverter import convertMCU, McuLanguage
 from app.ml.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
 from app.internal.config import CLASSIFIER_STORE
@@ -280,7 +279,7 @@ class RandomForest(BaseClassififer):
         return {"data_id": self.data_id}
 
     def restore(self, dict):
-        self.data_id = dict["data_id"]
+        self.data_id = dict.state["data_id"]
     
     def persisit(self):
         self.data_id = ObjectId()

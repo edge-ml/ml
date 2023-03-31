@@ -3,7 +3,7 @@ from app.utils.parameter_builder import ParameterBuilder
 
 class TimeWindower(BaseWindower):
 
-    def __init__(self, parameters):
+    def __init__(self, parameters=[]):
         super().__init__(parameters)
 
     @staticmethod
@@ -18,14 +18,8 @@ class TimeWindower(BaseWindower):
     def get_description():
         return "Windowing, where each window has the same length in the temporal dimension"
 
-    # @staticmethod
-    # def config():
-    #     return {
-    #     "name": TimeWindower.get_name(),
-    #     "description": TimeWindower.get_description(),
-    #     "parameters": TimeWindower.get_hyperparameters(),
-    #     "platforms": TimeWindower.get_platforms()
-    #     }
+    def restore(self, config):
+        self.parameters = config.parameters
 
     @staticmethod
     def get_parameters():

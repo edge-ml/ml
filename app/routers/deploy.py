@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Header
 from app.db.models import get_model
 from app.Deploy.Base import deployModel
+from app.ml.BaseConfig import Platforms
 
 router = APIRouter()
 
@@ -30,6 +31,7 @@ async def export(format: str):
     # )
 
 @router.get("/{model_id}/download/{format}")
-async def dlmodel(model_id: str, format: str, project: str = Header(...)):
+async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
     model = await get_model(model_id, project)
-    deployModel(model)
+    code = deployModel(model, format)
+    return code

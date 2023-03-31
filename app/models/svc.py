@@ -5,7 +5,6 @@ from app.models.edge_model import EdgeModel
 from sklearn.svm import SVC as SVCHoist
 from micromlgen import port
 import m2cgen as m2c
-from app.mcuConverter.mcuConverter import convertMCU
 
 import copy
 

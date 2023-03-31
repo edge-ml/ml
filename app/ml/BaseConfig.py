@@ -1,5 +1,6 @@
 from app.DataModels.parameter import Parameter
 from enum import Enum
+from typing import List
 
 class Platforms(Enum):
     C = "C"
@@ -7,7 +8,7 @@ class Platforms(Enum):
 
 class BaseConfig():
 
-    def __init__(self, parameters : Parameter = []):
+    def __init__(self, parameters : List[Parameter] = []):
         self.parameters = parameters
 
     @staticmethod
@@ -33,7 +34,14 @@ class BaseConfig():
     def get_state(self):
         return {}
 
-    def restore(self):
+    def restore(self, config):
+        self.parameters = config.parameters
+
+    def export(self, platform: Platforms):
+        if platform == Platforms.C:
+            return self.exportC()
+
+    def exportC():
         raise NotImplementedError()
 
     @classmethod

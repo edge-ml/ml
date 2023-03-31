@@ -5,7 +5,6 @@ from app.ml.Classifier import BaseClassififer
 from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
-from app.mcuConverter.mcuConverter import McuLanguage, convertMCU
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 import copy
@@ -14,6 +13,8 @@ from bson.objectid import ObjectId
 from app.internal.config import CLASSIFIER_STORE
 import pickle
 import os
+from app.ml.BaseConfig import Platforms
+from app.Deploy.Sklearn.exportC_decisionTree import convert
 
 class DecisionTree(BaseClassififer):
 
@@ -178,27 +179,30 @@ class DecisionTree(BaseClassififer):
     def get_platforms():
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
 
-    def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
-        if platform == InferenceFormats.PYTHON:
-            return m2c.export_to_python(self.clf)
-        elif platform == InferenceFormats.C_EMBEDDED:
-        #     return port(self.clf)
-        # elif platform == InferenceFormats.C:
-            return m2c.export_to_c(self.clf)
-        elif platform == InferenceFormats.JAVASCRIPT:
-            return export_javascript(self)
-        elif platform == InferenceFormats.CPP:
-            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.CPP)
-        elif platform == InferenceFormats.C:
-            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.C)
-        else:
-            print(platform)
-            raise NotImplementedError
+    # def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
+    #     if platform == InferenceFormats.PYTHON:
+    #         return m2c.export_to_python(self.clf)
+    #     elif platform == InferenceFormats.C_EMBEDDED:
+    #     #     return port(self.clf)
+    #     # elif platform == InferenceFormats.C:
+    #         return m2c.export_to_c(self.clf)
+    #     elif platform == InferenceFormats.JAVASCRIPT:
+    #         return export_javascript(self)
+    #     elif platform == InferenceFormats.CPP:
+    #         return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.CPP)
+    #     elif platform == InferenceFormats.C:
+    #         return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.C)
+    #     else:
+    #         print(platform)
+    #         raise NotImplementedError
+
+    def exportC(self):
+        return convert(self.clf)
 
     # class methods
-    def __init__(self, hyperparameters={}):
-        super().__init__(hyperparameters)
-        self.clf = DecisionTreeClassifier()
+    def __init__(self, parameters=[]):
+        super().__init__(parameters)
+        self.clf = DecisionTreeClassifier() # TODO: Set the parameters for this classifier
 
     def fit(self, X_train, y_train):
         X_train_reshaped = reshapeSklearn(X_train)
@@ -212,21 +216,15 @@ class DecisionTree(BaseClassififer):
         if not self.is_fit:
             return
             # TODO: throw error
-
-    # @staticmethod
-    # def config():
-    #     return {
-    #     "name": DecisionTree.get_name(),
-    #     "description": DecisionTree.get_description(),
-    #     "parameters": DecisionTree.get_hyperparameters(),
-    #     "platforms": DecisionTree.get_platforms()
-    #     }
     
     def get_state(self):
         return {"data_id": self.data_id}
 
     def restore(self, dict):
-        self.data_id = dict["data_id"]
+        self.data_id = dict.state["data_id"]
+        path = f'{CLASSIFIER_STORE}/{self.data_id}'
+        with open(path + "/clf.pkl", "rb") as f:
+            self.clf = pickle.load(f)
 
     def persist(self):
         self.data_id = ObjectId()

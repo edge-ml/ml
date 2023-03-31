@@ -4,10 +4,11 @@ import numpy as np
 import json
 from app.utils.jsonEncoder import JSONEncoder
 from jinja2 import Template, FileSystemLoader
+from app.Deploy.CPP.cPart import CPart
 
 class MinMaxNormalizer(BaseNormalizer):
 
-    def __init__(self, parameters):
+    def __init__(self, parameters=[]):
         super().__init__(parameters)
         self.min = None
         self.max = None
@@ -60,13 +61,15 @@ class MinMaxNormalizer(BaseNormalizer):
         return code
     
     def exportC(self):
-        template = '''
+        code = '''
 
         Matrix mins = {{min}}
         Matrix maxs = {{max}}
 
-        void normalize(Matrix input)
+        void normalize(Matrix &input)
         {
+            int num_sensors = input.size();
+            int feature_size = input[0].size();
             for (int i = 0; i < num_sensors; i++)
             {
                 for (int j = 0; j < feature_size; j++)
@@ -77,9 +80,6 @@ class MinMaxNormalizer(BaseNormalizer):
         }
         '''
 
-        data = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max)}
+        jinjaVars = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max)}
 
-        print(data)
-        template = Template(template)
-        print(template.render(data))
-        return template.render(data)
+        return CPart([], [], code, jinjaVars)

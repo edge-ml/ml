@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import math
 
 
 from app.DataProcessor.DataLoader.binaryStore import BinaryStore
@@ -41,6 +42,6 @@ def processDataset(dataset, labeling_id, labelMap):
                 arr[i][-1] = labelMap[str(l.type)]
                 break
             else:
-                arr[i][-1] = 100000
+                arr[i][-1] = 9*10^10
     
     return arr

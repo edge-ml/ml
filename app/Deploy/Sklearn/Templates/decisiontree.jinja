@@ -1,0 +1,7 @@
+{% block predict %}
+int predict(Matrix &features) {
+    int num_sensors = features.size();
+    int num_features = features[0].size();
+    {% include 'decisionTree_tree.jinja' %}
+}
+{% endblock %}

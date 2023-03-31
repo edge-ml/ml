@@ -5,7 +5,7 @@ from app.utils.jsonEncoder import JSONEncoder
 
 class ZNormalizer(BaseNormalizer):
 
-    def __init__(self, parameters):
+    def __init__(self, parameters=[]):
         super().__init__(parameters)
         self.mean = None
         self.std = None

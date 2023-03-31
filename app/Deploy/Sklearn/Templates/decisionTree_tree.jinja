@@ -1,12 +1,12 @@
 {% if left[i] != right[i] %}
-    if (features[{{ features[i] }}] <= {{ thresholds[i] }}) {
+    if (features[{{ features[i] }} / num_features][{{ features[i] }} % num_features] <= {{ thresholds[i] }}) {
         {% with i = left[i] %}
-            {% include 'decisiontree/tree.jinja' %}
+            {% include 'decisionTree_tree.jinja' %}
         {% endwith %}
     }
     else {
         {% with i = right[i] %}
-            {% include 'decisiontree/tree.jinja' %}
+            {% include 'decisionTree_tree.jinja' %}
         {% endwith %}
     }
 {% else %}

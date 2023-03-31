@@ -3,11 +3,14 @@ from app.ml.FeatureExtraction import BaseFeatureExtractor
 from app.ml.Normalizer import BaseNormalizer
 from app.ml.Classifier import BaseClassififer
 from app.DataModels.PipeLine import PipelineModel
+from app.ml.BaseConfig import Platforms
+from app.Deploy.CPP.cPart import CPart
 
 from app.ml.Windowing import get_windower_by_name
 from app.ml.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Classifier import get_classifier_by_name
+from jinja2 import Template, FileSystemLoader
 
 class Pipeline():
 
@@ -23,13 +26,41 @@ class Pipeline():
     @staticmethod
     def load(pipeline : PipelineModel):
 
-        classifier = get_classifier_by_name(pipeline.classifier.name)(pipeline.classifier.parameters)
-        classifier.restore(pipeline.classifier.state)
-        normalizer = get_normalizer_by_name(pipeline.normalizer.name)(pipeline.normalizer.parameters)
-        normalizer.restore(pipeline.classifier.state)
-        windower = get_windower_by_name(pipeline.windower.name)(pipeline.windower.parameters)
-        windower.restore(pipeline.windower.state)
-        featureExtractor = get_feature_extractor_by_name(pipeline.featureExtractor.name)(pipeline.featureExtractor.parameters)
-        featureExtractor.restore(pipeline.featureExtractor.state)
+        classifier = get_classifier_by_name(pipeline.classifier.name)()
+        classifier.restore(pipeline.classifier)
+        normalizer = get_normalizer_by_name(pipeline.normalizer.name)()
+        normalizer.restore(pipeline.normalizer)
+        windower = get_windower_by_name(pipeline.windower.name)()
+        windower.restore(pipeline.windower)
+        featureExtractor = get_feature_extractor_by_name(pipeline.featureExtractor.name)()
+        featureExtractor.restore(pipeline.featureExtractor)
 
-        pipeline = Pipeline(windower, featureExtractor, normalizer, classifier)
+        return Pipeline(windower, featureExtractor, normalizer, classifier)
+    
+
+    def deploy(self, platform: Platforms):
+        data = {}
+        data["windower"] = self.windower.export(platform)
+        data["featureExtractor"] = self.featureExtractor.export(platform)
+        data["normalizer"] = self.normalizer.export(platform)
+        data["classifier"] = self.classifier.export(platform)
+
+        if platform == Platforms.C:
+            return self.deployC(data)
+
+    def deployC(self, data):
+        with open('app/Deploy/Sklearn/Templates/CPP_Base.jinja') as f:
+            jinjaVars = {"includes": [], "globals": []}
+
+            functions = {"join": lambda x, y : f"{y}".join(x)}
+
+
+            for (key, value) in data.items():
+                jinjaVars[key] = value.code
+                jinjaVars["includes"].extend(value.includes)
+                jinjaVars["globals"].extend(value.globals)
+                jinjaVars = {**jinjaVars, **value.jinjaVars}
+            template = Template(f.read())
+        res = template.render(jinjaVars, **functions) # Add code snippests to the template
+        res = Template(res).render(jinjaVars, **functions) # Populate the code snippets with the variables
+        return res

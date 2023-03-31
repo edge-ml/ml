@@ -34,6 +34,8 @@ from app.utils.jsonEncoder import JSONEncoder
 
 def calculateMetrics(y_test, y_pred, target_labels):
     metrics = {}
+    print(list(zip(y_test, y_pred)))
+
     metrics['accuracy_score'] = accuracy_score(y_test, y_pred)
     metrics['precision_score'] = precision_score(y_test, y_pred, average='weighted')
     metrics['recall_score'] = recall_score(y_test, y_pred, average='weighted')

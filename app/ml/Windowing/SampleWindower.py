@@ -1,10 +1,13 @@
 from app.ml.Windowing.BaseWindower import BaseWindower
 from app.utils.parameter_builder import ParameterBuilder
 import numpy as np
+from app.ml.BaseConfig import Platforms
+from jinja2 import Template
+from app.Deploy.CPP.cPart import CPart
 
 class SampleWindower(BaseWindower):
 
-    def __init__(self, parameters):
+    def __init__(self, parameters=[]):
         super().__init__(parameters)
 
     @staticmethod
@@ -40,13 +43,16 @@ class SampleWindower(BaseWindower):
             False
         )
         return pb.parameters
+    
+    def restore(self, config):
+        self.parameters = config.parameters
 
 
     def window(self, datasets):
         window_size = self.get_param_value_by_name("window_size")
         stride = self.get_param_value_by_name("sliding_step")
-        all_windows = []
-        all_labels = []
+        train_X = []
+        train_Y = []
         for dataset in datasets:
             fused = []
             idx = 0
@@ -56,16 +62,38 @@ class SampleWindower(BaseWindower):
                 fused.append(dataset[idx: idx+window_size])
                 idx += stride
 
-            labels = []
-            windows = []
+            X = []
+            Y = []
 
             for w in fused:
-                windows.append(w[:, :-1])
+                X.append(w[:, :-1])
                 counts = np.bincount(w[:,-1].astype(int))
                 label = np.argmax(counts)
-                labels.append(label)
+                Y.append(label)
 
-            all_windows.extend(np.array(windows))
-            all_labels.extend(np.array(labels))
+            train_X.extend(np.array(X))
+            train_Y.extend(np.array(Y))
             
-        return np.array(all_windows), np.array(all_labels)
+        return self._filterLabelings(np.array(train_X), np.array(train_Y))
+
+    def exportC(self):
+        global_vars = {"window_size": self.get_param_value_by_name("window_size"), "sliding_step": self.get_param_value_by_name("sliding_step")}
+
+
+        code = '''
+        void add_datapoint({{timeSeriesInput}})
+            {
+                {% for ts in timeSeries %}
+                    raw_data[{{loop.index-1}}][ctr] = {{ts}};
+                {% endfor %}
+                ctr++;
+                if (ctr >= {{window_size}})
+                {
+                    ctr = 0;
+                }
+            }
+        '''
+        timeSeries = ["x", "y", "z"]
+        jinjaVars = {"timeSeries": timeSeries, "timeSeriesInput": ",".join([f"float {x}" for x in timeSeries]), "num_sensors": len(timeSeries), **global_vars}
+
+        return CPart([], ["Matrix raw_data({{num_sensors}}, vector<float>({{window_size}}));", "int ctr = 0;"], code, jinjaVars)

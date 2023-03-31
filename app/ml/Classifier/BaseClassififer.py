@@ -8,6 +8,7 @@ from app.ml.BaseConfig import BaseConfig
 class BaseClassififer(BaseConfig):
 
     def __init__(self, parameters):
+        super().__init__(parameters)
         self.is_fit = False
         self.parameters = parameters
 

@@ -51,7 +51,10 @@ async def init_train(trainReq : TrainRequest, id, project):
         print("pipeline")
         print(pipeline.persist())
 
-        await set_model_data(id, project, {"pipeline": pipeline.persist(), "evaluator": evaluator.persist()})
+        timeSeries = [x.name for x in datasets[0].timeSeries]
+        print(timeSeries)
+
+        await set_model_data(id, project, {"pipeline": pipeline.persist(), "evaluator": evaluator.persist(), "timeSeries": timeSeries})
         await update_model_status(id, project, ModelStatus.done)
     except Exception as e:
         print(e)

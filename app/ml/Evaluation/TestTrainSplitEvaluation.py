@@ -28,6 +28,7 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         self.normalizer = get_normalizer_by_name(normalizer_config.name)(windower_config.parameters)
         self.windower = get_windower_by_name(windower_config.name)(windower_config.parameters)
         self.featureExtractor = get_feature_extractor_by_name(featureExtractor_config.name)(featureExtractor_config.parameters)
+        self.labels = labels
 
     @staticmethod
     def get_name():
@@ -47,7 +48,7 @@ class TestTrainSplitEvaluation(BaseEvaluation):
     def train_eval(self) -> Pipeline:
 
         train_X, train_Y = self.windower.window(self.datasets)
-        train_x, train_Y = self.featureExtractor.extract_features(train_X, train_Y)
+        train_X, train_Y = self.featureExtractor.extract_features(train_X, train_Y)
 
 
         part = int(self.get_param_value_by_name("Train_test_split") / 100 * len(train_X))

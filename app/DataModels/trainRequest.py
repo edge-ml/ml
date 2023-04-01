@@ -12,11 +12,14 @@ class TrainDatasetModel(BaseModel):
     id : PyObjectId = Field(alias="_id")
     timeSeries: List[PyObjectId]
 
+class TrainLabelingModel(BaseModel):
+    id: PyObjectId = Field(alias="_id")
+    useZeroClass: bool
+
 class TrainRequest(BaseModel):
     name: str
     datasets: List[TrainDatasetModel]
-    labeling: PyObjectId
-    name: str
+    labeling: TrainLabelingModel
     classifier: ConfigObj
     evaluation: ConfigObj
     windowing: ConfigObj

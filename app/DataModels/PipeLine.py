@@ -12,3 +12,6 @@ class PipelineModel(BaseModel):
     featureExtractor: PipeLineStep
     normalizer: PipeLineStep
     classifier: PipeLineStep
+    labels : List[str]
+    timeSeries: List[str]
+

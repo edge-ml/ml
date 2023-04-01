@@ -6,9 +6,11 @@ import math
 from app.DataProcessor.DataLoader.binaryStore import BinaryStore
 
 
-def processDataset(dataset, labeling_id, labelMap):
+def processDataset(dataset, labeling_id, labelMap, useZero):
     
     # Get labels in datasets
+    print("labels", "-"*20)
+    print([x.labelingId for x in dataset.labelings], labeling_id)
     labels = [x for x in dataset.labelings if x.labelingId == labeling_id][0].labels
     # Get the time-series
     dfs = []
@@ -36,12 +38,14 @@ def processDataset(dataset, labeling_id, labelMap):
 
     arr = np.concatenate([arr, label_arr], axis=1)
 
+    maxVal = max(labelMap.values())
+
     for i, t in enumerate(arr):
         for l in labels:
             if t[0] >= int(l.start) and t[0] <= int(l.end):
                 arr[i][-1] = labelMap[str(l.type)]
                 break
             else:
-                arr[i][-1] = 9*10^10
+                arr[i][-1] = maxVal if useZero else 9*10^10 
     
     return arr

@@ -50,6 +50,8 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         train_X, train_Y = self.windower.window(self.datasets)
         train_X, train_Y = self.featureExtractor.extract_features(train_X, train_Y)
 
+        print("Eval", "-"*30)
+        print(train_Y)
 
         part = int(self.get_param_value_by_name("Train_test_split") / 100 * len(train_X))
         p = np.random.permutation(len(train_X))

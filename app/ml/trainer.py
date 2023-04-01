@@ -17,6 +17,7 @@ from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Windowing import get_windower_by_name
 from app.ml.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Pipeline import Pipeline
+from app.DataModels.PipeLine import PipelineModel
 import traceback
 
 
@@ -35,14 +36,23 @@ async def init_train(trainReq : TrainRequest, id, project):
         await update_model_status(id, project, ModelStatus.preprocessing)
         # Get the datasets and lableings used for training
         datasets = [await get_dataset(x.id, project) for x in trainReq.datasets]
-        labeling = await get_labeling(trainReq.labeling, project)
+        labeling = await get_labeling(trainReq.labeling.id, project)
+        useZeroClass = trainReq.labeling.useZeroClass
         
         labelMap = {str(x.id): i for i, x in enumerate(labeling.labels)}
+        maxIdx = max(labelMap.values())
+        print(labelMap.keys(), maxIdx)
+        if useZeroClass:
+            labelMap["Zero"] = maxIdx+1
 
+        print(labelMap)
         print("datasets: ", len(datasets))
 
-        datasets_processed = [processDataset(dataset, trainReq.labeling, labelMap) for dataset in datasets]
+        datasets_processed = [processDataset(dataset, trainReq.labeling.id, labelMap, useZeroClass) for dataset in datasets]
         labels = [x.name for x in labeling.labels]
+        if useZeroClass:
+            labels.append("Zero")
+        print("LABELS: ", labels)
 
         await update_model_status(id, project, ModelStatus.fitting_model)
         evaluator = get_eval_by_name(trainReq.evaluation.name)(trainReq.windowing, trainReq.featureExtractor, trainReq.normalizer, trainReq.classifier, datasets_processed, labels, trainReq.evaluation)
@@ -53,8 +63,10 @@ async def init_train(trainReq : TrainRequest, id, project):
 
         timeSeries = [x.name for x in datasets[0].timeSeries]
         print(timeSeries)
-
-        await set_model_data(id, project, {"pipeline": pipeline.persist(), "evaluator": evaluator.persist(), "timeSeries": timeSeries})
+        pipeline_data = pipeline.persist()
+        pipeline_data["labels"] = labels
+        pipeline_data["timeSeries"] = timeSeries
+        await set_model_data(id, project, {"pipeline": PipelineModel.parse_obj(pipeline_data).dict(by_alias=True), "evaluator": evaluator.persist(), "timeSeries": timeSeries})
         await update_model_status(id, project, ModelStatus.done)
     except Exception as e:
         print(e)

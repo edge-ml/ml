@@ -1,6 +1,7 @@
 from app.ml.FeatureExtraction import BaseFeatureExtractor
 import numpy as np
 from app.Deploy.CPP.cPart import CPart
+from app.utils.StringFile import StringFile
 
 
 class SimpleFeatureExtractor(BaseFeatureExtractor):
@@ -31,7 +32,6 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
             for i in range(1, windows.shape[-1]):
                 stack.append(self._extract_features(w[:, i]))
             window_features.append(np.stack(stack))
-
         return np.array(window_features), labels
 
     def exportC(self):
@@ -53,6 +53,10 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
             }
         }
         '''
+        
+        with open("./app/ml/FeatureExtraction/feature_extractor.cpp", "r") as f:
+            feature_extractor_file = [StringFile(f.read(), f.name.split("/")[-1])]
 
-        return CPart(['#include "feature_extractor.cpp"'], ["Matrix features({{num_sensors}}, std::vector<float>({{num_features}}));"], code, {"num_features": len(self._FEATURES)})
+
+        return CPart(['#include "feature_extractor.cpp"'], ["Matrix features({{num_sensors}}, std::vector<float>({{num_features}}));"], code, {"num_features": len(self._FEATURES)}, feature_extractor_file)
 

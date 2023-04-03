@@ -5,12 +5,15 @@ from app.ml.Classifier import BaseClassififer
 from app.DataModels.PipeLine import PipelineModel
 from app.ml.BaseConfig import Platforms
 from app.Deploy.CPP.cPart import CPart
+from app.utils.zipfile import zipFiles
+from app.utils.StringFile import StringFile
 
 from app.ml.Windowing import get_windower_by_name
 from app.ml.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Classifier import get_classifier_by_name
 from jinja2 import Template, FileSystemLoader
+from io import BytesIO, StringIO
 
 class Pipeline():
 
@@ -38,7 +41,7 @@ class Pipeline():
         return Pipeline(windower, featureExtractor, normalizer, classifier)
     
 
-    def deploy(self, platform: Platforms):
+    def generateModelData(self, platform: Platforms):
         data = {}
         data["windower"] = self.windower.export(platform)
         data["featureExtractor"] = self.featureExtractor.export(platform)
@@ -46,21 +49,24 @@ class Pipeline():
         data["classifier"] = self.classifier.export(platform)
 
         if platform == Platforms.C:
-            return self.deployC(data)
+            return self.generateModelData_C(data)
 
-    def deployC(self, data):
+    def generateModelData_C(self, data):
         with open('app/Deploy/Sklearn/Templates/CPP_Base.jinja') as f:
             jinjaVars = {"includes": [], "globals": []}
 
             functions = {"join": lambda x, y : f"{y}".join(x)}
-
+            additional_files = []
 
             for (key, value) in data.items():
                 jinjaVars[key] = value.code
                 jinjaVars["includes"].extend(value.includes)
                 jinjaVars["globals"].extend(value.globals)
                 jinjaVars = {**jinjaVars, **value.jinjaVars}
+                additional_files.extend(value.addtional_files)
             template = Template(f.read())
         res = template.render(jinjaVars, **functions) # Add code snippests to the template
         res = Template(res).render(jinjaVars, **functions) # Populate the code snippets with the variables
-        return res
+        main_file = StringFile(res, "main.cpp")
+        zip = zipFiles([main_file] + additional_files)
+        return zip

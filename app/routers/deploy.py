@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Header
 from app.db.models import get_model
-from app.Deploy.Base import deployModel
+from app.Deploy.Base import downloadModel
 from app.ml.BaseConfig import Platforms
+from fastapi.responses import StreamingResponse
+from io import BytesIO
 
 router = APIRouter()
 
@@ -33,5 +35,9 @@ async def export(format: str):
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
     model = await get_model(model_id, project)
-    code = deployModel(model, format)
-    return code
+    code = downloadModel(model, format)
+    print(code)
+    fileName = f"{model.name}_{format.name}.zip"
+    return StreamingResponse(code, media_type='application/zip', headers={
+        f'Content-Disposition': 'attachment; filename="' + fileName + '"'
+    })

@@ -4,6 +4,10 @@ from app.utils.PyObjectId import PyObjectId
 from pydantic import Field
 from typing import Optional, List, Dict
 
+class SamplingRateSchema(BaseModel):
+    mean: float
+    var: float
+
 class TimeSeries(BaseModel):
     id: PyObjectId = Field(default_factory=ObjectId, alias="_id")
     start: int
@@ -11,6 +15,7 @@ class TimeSeries(BaseModel):
     unit: str = Field(default="")
     name: str
     data: Optional[List]
+    samplingRate: SamplingRateSchema
 
 class DatasetLabels(BaseModel):
     start: int

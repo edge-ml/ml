@@ -1,21 +1,15 @@
-import numpy as np
 
 
 from app.DataModels.model import Model
 from app.db.models import add_model, update_model_status, ModelStatus, set_model_data
 from app.db.labelings import get_labeling
 from app.db.datasets import get_dataset
+from app.DataProcessor.DataLoader.DataLoader import processDatasets
 
 
-from app.DataProcessor.DataPreProcessor import getDatasetWindows, calculateFeatures
-from app.DataProcessor.DataLoader.DataLoader import processDataset
-from app.ml.Evaluation import get_eval_by_name, BaseEvaluation
+from app.ml.Evaluation import get_eval_by_name
 from app.DataModels.trainRequest import TrainRequest
 
-from app.ml.Classifier import get_classifier_by_name
-from app.ml.Normalizer import get_normalizer_by_name
-from app.ml.Windowing import get_windower_by_name
-from app.ml.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Pipeline import Pipeline
 from app.DataModels.PipeLine import PipelineModel
 import traceback
@@ -48,7 +42,7 @@ async def init_train(trainReq : TrainRequest, id, project):
         print(labelMap)
         print("datasets: ", len(datasets))
 
-        datasets_processed = [processDataset(dataset, trainReq.labeling.id, labelMap, useZeroClass) for dataset in datasets]
+        datasets_processed, samplingRate = processDatasets(datasets, trainReq.labeling.id, labelMap, useZeroClass)
         labels = [x.name for x in labeling.labels]
         if useZeroClass:
             labels.append("Zero")
@@ -66,6 +60,7 @@ async def init_train(trainReq : TrainRequest, id, project):
         pipeline_data = pipeline.persist()
         pipeline_data["labels"] = labels
         pipeline_data["timeSeries"] = timeSeries
+        pipeline_data["samplingRate"] = samplingRate
         await set_model_data(id, project, {"pipeline": PipelineModel.parse_obj(pipeline_data).dict(by_alias=True), "evaluator": evaluator.persist(), "timeSeries": timeSeries})
         await update_model_status(id, project, ModelStatus.done)
     except Exception as e:

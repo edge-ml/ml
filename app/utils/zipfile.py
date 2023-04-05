@@ -15,3 +15,10 @@ def zipFiles(files):
     # Seek to the beginning of the BytesIO object
     zip_bytes.seek(0)
     return zip_bytes
+
+def add_to_zip_file(zip_bytes : BytesIO, content: str, fileName: str):
+    with zipfile.ZipFile(zip_bytes, mode="a", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        zip_file.writestr(fileName, content)
+
+    zip_bytes.seek(0)
+    return zip_bytes

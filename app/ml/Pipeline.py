@@ -12,6 +12,7 @@ from app.ml.Windowing import get_windower_by_name
 from app.ml.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Classifier import get_classifier_by_name
+from app.utils.parameter_builder import ParameterBuilder
 from jinja2 import Template, FileSystemLoader
 from io import BytesIO, StringIO
 
@@ -25,6 +26,14 @@ class Pipeline():
 
     def persist(self):
         return {"windower": self.windower.persist(), "featureExtractor": self.featureExtractor.persist(), "normalizer": self.normalizer.persist(), "classifier": self.classifier.persist()}
+    
+    @staticmethod
+    def get_parameters():
+        pb = ParameterBuilder()
+        pb.parameters = []
+        pb.add_number("Classification frequency", "Classification frequency", "Sets the frequncy in Hz to predict", 0.1, 10, 1, step_size=0.1, required=True, is_advanced=False)
+        print(pb.parameters)
+        return pb.parameters
 
     @staticmethod
     def load(pipeline : PipelineModel):
@@ -67,6 +76,6 @@ class Pipeline():
             template = Template(f.read())
         res = template.render(jinjaVars, **functions) # Add code snippests to the template
         res = Template(res).render(jinjaVars, **functions) # Populate the code snippets with the variables
-        main_file = StringFile(res, "main.cpp")
+        main_file = StringFile(res, "model.hpp")
         zip = zipFiles([main_file] + additional_files)
         return zip

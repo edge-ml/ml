@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Union, List
 
-Number = Union[int, float]
+Number = Union[float, int]
 
 class NumberParameter(BaseModel):
     name: str

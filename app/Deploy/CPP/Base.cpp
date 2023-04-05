@@ -1,5 +1,5 @@
 #include <vector>
-#include "feature_extractor.cpp"
+#include "feature_extractor.hpp"
 
 #define Matrix vector<vector<float> >
 

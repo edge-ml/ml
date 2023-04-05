@@ -54,9 +54,9 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         }
         '''
         
-        with open("./app/ml/FeatureExtraction/feature_extractor.cpp", "r") as f:
+        with open("./app/ml/FeatureExtraction/feature_extractor.hpp", "r") as f:
             feature_extractor_file = [StringFile(f.read(), f.name.split("/")[-1])]
 
 
-        return CPart(['#include "feature_extractor.cpp"'], ["Matrix features({{num_sensors}}, std::vector<float>({{num_features}}));"], code, {"num_features": len(self._FEATURES)}, feature_extractor_file)
+        return CPart(['#include "feature_extractor.hpp"'], ["Matrix features({{num_sensors}}, std::vector<float>({{num_features}}));"], code, {"num_features": len(self._FEATURES)}, feature_extractor_file)
 

@@ -14,4 +14,5 @@ class PipelineModel(BaseModel):
     classifier: PipeLineStep
     labels : List[str]
     timeSeries: List[str]
+    samplingRate: float
 

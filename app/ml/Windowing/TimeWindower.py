@@ -86,7 +86,7 @@ class TimeWindower(BaseWindower):
         return self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y))
 
     # def exportC(self):
-    #     global_vars = {"window_size": self.get_param_value_by_name("window_size"), "sliding_step": self.get_param_value_by_name("sliding_step")}
+    #     global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
 
 
     #     code = '''

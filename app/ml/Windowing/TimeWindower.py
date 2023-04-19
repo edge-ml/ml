@@ -85,24 +85,31 @@ class TimeWindower(BaseWindower):
             print(train_Y)
         return self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y))
 
-    # def exportC(self):
-    #     global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
+    def exportC(self):
+        global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
 
 
-    #     code = '''
-    #     void add_datapoint({{timeSeriesInput}})
-    #         {
-    #             {% for ts in timeSeries %}
-    #                 raw_data[{{loop.index-1}}][ctr] = {{ts}};
-    #             {% endfor %}
-    #             ctr++;
-    #             if (ctr >= {{window_size}})
-    #             {
-    #                 ctr = 0;
-    #             }
-    #         }
-    #     '''
-    #     timeSeries = ["x", "y", "z"]
-    #     jinjaVars = {"timeSeries": timeSeries, "timeSeriesInput": ",".join([f"float {x}" for x in timeSeries]), "num_sensors": len(timeSeries), **global_vars}
+        code = '''
+        void add_datapoint({{timeSeriesInput}})
+            {
+                unsigned long now = millis();
+                if (last_window_start > now) {
+                    last_window_start = ULONG_MAX - last_window_start;
+                }
 
-    #     return CPart([], ["Matrix raw_data({{num_sensors}}, vector<float>({{window_size}}));", "int ctr = 0;"], code, jinjaVars)
+                if (now - last_window_start > {{window_size}})
+                {
+                    last_window_start = now;
+                    ctr = 0;
+                }
+
+                {% for ts in timeSeries %}
+                    raw_data[{{loop.index-1}}][ctr] = {{ts}};
+                {% endfor %}
+                ctr++;
+            }
+        '''
+        timeSeries = ["x", "y", "z"]
+        jinjaVars = {"timeSeries": timeSeries, "timeSeriesInput": ",".join([f"float {x}" for x in timeSeries]), "num_sensors": len(timeSeries), **global_vars}
+
+        return CPart(["#include \"limits.h\""], ["Matrix raw_data({{num_sensors}}, vector<float>();", "int ctr = 0;", "unsigned long last_window_start = 0;"], code, jinjaVars)

@@ -100,16 +100,17 @@ class TimeWindower(BaseWindower):
                 if (now - last_window_start > {{window_size}})
                 {
                     last_window_start = now;
-                    ctr = 0;
+                    {% for ts in timeSeries %}
+                        raw_data[{{loop.index-1}}].clear();
+                    {% endfor %}
                 }
 
                 {% for ts in timeSeries %}
-                    raw_data[{{loop.index-1}}][ctr] = {{ts}};
+                    raw_data[{{loop.index-1}}].push_back({{ts}});
                 {% endfor %}
-                ctr++;
             }
         '''
         timeSeries = ["x", "y", "z"]
         jinjaVars = {"timeSeries": timeSeries, "timeSeriesInput": ",".join([f"float {x}" for x in timeSeries]), "num_sensors": len(timeSeries), **global_vars}
 
-        return CPart(["#include \"limits.h\""], ["Matrix raw_data({{num_sensors}}, vector<float>();", "int ctr = 0;", "unsigned long last_window_start = 0;"], code, jinjaVars)
+        return CPart(["#include \"limits.h\""], ["Matrix raw_data({{num_sensors}}, vector<float>();", "unsigned long last_window_start = 0;"], code, jinjaVars)

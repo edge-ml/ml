@@ -17,8 +17,8 @@ def processDatasets(datasets: List[DatasetSchema], labeling_id, labelMap, useZer
     res = []
     for dataset in datasets:
         # Get labels in datasets
-        print("labels", "-"*20)
-        print([x.labelingId for x in dataset.labelings], labeling_id)
+        # print("labels", "-"*20)
+        # print([x.labelingId for x in dataset.labelings], labeling_id)
         labels = [x for x in dataset.labelings if x.labelingId == labeling_id][0].labels
         # Get the time-series
         dfs = []

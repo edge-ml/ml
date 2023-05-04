@@ -50,7 +50,7 @@ async def init_train(trainReq : TrainRequest, id, project):
         print("LABELS: ", labels)
 
         await update_model_status(id, project, ModelStatus.fitting_model)
-        pipeline, evaluator = fit_to_pipeline(trainReq, datasets, labels)
+        pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, labels)
 
         print("pipeline")
         print(pipeline.persist())

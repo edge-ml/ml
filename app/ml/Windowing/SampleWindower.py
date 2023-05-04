@@ -49,8 +49,8 @@ class SampleWindower(BaseWindower):
 
 
     def window(self, datasets):
-        window_size = self.get_param_value_by_name("window_size")
-        stride = self.get_param_value_by_name("sliding_step")
+        window_size = int(self.get_param_value_by_name("window_size"))
+        stride = int(self.get_param_value_by_name("sliding_step"))
         train_X = []
         train_Y = []
         for dataset in datasets:

@@ -14,6 +14,7 @@ from app.ml.Pipeline import Pipeline
 from app.DataModels.PipeLine import PipelineModel
 import traceback
 
+from app.ml.fit_to_pipeline import fit_to_pipeline
 
 
 # def trainClassifier(windows, labels, modelInfo):
@@ -49,8 +50,7 @@ async def init_train(trainReq : TrainRequest, id, project):
         print("LABELS: ", labels)
 
         await update_model_status(id, project, ModelStatus.fitting_model)
-        evaluator = get_eval_by_name(trainReq.evaluation.name)(trainReq.windowing, trainReq.featureExtractor, trainReq.normalizer, trainReq.classifier, datasets_processed, labels, trainReq.evaluation)
-        pipeline : Pipeline = evaluator.train_eval()
+        pipeline, evaluator = fit_to_pipeline(trainReq, datasets, labels)
 
         print("pipeline")
         print(pipeline.persist())

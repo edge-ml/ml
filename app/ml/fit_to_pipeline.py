@@ -19,7 +19,7 @@ def fit_to_pipeline(trainReq : TrainRequest, datasets, labels) -> Tuple[Pipeline
 
     normalizer = eval_normalizer
     classifier = eval_classifier
-    if not trainReq.useBestModelFromEvaluation: # https://stats.stackexchange.com/a/52277
+    if (not normalizer) or (not classifier) or (not trainReq.useBestModelFromEvaluation): # https://stats.stackexchange.com/a/52277
         normalizer = get_normalizer_by_name(trainReq.normalizer.name)(trainReq.normalizer.parameters)
         classifier = get_classifier_by_name(trainReq.classifier.name)(trainReq.classifier.parameters)
 

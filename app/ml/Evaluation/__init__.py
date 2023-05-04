@@ -1,9 +1,11 @@
 from app.ml.Evaluation.BaseEvaluation import BaseEvaluation
+from app.ml.Evaluation.KFold import KFold
 from app.ml.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
 from typing import List
 
 EVALAUTIONS : List[BaseEvaluation] = [
-    TestTrainSplitEvaluation
+    TestTrainSplitEvaluation,
+    KFold,
 ]
 
 def getConfig():

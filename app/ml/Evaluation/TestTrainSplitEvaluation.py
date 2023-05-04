@@ -7,13 +7,8 @@ from app.DataModels.PipeLine import PipeLineStep
 from typing import Tuple
 import numpy as np
 
-from app.ml.Windowing import get_windower_by_name
-from app.ml.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Classifier import get_classifier_by_name
-
-from app.ml.Pipeline import Pipeline
-
 
 from app.ml.Classifier import BaseClassififer
 

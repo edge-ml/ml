@@ -2,7 +2,7 @@ from app.ml.Classifier import BaseClassififer
 from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
 from app.ml.BaseConfig import BaseConfig
 from app.DataModels.PipeLine import PipeLineStep
-from typing import Tuple
+from typing import Optional, Tuple
 from app.ml.Pipeline import Pipeline
 import numpy as np
 
@@ -14,5 +14,5 @@ class BaseEvaluation(BaseConfig):
         self.classifier_config = classifier_config
 
     # Performs evaluation using the pipeline steps and then returns the metrics and the best normalizer + classifier created during evaluation.
-    def eval(self, X, Y, labels) -> Tuple[dict, Tuple[BaseNormalizer, BaseClassififer]]:
+    def eval(self, X, Y, labels) -> Tuple[dict, Tuple[Optional[BaseNormalizer], Optional[BaseClassififer]]]:
         raise NotImplementedError("Eval is not implemented")

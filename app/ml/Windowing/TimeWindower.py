@@ -24,7 +24,7 @@ class TimeWindower(BaseWindower):
     @staticmethod
     def get_parameters():
         pb = ParameterBuilder()
-        print(pb.parameters)
+        # print(pb.parameters)
         pb.add_number(
             "window_size", "Window Size", "The window size sind milliseconds.", 0, 60000, 100, 1, True, False, False
         )
@@ -41,7 +41,7 @@ class TimeWindower(BaseWindower):
             False
         )
 
-        print(pb.parameters)
+        # print(pb.parameters)
         return pb.parameters
 
 

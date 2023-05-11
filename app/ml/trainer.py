@@ -14,6 +14,7 @@ from app.ml.Pipeline import Pipeline
 from app.DataModels.PipeLine import PipelineModel
 import traceback
 
+from app.ml.fit_to_pipeline import fit_to_pipeline
 
 
 # def trainClassifier(windows, labels, modelInfo):
@@ -35,28 +36,28 @@ async def init_train(trainReq : TrainRequest, id, project):
         
         labelMap = {str(x.id): i for i, x in enumerate(labeling.labels)}
         maxIdx = max(labelMap.values())
-        print(labelMap.keys(), maxIdx)
+        # print(labelMap.keys(), maxIdx)
         if useZeroClass:
             labelMap["Zero"] = maxIdx+1
 
-        print(labelMap)
+        # print(labelMap)
         print("datasets: ", len(datasets))
 
         datasets_processed, samplingRate = processDatasets(datasets, trainReq.labeling.id, labelMap, useZeroClass)
         labels = [x.name for x in labeling.labels]
         if useZeroClass:
             labels.append("Zero")
-        print("LABELS: ", labels)
+        # print("LABELS: ", labels)
 
         await update_model_status(id, project, ModelStatus.fitting_model)
-        evaluator = get_eval_by_name(trainReq.evaluation.name)(trainReq.windowing, trainReq.featureExtractor, trainReq.normalizer, trainReq.classifier, datasets_processed, labels, trainReq.evaluation)
-        pipeline : Pipeline = evaluator.train_eval()
+        pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, labels)
 
-        print("pipeline")
-        print(pipeline.persist())
+        # print("pipeline")
+        # print(pipeline.persist())
+        pipeline.persist()
 
         timeSeries = [x.name for x in datasets[0].timeSeries]
-        print(timeSeries)
+        # print(timeSeries)
         pipeline_data = pipeline.persist()
         pipeline_data["labels"] = labels
         pipeline_data["timeSeries"] = timeSeries

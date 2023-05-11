@@ -39,6 +39,7 @@ class TrainLabelingModel(BaseModel):
 
 class TrainRequest(BaseModel):
     name: str
+    useBestModelFromEvaluation: bool = False
     datasets: List[TrainDatasetModel]
     labeling: TrainLabelingModel
     name: str

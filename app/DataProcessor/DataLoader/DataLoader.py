@@ -1,12 +1,14 @@
+from typing import List
 import numpy as np
 import pandas as pd
 import math
+from app.DataModels.dataset import DatasetSchema
 
 
 from app.DataProcessor.DataLoader.binaryStore import BinaryStore
 
 
-def processDatasets(datasets, labeling_id, labelMap, useZero):
+def processDatasets(datasets: List[DatasetSchema], labeling_id, labelMap, useZero):
     
 
     samplingRate = min([ts.samplingRate.mean for d in datasets for ts in d.timeSeries])
@@ -15,8 +17,8 @@ def processDatasets(datasets, labeling_id, labelMap, useZero):
     res = []
     for dataset in datasets:
         # Get labels in datasets
-        print("labels", "-"*20)
-        print([x.labelingId for x in dataset.labelings], labeling_id)
+        # print("labels", "-"*20)
+        # print([x.labelingId for x in dataset.labelings], labeling_id)
         labels = [x for x in dataset.labelings if x.labelingId == labeling_id][0].labels
         # Get the time-series
         dfs = []

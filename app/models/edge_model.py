@@ -5,7 +5,7 @@ from app.utils.parameter_builder import ParameterBuilder
 class EdgeModel:
     # static methods
     @staticmethod
-    def get_hyperparameters():
+    def get_parameters():
         pb = ParameterBuilder()
         # pb.add_number(
         #     "window_size", "Window Size", "Sets the window size.", 0, 60000, 100, 1, True, False, False

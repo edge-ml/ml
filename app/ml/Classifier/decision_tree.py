@@ -17,14 +17,13 @@ from app.ml.BaseConfig import Platforms
 from app.Deploy.Sklearn.exportC_decisionTree import convert
 
 class DecisionTree(BaseClassififer):
-
     def __init__(self, parameters):
         super().__init__(parameters)
         self.data_id = None
 
     # static methods
     @staticmethod
-    def get_hyperparameters():
+    def get_parameters():
         pb = ParameterBuilder()
         pb.parameters = []
         pb.add_selection(

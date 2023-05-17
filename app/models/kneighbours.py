@@ -7,9 +7,9 @@ import copy
 class KNeighbours(EdgeModel):
     # static methods
     @staticmethod
-    def get_hyperparameters():
+    def get_parameters():
         pb = copy.deepcopy(
-            ParameterBuilder(EdgeModel.get_hyperparameters())
+            ParameterBuilder(EdgeModel.get_parameters())
         )  # get base parameter
 
         pb.add_number(

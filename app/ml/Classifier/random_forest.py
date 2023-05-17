@@ -22,7 +22,7 @@ class RandomForest(BaseClassififer):
         self.data_id = None
 
     @staticmethod
-    def get_hyperparameters():
+    def get_parameters():
         pb = ParameterBuilder()
 
         pb.add_number(
@@ -271,7 +271,7 @@ class RandomForest(BaseClassififer):
     #     return {
     #     "name": RandomForest.get_name(),
     #     "description": RandomForest.get_description(),
-    #     "parameters": RandomForest.get_hyperparameters(),
+    #     "parameters": RandomForest.get_parameters(),
     #     "platforms": RandomForest.get_platforms()
     #     }
 

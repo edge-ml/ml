@@ -9,9 +9,9 @@ class MLP(EdgeModel):
 
     # static methods
     @staticmethod
-    def get_hyperparameters():
+    def get_parameters():
         pb = copy.deepcopy(
-            ParameterBuilder(EdgeModel.get_hyperparameters())
+            ParameterBuilder(EdgeModel.get_parameters())
         )  # get base parameter
         pb.add_number("c_value", "C Value", "", 0.03125, 32768., 1.0, 0.00001, True, True)
         pb.add_selection("kernel", "Kernel", "", ["rbf", "poly", "sigmoid"], "rbf", False, True)

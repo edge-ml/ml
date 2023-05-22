@@ -15,14 +15,16 @@ from app.ml.Classifier import get_classifier_by_name
 from app.utils.parameter_builder import ParameterBuilder
 from jinja2 import Template, FileSystemLoader
 from io import BytesIO, StringIO
+from typing import List
 
 class Pipeline():
 
-    def __init__(self, windower: BaseWindower = None, featureExtractor: BaseFeatureExtractor = None, normalizer: BaseNormalizer = None, classifier: BaseClassififer = None):
+    def __init__(self, windower: BaseWindower = None, featureExtractor: BaseFeatureExtractor = None, normalizer: BaseNormalizer = None, classifier: BaseClassififer = None, pipelineData: PipelineModel = None):
         self.windower = windower
         self.featureExtractor = featureExtractor
         self.normalizer = normalizer
         self.classifier = classifier
+        self.piplineData = pipelineData
 
     def persist(self):
         return {"windower": self.windower.persist(), "featureExtractor": self.featureExtractor.persist(), "normalizer": self.normalizer.persist(), "classifier": self.classifier.persist()}
@@ -47,7 +49,7 @@ class Pipeline():
         featureExtractor = get_feature_extractor_by_name(pipeline.featureExtractor.name)()
         featureExtractor.restore(pipeline.featureExtractor)
 
-        return Pipeline(windower, featureExtractor, normalizer, classifier)
+        return Pipeline(windower, featureExtractor, normalizer, classifier, pipeline)
     
 
     def generateModelData(self, platform: Platforms):
@@ -61,10 +63,10 @@ class Pipeline():
             return self.generateModelData_C(data)
 
     def generateModelData_C(self, data):
-        with open('app/Deploy/Sklearn/Templates/CPP_Base.jinja') as f:
-            jinjaVars = {"includes": [], "globals": []}
+        with open('app/Deploy/Sklearn/Templates/CPP_Base.cpp') as f:
+            jinjaVars = {"includes": [], "globals": [], "labels": self.piplineData.labels, "samplingRate": self.piplineData.samplingRate}
 
-            functions = {"join": lambda x, y : f"{y}".join(x)}
+            functions = {"join": lambda x, y : f"{y}".join(x), "enumerate": enumerate}
             additional_files = []
 
             for (key, value) in data.items():

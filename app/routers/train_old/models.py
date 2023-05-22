@@ -37,5 +37,5 @@ from app.utils.jsonEncoder import JSONEncoder
 
 
 # @router.get("/{model_id}")
-# async def getModels(model_id, project: str = Header(), user_data=Depends(validate_user)):
+# async def getModels(model_id, project: str = Header(...), user_data=Depends(validate_user)):
     

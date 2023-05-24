@@ -30,7 +30,7 @@ class Device(BaseModel):
     name: str
     sensors: List[SensorModel]
 
-class DeployRquest(BaseModel):
+class DeployRequest(BaseModel):
     tsMap: List[tsMapComponent]
     parameters: List[Parameter]
     device: Device
@@ -75,17 +75,23 @@ async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
 async def deployConfig(model_id: str, project: str = Header(...)):
     return {"devices": [x.get_config() for x in  DEPLOY_DEVICES], "parameters": Pipeline.get_parameters()}
 
+from fastapi import HTTPException
+
 @router.post("/{model_id}")
-async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
-    device = get_device_by_name(body.device.name)()
-    main_file_content = device.deploy(body.tsMap, body.parameters)
+async def deploy(body: DeployRequest, model_id: str, project: str = Header(...)):
+    try:
+        device = get_device_by_name(body.device.name)()
+        main_file_content = device.deploy(body.tsMap, body.parameters)
 
-    model = await get_model(model_id, project)
-    code = downloadModel(model, Platforms.C)
+        model = await get_model(model_id, project)
+        code = downloadModel(model, Platforms.C)
 
-    zip_file = add_to_zip_file(code, main_file_content, "main.ino")
-    file_data = {'file': ('example.zip', zip_file)}
-    url = "http://localhost:3005/compile/nicla"
-    response = requests.post(url, files=file_data)
-    print(response.content)
-    return StreamingResponse(iter([response.content]), media_type="application/octet-stream")
+        zip_file = add_to_zip_file(code, main_file_content, "main.ino")
+        file_data = {'file': ('example.zip', zip_file)}
+        url = "http://localhost:3005/compile/nicla"
+        response = requests.post(url, files=file_data)
+        response.raise_for_status()  # Raise an exception for non-2xx status codes
+
+        return StreamingResponse(iter([response.content]), media_type="application/octet-stream")
+    except requests.exceptions.RequestException as err:
+        raise HTTPException(status_code=500, detail=str(err))

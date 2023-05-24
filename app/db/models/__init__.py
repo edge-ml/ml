@@ -23,8 +23,8 @@ async def get_project_models(project_id: str):
     objs = await _models().find({'projectId': ObjectId(project_id)}).to_list(length=10000)
     return objs
 
-async def delete_model(id: str) -> None:
-    await _models().delete_one({ '_id': ObjectId(id)})
+async def delete_model(id: str, project_id: ObjectId) -> None:
+    await _models().delete_one({ '_id': ObjectId(id), 'projectId': ObjectId(project_id)})
 
 
 async def update_model_status(id: str, project_id: str, status: ModelStatus):

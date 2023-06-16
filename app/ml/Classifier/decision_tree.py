@@ -3,7 +3,6 @@ from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
 from app.ml.Classifier import BaseClassififer
 from sklearn.tree import DecisionTreeClassifier
-from micromlgen import port
 import m2cgen as m2c
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np

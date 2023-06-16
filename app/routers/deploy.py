@@ -89,3 +89,17 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
     response = requests.post(url, files=file_data)
     print(response.content)
     return StreamingResponse(iter([response.content]), media_type="application/octet-stream")
+
+@router.post("/{model_id}/download")
+async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
+    device = get_device_by_name(body.device.name)()
+    main_file_content = device.deploy(body.tsMap, body.parameters)
+
+    model = await get_model(model_id, project)
+    code = downloadModel(model, Platforms.C)
+
+    zip_file = add_to_zip_file(code, main_file_content, "main.ino")
+
+    zip_file.seek(0)
+    return StreamingResponse(zip_file, media_type="application/zip", headers={'Content-Disposition': f'attachment; filename={model.name}.zip'})
+

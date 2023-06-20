@@ -4,20 +4,21 @@ from os.path import join
 import struct
 import numpy as np
 from scipy.signal import resample
-# import lttbc
+import lttbc
+import h5py
 import functools
+import tempfile
+from app.internal.config import TS_STORE_MECHANISM
+from app.dataLoader.FileSystemDataLoader import FileSystemDataLoader
+from app.dataLoader.S3DataLoader import S3DataLoader
 
+dataLoader = None
 
-DATA_PREFIX = "../TS_DATA"
-
-
-# @functools.lru_cache(maxsize=512)
-def _readSeries(path):
-    with open(path, "rb") as f:
-        len = struct.unpack("I", f.read(4))[0]
-        time_arr = np.asarray(struct.unpack("Q" * len, f.read(len * 8)), dtype=np.uint64)
-        data_arr = np.asarray(struct.unpack("f" * len, f.read(len * 4)), dtype=np.float32)
-        return time_arr, data_arr
+# Set the correct dataloader
+if TS_STORE_MECHANISM == "FS":
+    dataLoader = FileSystemDataLoader()
+if TS_STORE_MECHANISM == "S3":
+    dataLoader = S3DataLoader()
 
 
 class BinaryStore():
@@ -26,20 +27,22 @@ class BinaryStore():
         self._id = str(_id)
         self.time_arr = np.array([], dtype=np.uint64)
         self.data_arr = np.array([], dtype=np.float32)
-
-        if not os.path.exists(DATA_PREFIX):
-            os.makedirs(DATA_PREFIX)
-
-        self._path = join(DATA_PREFIX, self._id + ".bin")
     
     def loadSeries(self):
-        self.time_arr, self.data_arr = _readSeries(self._path)
+        self.time_arr, self.data_arr = dataLoader.load_series(self._id)
+
+    def getHdf5Stream(self):
+        self.loadSeries()
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            with h5py.File(tmp_file.name, "w") as hf:
+                hf.create_dataset("time", data=self.time_arr)
+                hf.create_dataset("data", data=self.data_arr)
+                print(self.data_arr)
+            return tmp_file.name
 
     def saveSeries(self):
-        with open(join(DATA_PREFIX, self._id + ".bin"), "wb") as f:
-            f.write(struct.pack("I", len(self.time_arr)))
-            f.write(struct.pack("Q" * len(self.time_arr), *self.time_arr))
-            f.write(struct.pack("f" * len(self.data_arr), *self.data_arr))
+        dataLoader.save_series(self._id, self.time_arr, self.data_arr)
+        
 
     def getPart(self, start_time, end_time, max_resolution=None):
         max_resolution = int(float(max_resolution))
@@ -90,13 +93,12 @@ class BinaryStore():
         self.data_arr = self.data_arr[inds]
         self.saveSeries()
         time_diff = np.diff(self.time_arr)
-        sampling_rate = np.nan_to_num(np.mean(time_diff))
-        sampling_rate_var = np.nan_to_num(np.var(time_diff))
-        print(sampling_rate, sampling_rate_var)
+        sampling_rate_mean = np.nan_to_num(np.mean(time_diff)) if len(time_diff) > 0 else -1
+        sampling_rate_var = np.nan_to_num(np.var(time_diff)) if len(time_diff) > 0 else -1
         if len(self.time_arr) == 0:
-            return None, None, -1, 0
-        return int(self.time_arr[0]), int(self.time_arr[-1]), sampling_rate, len(self.time_arr) # start, end
+            return None, None, {"mean": 0, "var": 0}, 0
+        return int(self.time_arr[0]), int(self.time_arr[-1]), {"mean": sampling_rate_mean, "var": sampling_rate_var}, len(self.time_arr) # start, end
 
 
     def delete(self):
-        os.remove(self._path)
+        dataLoader.delete(self._id)

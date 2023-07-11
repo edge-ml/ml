@@ -12,6 +12,7 @@ from app.DataModels.parameter import Parameter
 from app.Deploy.Devices import get_device_by_name
 from app.utils.zipfile import add_to_zip_file
 import requests
+from app.internal.config import FRIMWARE_COMPILE_URL
 
 class tsMapComponent(BaseModel):
     sensor_id: int
@@ -85,7 +86,7 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
 
     zip_file = add_to_zip_file(code, main_file_content, "main.ino")
     file_data = {'file': ('example.zip', zip_file)}
-    url = "http://localhost:3005/compile/nicla"
+    url = f"{FRIMWARE_COMPILE_URL}compile/nicla"
     response = requests.post(url, files=file_data)
     print(response.content)
     return StreamingResponse(iter([response.content]), media_type="application/octet-stream")

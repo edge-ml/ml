@@ -70,4 +70,4 @@ class Model(BaseModel):
     pipeline: Optional[PipelineModel]
     timeSeries: Optional[List[str]]
     status: ModelStatus = ModelStatus.waiting
-    error: Optional[str]
+    error: str = Field(default="")

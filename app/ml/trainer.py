@@ -1,7 +1,7 @@
 
 
 from app.DataModels.model import Model
-from app.db.models import add_model, update_model_status, ModelStatus, set_model_data
+from app.db.models import add_model, update_model_status, ModelStatus, set_model_data, set_train_error
 from app.db.labelings import get_labeling
 from app.db.datasets import get_dataset
 from app.DataProcessor.DataLoader.DataLoader import processDatasets
@@ -67,6 +67,7 @@ async def init_train(trainReq : TrainRequest, id, project):
     except Exception as e:
         print(e)
         print(traceback.format_exc())
+        await set_train_error(id, project, str(e))
 
 
 async def train(trainReq, project, background_tasks):

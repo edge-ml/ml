@@ -34,3 +34,6 @@ async def update_model_status(id: str, project_id: str, status: ModelStatus):
 
 async def set_model_data(id: str, project_id: str, data):
     await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": data})
+
+async def set_train_error(id: ObjectId, projectId: ObjectId, errorMsg: str) -> None:
+    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(projectId)}, {"$set": {"error": errorMsg}})

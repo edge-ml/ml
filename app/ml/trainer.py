@@ -38,6 +38,9 @@ async def init_train(trainReq : TrainRequest, id, project):
             trainReqDs = next(reqDs for reqDs in trainReq.datasets if reqDs.id == ds.id)
             ds.timeSeries = [ts for ts in ds.timeSeries if ts.id in trainReqDs.timeSeries]
 
+        if not all([len(x.timeSeries) == len(datasets[0].timeSeries) for x in datasets]):
+            raise Exception('mismatching timeseries count in datasets')
+
         # only use selected labels in the map/naming
         selectedLabels = [label for label in labeling.labels if label.id not in trainReq.labeling.disabledLabelIDs]
         

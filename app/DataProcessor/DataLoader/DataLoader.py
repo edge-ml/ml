@@ -49,11 +49,11 @@ def processDatasets(datasets: List[DatasetSchema], labeling_id, labelMap, useZer
         maxVal = max(labelMap.values())
 
         for i, t in enumerate(arr):
+            arr[i][-1] = maxVal if useZero else 9*10^10
             for l in labels:
                 if t[0] >= int(l.start) and t[0] <= int(l.end):
                     arr[i][-1] = labelMap[str(l.type)]
                     break
-                else:
-                    arr[i][-1] = maxVal if useZero else 9*10^10 
+                     
         res.append(arr)
     return res, samplingRate

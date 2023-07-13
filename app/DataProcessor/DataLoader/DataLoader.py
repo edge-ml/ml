@@ -8,8 +8,11 @@ from app.DataModels.dataset import DatasetSchema
 from app.DataProcessor.DataLoader.binaryStore import BinaryStore
 
 
-def processDatasets(datasets: List[DatasetSchema], labeling_id, labelMap, useZero):
+def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):
     
+    useZero = reqLabeling.useZeroClass
+    labeling_id = reqLabeling.id
+    disabledLabelTypeIDs = reqLabeling.disabledLabelIDs
 
     samplingRate = min([ts.samplingRate.mean for d in datasets for ts in d.timeSeries])
     
@@ -17,9 +20,10 @@ def processDatasets(datasets: List[DatasetSchema], labeling_id, labelMap, useZer
     res = []
     for dataset in datasets:
         # Get labels in datasets
-        # print("labels", "-"*20)
-        # print([x.labelingId for x in dataset.labelings], labeling_id)
-        labels = [x for x in dataset.labelings if x.labelingId == labeling_id][0].labels
+        ## get all labels in the labeling
+        labelsAll = [x for x in dataset.labelings if x.labelingId == labeling_id][0].labels
+        ## only keep labels of types that are not disabled
+        labels = [x for x in labelsAll if x.type not in disabledLabelTypeIDs] 
         # Get the time-series
         dfs = []
         

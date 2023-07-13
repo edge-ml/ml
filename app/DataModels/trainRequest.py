@@ -15,6 +15,7 @@ class TrainDatasetModel(BaseModel):
 class TrainLabelingModel(BaseModel):
     id: PyObjectId = Field(alias="_id")
     useZeroClass: bool
+    disabledLabelIDs: List[PyObjectId]
 
 class TrainRequest(BaseModel):
     name: str

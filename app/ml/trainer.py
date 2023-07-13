@@ -32,28 +32,29 @@ async def init_train(trainReq : TrainRequest, id, project):
         # Get the datasets and lableings used for training
         datasets = [await get_dataset(x.id, project) for x in trainReq.datasets]
         labeling = await get_labeling(trainReq.labeling.id, project)
-        useZeroClass = trainReq.labeling.useZeroClass
+
+        # only keep selected timeseries from the datasets
+        for ds in datasets:
+            trainReqDs = next(reqDs for reqDs in trainReq.datasets if reqDs.id == ds.id)
+            ds.timeSeries = [ts for ts in ds.timeSeries if ts.id in trainReqDs.timeSeries]
+
+        # only use selected labels in the map/naming
+        selectedLabels = [label for label in labeling.labels if label.id not in trainReq.labeling.disabledLabelIDs]
         
-        labelMap = {str(x.id): i for i, x in enumerate(labeling.labels)}
+        labelMap = {str(x.id): i for i, x in enumerate(selectedLabels)}
         maxIdx = max(labelMap.values())
-        # print(labelMap.keys(), maxIdx)
-        if useZeroClass:
+        if trainReq.labeling.useZeroClass:
             labelMap["Zero"] = maxIdx+1
 
-        # print(labelMap)
-        print("datasets: ", len(datasets))
-
-        datasets_processed, samplingRate = processDatasets(datasets, trainReq.labeling.id, labelMap, useZeroClass)
-        labels = [x.name for x in labeling.labels]
-        if useZeroClass:
+        labels = [x.name for x in selectedLabels]
+        if trainReq.labeling.useZeroClass:
             labels.append("Zero")
-        # print("LABELS: ", labels)
+
+        datasets_processed, samplingRate = processDatasets(datasets, trainReq.labeling, labelMap)
 
         await update_model_status(id, project, ModelStatus.fitting_model)
         pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, labels)
 
-        # print("pipeline")
-        # print(pipeline.persist())
         pipeline.persist()
 
         timeSeries = [x.name for x in datasets[0].timeSeries]

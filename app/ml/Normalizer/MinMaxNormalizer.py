@@ -40,8 +40,8 @@ class MinMaxNormalizer(BaseNormalizer):
         return {"min": json.dumps(self.min, cls=JSONEncoder), "max": json.dumps(self.max, cls=JSONEncoder)}
 
     def restore(self, dict):
-        self.min = json.loads(dict.state["min"])
-        self.max = json.loads(dict.state["max"])
+        self.min = np.array(json.loads(dict.state["min"]))
+        self.max = np.array(json.loads(dict.state["max"]))
         self.parameters = dict.parameters
     
     def export(self, platforms: Platforms):

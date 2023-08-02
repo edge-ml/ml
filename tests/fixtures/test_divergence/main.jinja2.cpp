@@ -4,13 +4,14 @@
 #include <vector>
 #include "model.hpp"
 
-const std::string csv_file_path = "./example_data.csv";
-const int data_points_to_read = 300; // Number of data points to read from the CSV file
+const std::string CSV_FILE_PATH = "{{ csv_file_path }}";
+const int DATAPOINTS_TO_READ = {{ datapoints_to_read }}; // Number of data points to read from the CSV file
+const int WINDOW_SIZE = {{ window_size }}; // Window size
 
 int main() {
-    std::ifstream file(csv_file_path);
+    std::ifstream file(CSV_FILE_PATH);
     if (!file) {
-        std::cerr << "Error opening file: " << csv_file_path << std::endl;
+        std::cerr << "Error opening file: " << CSV_FILE_PATH << std::endl;
         return 1;
     }
 
@@ -18,7 +19,7 @@ int main() {
     int data_count = 0;
 
     // Loop through the CSV file and read time-series sensor data
-    while (std::getline(file, line) && data_count < data_points_to_read) {
+    while (std::getline(file, line) && data_count < DATAPOINTS_TO_READ) {
         std::stringstream ss(line);
         std::string x_str, y_str, z_str;
 
@@ -34,16 +35,15 @@ int main() {
             // Add the data points to the model
             add_datapoint(x, y, z);
             data_count++;
+
+            if (data_count >= WINDOW_SIZE) {
+                int prediction = predict();
+                std::cout << prediction << std::endl;
+            }
         }
     }
 
     file.close();
-
-    // Perform predictions using the collected data points
-    for (int i = 0; i < data_count; i++) {
-        int prediction = predict();
-        std::cout << "Prediction " << i + 1 << ": " << class_to_label(prediction) << std::endl;
-    }
 
     return 0;
 }

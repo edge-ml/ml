@@ -8,6 +8,7 @@ from jinja2 import Template, Markup
 import subprocess
 import shutil
 import asyncio
+import joblib
 
 from app.Deploy.Base import downloadModel
 from app.db.db import setup_db_connection
@@ -71,10 +72,39 @@ def run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model):
         np.swapaxes(np.array(output_dict["windowed"]), 1, 2)
 
 
-class TestMLDivergenceCPPPython(unittest.IsolatedAsyncioTestCase):
+class TestMLDivergenceCPPPythonBase(object):
     """Test if whether python and cpp inference diverges.
     """
+    def setUp(self) -> None:
+        self.prediction_ppl, self.normalized_ppl, self.features_ppl, self.windowed_ppl = self.res_ppl
+        self.prediction_cpp, self.normalized_cpp, self.features_cpp, self.windowed_cpp = self.res_cpp
 
+    def test_prediction(self):
+        np.testing.assert_array_equal(self.prediction_ppl, self.prediction_cpp)
+
+    def test_normalizer(self):
+        """uses a much higher atol (1e-6) than the other tests, because of the different feature extraction methods used
+        """
+        np.testing.assert_allclose(self.normalized_ppl, self.normalized_cpp, rtol=1e-05, atol=1e-06)
+
+    def test_feature_extractor(self):
+        """uses a much higher atol (1e-3) than the other tests, because of the different feature extraction methods used
+        """
+        np.testing.assert_allclose(self.features_ppl, self.features_cpp, rtol=1e-05, atol=1e-03)
+
+    def test_windower(self):
+        # cpp uses a circular buffer, so the order of the windows is different
+        sorted_ppl = np.sort(self.windowed_ppl, axis=1)
+        sorted_cpp = np.sort(self.windowed_cpp, axis=1)
+        # use allclose instead of array_equal because of floating point errors
+        np.testing.assert_allclose(sorted_ppl, sorted_cpp, rtol=1e-05, atol=1e-08)
+
+@unittest.skip("Use this test to check custom models.")
+class TestMLDivergenceCPPPythonCustom(TestMLDivergenceCPPPythonBase, unittest.IsolatedAsyncioTestCase):
+    """Test if cpp and python inference diverges.
+        You'll need to have the model 'test_devicemotion_model' in your database for this to work.
+        The training data for the model can be found under tests/fixtures/test_divergence/
+    """
     @classmethod
     async def asyncSetUpClass(cls) -> None:
         setup_db_connection()
@@ -88,39 +118,31 @@ class TestMLDivergenceCPPPython(unittest.IsolatedAsyncioTestCase):
         data_points_to_read = 375
 
         # predictions from the pipeline
-        TestMLDivergenceCPPPython.res_ppl = run_prediction_pipeline(example_data_path, data_points_to_read, model)
+        cls.res_ppl = run_prediction_pipeline(example_data_path, data_points_to_read, model)
         # predictions from the cpp model
-        TestMLDivergenceCPPPython.res_cpp = run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model)
+        cls.res_cpp = run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model)
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        asyncio.run(TestMLDivergenceCPPPythonCustom.asyncSetUpClass())
+
+class TestMLDivergenceCPPPython(TestMLDivergenceCPPPythonBase, unittest.TestCase):
+    """Test if cpp and python inference diverges with an example device motion dataset.
+    """
+    @classmethod
+    async def asyncSetUpClass(cls) -> None:
+        fixtures = os.path.join(fixture_dir, 'test_divergence')
+
+        model = joblib.load(os.path.abspath(os.path.join(fixtures, 'test_devicemotion_model.joblib')))
+
+        example_data_path = os.path.abspath(os.path.join(fixtures, 'test_data.csv'))
+        data_points_to_read = 375
+
+        # predictions from the pipeline
+        cls.res_ppl = run_prediction_pipeline(example_data_path, data_points_to_read, model)
+        # predictions from the cpp model
+        cls.res_cpp = run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model)
 
     @classmethod
     def setUpClass(cls) -> None:
         asyncio.run(TestMLDivergenceCPPPython.asyncSetUpClass())
-
-    def setUp(self) -> None:
-        self.prediction_ppl, self.normalized_ppl, self.features_ppl, self.windowed_ppl = TestMLDivergenceCPPPython.res_ppl
-        self.prediction_cpp, self.normalized_cpp, self.features_cpp, self.windowed_cpp = TestMLDivergenceCPPPython.res_cpp
-
-    async def test_prediction(self):
-        """Test if cpp and python inference diverges with an example device motion dataset.
-            You'll need to have the model 'test_devicemotion_model' in your database for this to work.
-            The training data for the model can be found under tests/fixtures/test_divergence/
-        """
-
-        np.testing.assert_array_equal(self.prediction_ppl, self.prediction_cpp)
-
-    async def test_normalizer(self):
-        """uses a much higher atol (1e-6) than the other tests, because of the different feature extraction methods used
-        """
-        np.testing.assert_allclose(self.normalized_ppl, self.normalized_cpp, rtol=1e-05, atol=1e-06)
-
-    async def test_feature_extractor(self):
-        """uses a much higher atol (1e-3) than the other tests, because of the different feature extraction methods used
-        """
-        np.testing.assert_allclose(self.features_ppl, self.features_cpp, rtol=1e-05, atol=1e-03)
-
-    async def test_windower(self):
-        # cpp uses a circular buffer, so the order of the windows is different
-        sorted_ppl = np.sort(self.windowed_ppl, axis=1)
-        sorted_cpp = np.sort(self.windowed_cpp, axis=1)
-        # use allclose instead of array_equal because of floating point errors
-        np.testing.assert_allclose(sorted_ppl, sorted_cpp, rtol=1e-05, atol=1e-08)

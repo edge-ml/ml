@@ -3,6 +3,9 @@
 #include <sstream>
 #include <vector>
 #include "model.hpp"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 const std::string CSV_FILE_PATH = "{{ csv_file_path }}";
 const int DATAPOINTS_TO_READ = {{ datapoints_to_read }}; // Number of data points to read from the CSV file
@@ -15,6 +18,7 @@ int main() {
         return 1;
     }
 
+    json cpp_json;
     std::string line;
     int data_count = 0;
 
@@ -37,13 +41,21 @@ int main() {
             data_count++;
 
             if (data_count >= WINDOW_SIZE) {
-                int prediction = predict();
-                std::cout << prediction << std::endl;
+                cpp_json["windowed"].push_back(raw_data);
+                extract_features(raw_data, features);
+                cpp_json["features"].push_back(features);
+                normalize(features);
+                cpp_json["normalized"].push_back(features);
+                int prediction = predict(features);
+
+                cpp_json["predictions"].push_back(prediction);
             }
         }
     }
 
     file.close();
+
+    std::cout << cpp_json.dump() << std::endl;
 
     return 0;
 }

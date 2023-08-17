@@ -9,7 +9,7 @@ float sum(vector<float>& x) {
     return accumulate(x.begin(), x.end(), 0.0);
 }
 
-float median(vector<float>& x) {
+float in_place_median(vector<float>& x) {
     size_t n = x.size();
     size_t mid = n / 2;
     nth_element(x.begin(), x.begin() + mid, x.end());
@@ -19,6 +19,11 @@ float median(vector<float>& x) {
         median = (median + x[mid - 1]) / 2.0;
     }
     return median;
+}
+
+float median(vector<float>& x) {
+    vector<float> copy_x = x;
+    return in_place_median(copy_x);
 }
 
 float mean(vector<float>& x) {

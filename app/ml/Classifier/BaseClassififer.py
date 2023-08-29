@@ -18,3 +18,4 @@ class BaseClassififer(BaseConfig):
 
     def predict(self, X_test):
         raise NotImplementedError
+    

@@ -1,18 +1,15 @@
 from app.codegen.export_javascript import export_javascript
 from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel
 from sklearn.ensemble import RandomForestClassifier
 from app.ml.Classifier.BaseClassififer import BaseClassififer
 from micromlgen import port
 import m2cgen as m2c
 from app.ml.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-from app.internal.config import CLASSIFIER_STORE
+from app.StorageProvider import StorageProvider
 import pickle
-import os
 
-import copy
 
 
 class RandomForest(BaseClassififer):
@@ -280,13 +277,11 @@ class RandomForest(BaseClassififer):
 
     def restore(self, dict):
         self.data_id = dict.state["data_id"]
-    
-    def persisit(self):
+        byte_clf = StorageProvider.load(self.data_id)
+        self.clf = pickle.loads(byte_clf)
+
+    def persist(self):
         self.data_id = ObjectId()
-        path = f'{CLASSIFIER_STORE}/{self.data_id}'
-        isExist = os.path.exists(path)
-        if not isExist:
-            os.makedirs(path)
-        with open(path + "/clf.pkl", 'wb') as f:
-            pickle.dump(self.clf, f)  
+        byte_clf = pickle.dumps(self.clf)
+        StorageProvider.save(self.data_id, byte_clf)
         return super().persist()

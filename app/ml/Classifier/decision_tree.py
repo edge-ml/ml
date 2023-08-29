@@ -14,6 +14,7 @@ import pickle
 import os
 from app.ml.BaseConfig import Platforms
 from app.Deploy.Sklearn.exportC_decisionTree import convert
+from app.StorageProvider import StorageProvider
 
 class DecisionTree(BaseClassififer):
     def __init__(self, parameters):
@@ -220,16 +221,11 @@ class DecisionTree(BaseClassififer):
 
     def restore(self, dict):
         self.data_id = dict.state["data_id"]
-        path = f'{CLASSIFIER_STORE}/{self.data_id}'
-        with open(path + "/clf.pkl", "rb") as f:
-            self.clf = pickle.load(f)
+        byte_clf = StorageProvider.load(self.data_id)
+        self.clf = pickle.loads(byte_clf)
 
     def persist(self):
         self.data_id = ObjectId()
-        path = f'{CLASSIFIER_STORE}/{self.data_id}'
-        isExist = os.path.exists(path)
-        if not isExist:
-            os.makedirs(path)
-        with open(path + "/clf.pkl", 'wb') as f:
-            pickle.dump(self.clf, f)  
+        byte_clf = pickle.dumps(self.clf)
+        StorageProvider.save(self.data_id, byte_clf)
         return super().persist()

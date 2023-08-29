@@ -1,9 +1,10 @@
 from app.ml.FeatureExtraction.BaseFeatureExtractor import BaseFeatureExtractor
 from app.ml.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
 from app.ml.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
+from app.ml.FeatureExtraction.FFTFeatureExtractor import FFTFeatureExtractor
 from typing import List
 
-FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor]
+FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor, FFTFeatureExtractor]
 
 def get_feature_extractor_by_name(name):
     for ext in FEATURE_EXTRACTORS:

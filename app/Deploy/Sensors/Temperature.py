@@ -1,9 +1,9 @@
 from app.Deploy.Sensors.SensorComponent import SensorComponent
 
-class Orientation():
+class Temperature():
 
     def get_name(self):
-        return "Orientation"
+        return "Temperature"
 
     def get_components(self):
         return [

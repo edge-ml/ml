@@ -29,7 +29,7 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         window_features = []
         for w in windows:
             stack = []
-            for i in range(1, windows.shape[-1]):
+            for i in range(1, w.shape[-1]):
                 stack.append(self._extract_features(w[:, i]))
             window_features.append(np.stack(stack))
         return np.array(window_features), labels

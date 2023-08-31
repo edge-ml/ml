@@ -2,6 +2,9 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <chrono>
+#include <thread>
+
 #include "model.hpp"
 #include "json.hpp"
 
@@ -39,8 +42,7 @@ int main() {
             // Add the data points to the model
             add_datapoint(x, y, z);
             data_count++;
-
-            if (data_count >= WINDOW_SIZE) {
+            if ({{ time_windowing }}) {
                 cpp_json["windowed"].push_back(raw_data);
                 extract_features(raw_data, features);
                 cpp_json["features"].push_back(features);
@@ -49,6 +51,19 @@ int main() {
                 int prediction = predict(features);
 
                 cpp_json["predictions"].push_back(prediction);
+
+                std::this_thread::sleep_for(std::chrono::milliseconds({{  time_window_sep_interval }}));
+            } else {
+                if (data_count >= WINDOW_SIZE) {
+                    cpp_json["windowed"].push_back(raw_data);
+                    extract_features(raw_data, features);
+                    cpp_json["features"].push_back(features);
+                    normalize(features);
+                    cpp_json["normalized"].push_back(features);
+                    int prediction = predict(features);
+
+                    cpp_json["predictions"].push_back(prediction);
+                }
             }
         }
     }

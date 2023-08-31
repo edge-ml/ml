@@ -71,14 +71,14 @@ class SampleWindower(BaseWindower):
                 label = np.argmax(counts)
                 Y.append(label)
 
-            train_X.extend(np.array(X))
-            train_Y.extend(np.array(Y))
-            # print("PRE - filter")
-            # print(train_Y)
-        return self._filterLabelings(np.array(train_X), np.array(train_Y))
+            train_X.extend(X)
+            train_Y.extend(Y)
+            print("PRE - filter")
+            print(train_Y)
+        return self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y))
 
     def exportC(self):
-        global_vars = {"window_size": self.get_param_value_by_name("window_size"), "sliding_step": self.get_param_value_by_name("sliding_step")}
+        global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
 
 
         code = '''

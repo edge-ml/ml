@@ -23,8 +23,5 @@ class NoFeatureExtractor(BaseFeatureExtractor):
     def get_description():
         return "Does not extract any feature and returns the time-series as is."
 
-    def persist(self):
-        return {}
-
     def extract_features(self, windows, labels):
         return windows, labels

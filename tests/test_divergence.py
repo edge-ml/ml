@@ -18,36 +18,70 @@ from app.ml.Pipeline import Pipeline
 
 fixture_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
 
-def run_prediction_pipeline(csv_file_path, data_points_to_read, model):
+def run_prediction_pipeline(csv_file_path, data_points_to_read, model, time_window_sep_interval = 30):
     pipeline = Pipeline.load(model.pipeline)
 
     data = np.genfromtxt(csv_file_path, delimiter=',', skip_header=0, max_rows=data_points_to_read)
     data = np.pad(data, ((0,0),(1,0)), mode='constant', constant_values=0) # add a zero column for the timestamp, as feature extraction expects it (and removes it)
 
-    assert pipeline.windower.get_name() == 'Sample based'
     window_size = int(pipeline.windower.get_param_value_by_name('window_size'))
-    windowed = np.lib.stride_tricks.sliding_window_view(data, window_shape=(window_size, data.shape[-1])).squeeze(1)
+    if pipeline.windower.get_name() == 'Sample based':
+        windowed = np.lib.stride_tricks.sliding_window_view(data, window_shape=(window_size, data.shape[-1])).squeeze(1)
+    elif pipeline.windower.get_name() == 'Time based':
+        lookbehind = window_size // time_window_sep_interval # n sample lookbehind
+        windowed = []
+        for i in range(0, data.shape[0]):
+            windowed.append(data[max(0, i-lookbehind) : i+1])
+    else:
+        raise Exception('Unknown windower')
 
     features, _ = pipeline.featureExtractor.extract_features(windowed, None)
     normalized = pipeline.normalizer.normalize(features)
     prediction = pipeline.classifier.predict(normalized)
-    return prediction, normalized, features, windowed[..., 1:]
 
-def run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model):
+    # varying window size and windowing type leads to different output shapes
+    first = len(windowed)
+    second = np.max([len(sample) for sample in windowed])
+    np_windowed = np.zeros((first, second, data.shape[-1] - 1))
+    for i in range(first):
+        window_len = len(windowed[i])
+        for j in range(window_len):
+            for k in range(data.shape[-1] - 1): # skip the timestamp
+                np_windowed[i, j, k] = windowed[i][j][k + 1]
+
+    return prediction, normalized, features, np_windowed
+
+def run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model, time_window_sep_interval = 30):
     main_template_path = os.path.abspath(os.path.join(fixtures, 'main.jinja2.cpp'))
     json_hpp_path = os.path.abspath(os.path.join(fixtures, 'json.hpp'))
 
     pipeline = Pipeline.load(model.pipeline)
-    assert pipeline.windower.get_name() == 'Sample based'
     window_size = int(pipeline.windower.get_param_value_by_name('window_size'))
 
     code = downloadModel(model, Platforms.C)
     with TemporaryDirectory() as tmpdir_real:
         tmpdir = tmpdir_real
+
+        # unzip model
         zip_ref = zipfile.ZipFile(code)
         zip_ref.extractall(tmpdir)
 
+        # json
         shutil.copy(json_hpp_path, tmpdir + '/json.hpp')
+
+        # arduino polyfills for cpp:
+        with open(tmpdir + '/model.hpp', 'r+') as file:
+            polyfill = """
+#include <chrono>
+unsigned long millis() {
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
+}
+"""
+            original_content = file.read()
+            file.seek(0, 0)
+            file.write(polyfill)
+            file.write(original_content)
 
         with open(main_template_path, 'r') as file:
             main_template_str = file.read()
@@ -55,7 +89,9 @@ def run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model):
         main_rendered = main_template.render({
             'csv_file_path': example_data_path,
             'datapoints_to_read': data_points_to_read,
-            'window_size': window_size, #this is actually not needed irl, but behavior <= window_size is undefined in the cpp code
+            'time_windowing': 1 if pipeline.windower.get_name() == 'Time based' else 0,
+            'time_window_sep_interval': time_window_sep_interval,
+            'window_size': window_size,
         })
         main_rendered_path = os.path.abspath(os.path.join(tmpdir, 'main.cpp'))
         with open(main_rendered_path, 'w') as file:
@@ -66,10 +102,21 @@ def run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model):
         process = subprocess.run([main_binary_path], stdout=subprocess.PIPE, text=True)
         output_dict = json.loads(process.stdout)
 
+    # varying window size and windowing type leads to different output shapes
+    first = len(output_dict["windowed"])
+    second = np.max([len(sample) for sample in output_dict["windowed"]])
+    third = np.max([[len(axis) for axis in sample] for sample in output_dict["windowed"]])
+    np_windowed = np.zeros((first, second, third))
+    for i in range(first):
+        for j in range(second):
+            window_len = len(output_dict["windowed"][i][j])
+            for k in range(window_len):
+                np_windowed[i, j, k] = output_dict["windowed"][i][j][k]
+
     return np.array(output_dict["predictions"]), \
         np.array(output_dict["normalized"]), \
         np.array(output_dict["features"]), \
-        np.swapaxes(np.array(output_dict["windowed"]), 1, 2)
+        np.swapaxes(np_windowed, 1, 2)
 
 
 class TestMLDivergenceCPPPythonBase(object):
@@ -112,6 +159,7 @@ class TestMLDivergenceCPPPythonCustom(TestMLDivergenceCPPPythonBase, unittest.Is
         model_id = found_model['_id']
         project = found_model['projectId']
         model = await get_model(model_id, project)
+        cls.model = model
 
         fixtures = os.path.join(fixture_dir, 'test_divergence')
         example_data_path = os.path.abspath(os.path.join(fixtures, 'test_data.csv'))
@@ -126,14 +174,14 @@ class TestMLDivergenceCPPPythonCustom(TestMLDivergenceCPPPythonBase, unittest.Is
     def setUpClass(cls) -> None:
         asyncio.run(TestMLDivergenceCPPPythonCustom.asyncSetUpClass())
 
-class TestMLDivergenceCPPPython(TestMLDivergenceCPPPythonBase, unittest.TestCase):
-    """Test if cpp and python inference diverges with an example device motion dataset.
+class TestMLDivergenceCPPPythonSample(TestMLDivergenceCPPPythonBase, unittest.TestCase):
+    """Decision Tree, sample based windowing, max normalization
     """
     @classmethod
     async def asyncSetUpClass(cls) -> None:
         fixtures = os.path.join(fixture_dir, 'test_divergence')
 
-        model = joblib.load(os.path.abspath(os.path.join(fixtures, 'test_devicemotion_model.joblib')))
+        model = joblib.load(os.path.abspath(os.path.join(fixtures, 'dt_sample_maxnorm.joblib')))
 
         example_data_path = os.path.abspath(os.path.join(fixtures, 'test_data.csv'))
         data_points_to_read = 375
@@ -145,4 +193,25 @@ class TestMLDivergenceCPPPython(TestMLDivergenceCPPPythonBase, unittest.TestCase
 
     @classmethod
     def setUpClass(cls) -> None:
-        asyncio.run(TestMLDivergenceCPPPython.asyncSetUpClass())
+        asyncio.run(TestMLDivergenceCPPPythonSample.asyncSetUpClass())
+
+class TestMLDivergenceCPPPythonTime(TestMLDivergenceCPPPythonBase, unittest.TestCase):
+    """Decision Tree, time based windowing, max normalization
+    """
+    @classmethod
+    async def asyncSetUpClass(cls) -> None:
+        fixtures = os.path.join(fixture_dir, 'test_divergence')
+
+        model = joblib.load(os.path.abspath(os.path.join(fixtures, 'dt_time_maxnorm.joblib')))
+
+        example_data_path = os.path.abspath(os.path.join(fixtures, 'test_data.csv'))
+        data_points_to_read = 375
+
+        # predictions from the pipeline
+        cls.res_ppl = run_prediction_pipeline(example_data_path, data_points_to_read, model)
+        # predictions from the cpp model
+        cls.res_cpp = run_prediction_cpp(fixtures, example_data_path, data_points_to_read, model)
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        asyncio.run(TestMLDivergenceCPPPythonTime.asyncSetUpClass())

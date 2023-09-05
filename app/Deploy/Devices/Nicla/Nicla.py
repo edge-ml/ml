@@ -16,6 +16,9 @@ class Nicla(BaseDevice):
     def get_name():
         return "Nicla Sense ME"
     
+    def get_ota_update(self):
+        return True
+    
     def getSensorParams(self,tsMap, parameters):
 
 
@@ -31,7 +34,7 @@ class Nicla(BaseDevice):
 
         return list(before_setup), list(setup), list(obtain_values)
     
-    def deploy(self, tsMap, parameters):
+    def deploy(self, tsMap, parameters, additionalSettings, model):
         before_setup, setup, obtain_values = self.getSensorParams(tsMap, parameters)
 
         data = {"before_setup": before_setup, "setup": setup, "obtain_values": obtain_values}

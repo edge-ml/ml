@@ -54,6 +54,7 @@ class SampleWindower(BaseWindower):
         train_X = []
         train_Y = []
         for dataset in datasets:
+            print("Dataset_shape: ", dataset.shape)
             fused = []
             idx = 0
             while idx < dataset.shape[0]:
@@ -75,7 +76,9 @@ class SampleWindower(BaseWindower):
             train_Y.extend(np.array(Y))
             # print("PRE - filter")
             # print(train_Y)
-        return self._filterLabelings(np.array(train_X), np.array(train_Y))
+        res = self._filterLabelings(np.array(train_X), np.array(train_Y))
+        print("num_winndows: ", len(res[0]))
+        return res
 
     def exportC(self):
         global_vars = {"window_size": self.get_param_value_by_name("window_size"), "sliding_step": self.get_param_value_by_name("sliding_step")}

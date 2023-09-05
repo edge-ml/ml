@@ -14,7 +14,7 @@ def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):
     labeling_id = reqLabeling.id
     disabledLabelTypeIDs = reqLabeling.disabledLabelIDs
 
-    samplingRate = min([ts.samplingRate.mean for d in datasets for ts in d.timeSeries])
+    samplingRate = min([1000 / ts.samplingRate.mean for d in datasets for ts in d.timeSeries])
     
     
     res = []

@@ -5,9 +5,9 @@ from app.ml.BaseConfig import Platforms
 from fastapi.responses import StreamingResponse
 from io import BytesIO
 from app.ml.Pipeline import Pipeline
-from app.Deploy import DEPLOY_DEVICES
+from app.Deploy.Devices import DEVICES
 from pydantic import BaseModel
-from typing import List
+from typing import List, Dict
 from app.DataModels.parameter import Parameter
 from app.Deploy.Devices import get_device_by_name
 from app.utils.zipfile import add_to_zip_file
@@ -35,6 +35,7 @@ class DeployRquest(BaseModel):
     tsMap: List[tsMapComponent]
     parameters: List[Parameter]
     device: Device
+    additionalSettings: Dict
 
 
 router = APIRouter()
@@ -74,11 +75,11 @@ async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
 
 @router.get("/{model_id}")
 async def deployConfig(model_id: str, project: str = Header(...)):
-    return {"devices": [x.get_config() for x in  DEPLOY_DEVICES], "parameters": Pipeline.get_parameters()}
+    return {"devices": [x.get_config() for x in  DEVICES], "parameters": Pipeline.get_parameters()}
 
 @router.post("/{model_id}")
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
-    device = get_device_by_name(body.device.name)()
+    device = get_device_by_name(body.device.name)
     main_file_content = device.deploy(body.tsMap, body.parameters)
 
     model = await get_model(model_id, project)
@@ -93,13 +94,12 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
 
 @router.post("/{model_id}/download")
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
-    device = get_device_by_name(body.device.name)()
-    main_file_content = device.deploy(body.tsMap, body.parameters)
-
     model = await get_model(model_id, project)
+    device = get_device_by_name(body.device.name)
+    main_file_content = device.deploy(body.tsMap, body.parameters, body.additionalSettings, model)
     code = downloadModel(model, Platforms.C)
 
-    zip_file = add_to_zip_file(code, main_file_content, "main.ino")
+    zip_file = add_to_zip_file(code, main_file_content, f"{model.name}.ino")
 
     zip_file.seek(0)
     return StreamingResponse(zip_file, media_type="application/zip", headers={'Content-Disposition': f'attachment; filename={model.name}.zip'})

@@ -33,15 +33,18 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         return pb.parameters
 
     def eval(self, X, Y, labels) -> Tuple[dict, Tuple[BaseNormalizer, BaseClassififer]]:
-        part = int(self.get_param_value_by_name("Train_test_split") / 100 * len(X))
-        p = np.random.permutation(len(X))
-        random_train_x = X[p]
-        random_train_y = Y[p]
+        # part = int(self.get_param_value_by_name("Train_test_split") / 100 * len(X))
+        # p = np.random.permutation(len(X))
+        # random_train_x = X[p]
+        # random_train_y = Y[p]
 
-        train_x = random_train_x[:part]
-        train_y = random_train_y[:part]
-        test_x = random_train_x[part:]
-        test_y = random_train_y[part:]
+        # train_x = random_train_x[:part]
+        # train_y = random_train_y[:part]
+        # test_x = random_train_x[part:]
+        # test_y = random_train_y[part:]
+        test_percentage = 1 - (self.get_param_value_by_name("Train_test_split") / 100)
+        train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=test_percentage, stratify=Y)
+
 
         normalizer = get_normalizer_by_name(self.normalizer_config.name)(self.normalizer_config.parameters)
         train_x = normalizer.fit_normalize(train_x)

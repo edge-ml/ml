@@ -5,7 +5,7 @@ from app.ml.Classifier.BaseClassififer import BaseClassififer
 from app.ml.Classifier.KMeansClassifier import KMeansClassifier
 from typing import List
 
-CLASSIFIERS : List[BaseClassififer] = [DecisionTree, KMeansClassifier, RandomForest]
+CLASSIFIERS : List[BaseClassififer] = [DecisionTree]
 
 def get_classifier_by_name(name):
     for cls in CLASSIFIERS:

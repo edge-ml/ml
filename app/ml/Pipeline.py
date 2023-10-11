@@ -53,17 +53,23 @@ class Pipeline():
     
 
     def generateModelData(self, platform: Platforms):
+        platform_for_parts = platform
+        if platform == Platforms.WASM:
+            platform_for_parts = Platforms.C
+
         data = {}
-        data["windower"] = self.windower.export(platform)
-        data["featureExtractor"] = self.featureExtractor.export(platform)
-        data["normalizer"] = self.normalizer.export(platform)
-        data["classifier"] = self.classifier.export(platform)
+        data["windower"] = self.windower.export(platform_for_parts)
+        data["featureExtractor"] = self.featureExtractor.export(platform_for_parts)
+        data["normalizer"] = self.normalizer.export(platform_for_parts)
+        data["classifier"] = self.classifier.export(platform_for_parts)
 
         if platform == Platforms.C:
             return self.generateModelData_C(data)
+        elif platform == Platforms.WASM:
+            return self.generateModelData_WASM(data)
 
-    def generateModelData_C(self, data):
-        with open('app/Deploy/Sklearn/Templates/CPP_Base.cpp') as f:
+    def generateModelData_CLike(self, data, base_template, out_name):
+        with open(base_template) as f:
             jinjaVars = {"includes": [], "globals": [], "labels": self.piplineData.labels, "samplingRate": self.piplineData.samplingRate}
 
             functions = {"join": lambda x, y : f"{y}".join(x), "enumerate": enumerate}
@@ -78,6 +84,13 @@ class Pipeline():
             template = Template(f.read())
         res = template.render(jinjaVars, **functions) # Add code snippests to the template
         res = Template(res).render(jinjaVars, **functions) # Populate the code snippets with the variables
-        main_file = StringFile(res, "model.hpp")
+        main_file = StringFile(res, out_name)
         zip = zipFiles([main_file] + additional_files)
         return zip
+
+    def generateModelData_C(self, data):
+        return self.generateModelData_CLike(data, 'app/Deploy/Sklearn/Templates/CPP_Base.cpp', 'model.hpp')
+    
+    def generateModelData_WASM(self, data):
+        return self.generateModelData_CLike(data, 'app/Deploy/Sklearn/Templates/WASM_Base.cpp', 'model.cpp')
+        

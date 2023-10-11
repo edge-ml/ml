@@ -71,3 +71,4 @@ class Model(BaseModel):
     timeSeries: Optional[List[str]]
     status: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
+    isNeuralNetwork: bool = Field(default=False)

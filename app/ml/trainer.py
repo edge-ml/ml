@@ -6,7 +6,7 @@ from app.db.labelings import get_labeling
 from app.db.datasets import get_dataset
 from app.DataProcessor.DataLoader.DataLoader import processDatasets
 
-
+from app.ml.Classifier import get_classifier_by_name
 from app.ml.Evaluation import get_eval_by_name
 from app.DataModels.trainRequest import TrainRequest
 
@@ -58,8 +58,6 @@ async def init_train(trainReq : TrainRequest, id, project):
         await update_model_status(id, project, ModelStatus.fitting_model)
         pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, labels)
 
-        pipeline.persist()
-
         timeSeries = [x.name for x in datasets[0].timeSeries]
         # print(timeSeries)
         pipeline_data = pipeline.persist()
@@ -76,7 +74,8 @@ async def init_train(trainReq : TrainRequest, id, project):
 
 async def train(trainReq, project, background_tasks):
     data = trainReq.dict(by_alias=True)
-    model = Model(name = trainReq.name, trainRequest=data, projectId=project)
+    classifier_type = get_classifier_by_name(trainReq.classifier.name)
+    model = Model(name = trainReq.name, trainRequest=data, projectId=project, isNeuralNetwork=classifier_type.is_neural_network())
     id = await add_model(model=model.dict(by_alias=True))
     background_tasks.add_task(init_train, trainReq, id, project)
     return id

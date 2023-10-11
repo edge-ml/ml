@@ -31,6 +31,14 @@ class NeuralNetwork(BaseClassififer):
     def get_platforms():
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
     
+    @staticmethod
+    def bytes_to_c_arr(data):
+        return [format(b, '#04x') for b in data]
+    
+    @staticmethod
+    def is_neural_network():
+        return True
+    
     def fit(self, X_train, y_train):
         raise NotImplementedError()
 
@@ -42,7 +50,7 @@ class NeuralNetwork(BaseClassififer):
 
     def restore(self, dict):
         self.data_id = dict.state["data_id"]
-        path = f'{CLASSIFIER_STORE}/{self.data_id}'
+        path = f'{CLASSIFIER_STORE}/{self.data_id}/tf_model.tf'
         self.model = tf.saved_model.load(path)
 
     def persist(self):
@@ -55,8 +63,22 @@ class NeuralNetwork(BaseClassififer):
         tf.saved_model.save(self.model, model_path)
         return super().persist()
     
-    def exportLite(self):
-        path = f'../../{CLASSIFIER_STORE}/{self.data_id}'
+    def exportC(self):
+        path = f'{CLASSIFIER_STORE}/{self.data_id}/tf_model.tf'
         converter = tf.lite.TFLiteConverter.from_saved_model(path)
         tflite_model = converter.convert()
-        return tflite_model
+        
+        c_array = self.bytes_to_c_arr(tflite_model)
+        array_content = "{}".format(", ".join(c_array))
+        converted_model_str = "const unsigned char converted_model_tflite[] = {\n\t"
+        # pretty printing the bytes
+        chunk_size = 6 * 12
+        for i in range(0, len(array_content), chunk_size):
+            converted_model_str += array_content[i:i + chunk_size]
+            if i + chunk_size < len(array_content):
+                converted_model_str += "\n\t"
+
+        converted_model_str += "};\n"
+        converted_model_str += f"const unsigned int converted_model_tflite_len = {len(c_array)};"
+       
+        return converted_model_str

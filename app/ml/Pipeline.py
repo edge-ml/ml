@@ -58,8 +58,9 @@ class Pipeline():
         data["featureExtractor"] = self.featureExtractor.export(platform)
         data["normalizer"] = self.normalizer.export(platform)
         data["classifier"] = self.classifier.export(platform)
-
         if platform == Platforms.C:
+            if self.classifier.is_neural_network():
+                return self.generateModelData_NN(data)
             return self.generateModelData_C(data)
 
     def generateModelData_C(self, data):
@@ -80,4 +81,9 @@ class Pipeline():
         res = Template(res).render(jinjaVars, **functions) # Populate the code snippets with the variables
         main_file = StringFile(res, "model.hpp")
         zip = zipFiles([main_file] + additional_files)
+        return zip
+    
+    def generateModelData_NN(self, data):
+        main_file = StringFile(data["classifier"], "model_data.cc")
+        zip = zipFiles([main_file])
         return zip

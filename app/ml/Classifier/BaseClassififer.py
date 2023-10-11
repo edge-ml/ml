@@ -12,6 +12,9 @@ class BaseClassififer(BaseConfig):
         self.is_fit = False
         self.parameters = parameters
 
+    @staticmethod
+    def is_neural_network():
+        return False
 
     def fit(self, X_train, y_train):
         raise NotImplementedError

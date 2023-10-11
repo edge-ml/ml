@@ -16,7 +16,7 @@ class Nicla(BaseDevice):
     def get_name():
         return "Nicla Sense ME"
     
-    def getSensorParams(self,tsMap, parameters):
+    def getSensorParams(self, tsMap, parameters):
 
 
         before_setup = set()
@@ -31,14 +31,16 @@ class Nicla(BaseDevice):
 
         return list(before_setup), list(setup), list(obtain_values)
     
-    def deploy(self, tsMap, parameters):
+    def deploy(self, tsMap, parameters, is_neural_network):
         before_setup, setup, obtain_values = self.getSensorParams(tsMap, parameters)
 
         data = {"before_setup": before_setup, "setup": setup, "obtain_values": obtain_values}
         data["add_datapoint_vars"] = ",".join([x.split(" = ")[0].split(" ")[1] for x in obtain_values])
         data["sampling_rate"] = parameters[0].value
 
-        with open("app/Deploy/Devices/Nicla/Base.cpp", "r") as f:
+        base_path = f"app/Deploy/Devices/Nicla/Base{'NN' if is_neural_network else ''}.cpp"
+        
+        with open(base_path, "r") as f:
             base = f.read()
             print(base)
 

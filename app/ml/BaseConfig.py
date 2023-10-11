@@ -5,7 +5,6 @@ from typing import List
 class Platforms(Enum):
     C = "C"
 
-
 class BaseConfig():
 
     def __init__(self, parameters : List[Parameter] = []):
@@ -41,7 +40,7 @@ class BaseConfig():
         if platform == Platforms.C:
             return self.exportC()
 
-    def exportC():
+    def exportC(self):
         raise NotImplementedError()
 
     @classmethod

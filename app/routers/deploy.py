@@ -94,10 +94,9 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
 @router.post("/{model_id}/download")
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
     device = get_device_by_name(body.device.name)()
-    main_file_content = device.deploy(body.tsMap, body.parameters)
-
     model = await get_model(model_id, project)
     code = downloadModel(model, Platforms.C)
+    main_file_content = device.deploy(body.tsMap, body.parameters, model.isNeuralNetwork)
 
     zip_file = add_to_zip_file(code, main_file_content, "main.ino")
 

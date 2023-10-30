@@ -1,6 +1,6 @@
-from app.ml.Evaluation.BaseEvaluation import BaseEvaluation
-from app.ml.Evaluation.KFold import KFold
-from app.ml.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
+from app.ml.Pipelines.Categories.Evaluation.BaseEvaluation import BaseEvaluation
+from app.ml.Pipelines.Categories.Evaluation.KFold import KFold
+from app.ml.Pipelines.Categories.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
 from typing import List
 
 EVALAUTIONS : List[BaseEvaluation] = [

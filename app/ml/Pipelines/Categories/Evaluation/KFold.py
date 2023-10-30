@@ -1,13 +1,13 @@
-from app.ml.Evaluation.BaseEvaluation import BaseEvaluation
+from app.ml.Pipelines.Categories.Evaluation.BaseEvaluation import BaseEvaluation
 from app.utils.parameter_builder import ParameterBuilder
 from sklearn.model_selection import train_test_split
-from app.ml.Evaluation.utils import calculateMetrics
+from app.ml.Pipelines.Categories.Evaluation.utils import calculateMetrics
 from app.DataModels.PipeLine import PipeLineStep
 from typing import Optional, Tuple
 import numpy as np
 
-from app.ml.Normalizer import get_normalizer_by_name
-from app.ml.Classifier import get_classifier_by_name
+from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
+from app.ml.Pipelines.Categories.Classifier import get_classifier_by_name
 
 
 class KFold(BaseEvaluation):

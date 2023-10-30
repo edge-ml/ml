@@ -1,12 +1,9 @@
-from app.DataModels.parameter import Parameter
-from enum import Enum
 from typing import List
+from app.DataModels.parameter import Parameter
 
-class Platforms(Enum):
-    C = "C"
+from app.utils.enums import Platforms
 
-
-class BaseConfig():
+class AbstractPipelineStep():
 
     def __init__(self, parameters : List[Parameter] = []):
         self.parameters = parameters
@@ -18,12 +15,7 @@ class BaseConfig():
     @staticmethod
     def get_desciption():
         raise NotImplementedError()
-
-    @staticmethod
-    def get_platforms():
-        return []
-
-    # Hyperparameters that can be set for the config
+    
     @staticmethod
     def get_parameters():
         return []
@@ -40,10 +32,12 @@ class BaseConfig():
     def export(self, platform: Platforms):
         if platform == Platforms.C:
             return self.exportC()
+        else:
+            raise NotImplementedError()
 
     def exportC():
         raise NotImplementedError()
-
+    
     @classmethod
     def get_train_config(cls):
         return {
@@ -59,4 +53,3 @@ class BaseConfig():
             if param.parameter_name == name:
                 return param.value
         raise KeyError(f"Parameter with name {name} not found")
-        

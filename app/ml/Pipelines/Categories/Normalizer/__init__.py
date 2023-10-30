@@ -1,6 +1,6 @@
-from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
-from app.ml.Normalizer.MinMaxNormalizer import MinMaxNormalizer
-from app.ml.Normalizer.ZNormalizer import ZNormalizer
+from app.ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
+from app.ml.Pipelines.Categories.Normalizer.MinMaxNormalizer import MinMaxNormalizer
+from app.ml.Pipelines.Categories.Normalizer.ZNormalizer import ZNormalizer
 from typing import List
 
 NORMALIZERS : List[BaseNormalizer]  = [MinMaxNormalizer, ZNormalizer]

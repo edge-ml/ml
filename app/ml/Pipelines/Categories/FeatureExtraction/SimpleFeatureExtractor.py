@@ -1,4 +1,4 @@
-from app.ml.FeatureExtraction import BaseFeatureExtractor
+from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
 import numpy as np
 from app.Deploy.CPP.cPart import CPart
 from app.utils.StringFile import StringFile

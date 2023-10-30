@@ -1,4 +1,4 @@
-from app.ml.Normalizer.BaseNormalizer import BaseNormalizer
+from app.ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
 import numpy as np
 import json
 from app.utils.jsonEncoder import JSONEncoder

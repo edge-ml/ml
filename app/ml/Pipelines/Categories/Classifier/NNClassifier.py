@@ -1,9 +1,9 @@
 from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Classifier import BaseClassififer
+from app.ml.Pipelines.Categories.Classifier import BaseClassififer
 from sklearn.cluster import KMeans
 import numpy as np
-from app.ml.Classifier.utils import reshapeSklearn
+from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
 from app.internal.config import CLASSIFIER_STORE
 import pickle 

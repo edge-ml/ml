@@ -7,7 +7,7 @@ from app.db.datasets import get_dataset
 from app.DataProcessor.DataLoader.DataLoader import processDatasets
 
 
-from app.ml.Evaluation import get_eval_by_name
+from app.ml.Pipelines.Categories.Evaluation import get_eval_by_name
 from app.DataModels.trainRequest import TrainRequest
 
 from app.ml.Pipeline import Pipeline

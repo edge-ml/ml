@@ -1,35 +1,42 @@
 from app.codegen.export_javascript import export_javascript
 from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Classifier import BaseClassififer
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
+from micromlgen import port
 import m2cgen as m2c
-from sklearn.tree import DecisionTreeClassifier
-import numpy as np
-import copy
-from app.ml.Classifier.utils import reshapeSklearn
+from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-from app.internal.config import CLASSIFIER_STORE
-import pickle
-import os
-from app.ml.BaseConfig import Platforms
-from app.Deploy.Sklearn.exportC_decisionTree import convert
 from app.StorageProvider import StorageProvider
+import pickle
 
-class DecisionTree(BaseClassififer):
+
+
+class RandomForest(BaseClassififer):
+
     def __init__(self, parameters):
         super().__init__(parameters)
         self.data_id = None
 
-    # static methods
     @staticmethod
     def get_parameters():
         pb = ParameterBuilder()
-        pb.parameters = []
+
+        pb.add_number(
+            "n_estimators",
+            "N-Estimators",
+            "The number of trees in the forest",
+            1,
+            2000,
+            100,
+            1,
+            True,
+        )
+
         pb.add_selection(
             "criterion",
             "Criterion",
-            "The function to measure the quality of a split. Supported criteria are “gini” for the Gini impurity and “entropy” for the information gain.",
+            "The function to measure the quality of a split. Supported criteria are “gini” for the Gini impurity and “entropy” for the information gain. Note: this parameter is tree-specific.",
             ["gini", "entropy"],
             "gini",
             False,
@@ -46,16 +53,6 @@ class DecisionTree(BaseClassififer):
             1,
             False,
             False,
-        )
-
-        pb.add_selection(
-            "splitter",
-            "Splitter",
-            "The strategy used to choose the split at each node. Supported strategies are “best” to choose the best split and “random” to choose the best random split.",
-            ["best", "random"],
-            "best",
-            False,
-            True,
         )
 
         pb.add_number(
@@ -105,18 +102,6 @@ class DecisionTree(BaseClassififer):
         )
 
         pb.add_number(
-            "random_state",
-            "Random State",
-            "Controls the randomness of the estimator. The features are always randomly permuted at each split, even if splitter is set to \"best\". When max_features < n_features, the algorithm will select max_features at random at each split before finding the best split among them. But the best found split may vary across different runs, even if max_features=n_features. That is the case, if the improvement of the criterion is identical for several splits and one split has to be selected at random. To obtain a deterministic behaviour during fitting, random_state has to be fixed to an integer.",
-            0,
-            2 ** 32 - 1,
-            None,
-            1,
-            True,
-            False,
-        )
-
-        pb.add_number(
             "max_leaf_nodes",
             "Max Leaf Nodes",
             "Grow trees with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.",
@@ -140,12 +125,63 @@ class DecisionTree(BaseClassififer):
             False,
         )
 
-        # TODO missing dict / list of dicts parameter
+        pb.add_boolean(
+            "bootstrap",
+            "Bootstrap Sampling",
+            "Whether bootstrap samples are used when building trees. If False, the whole dataset is used to build each tree.",
+            True,
+            True,
+        )
+
+        pb.add_boolean(
+            "oob_score",
+            "OOB Score",
+            "Whether to use out-of-bag samples to estimate the generalization score. Only available if bootstrap is set to True",
+            False,
+            True,
+        )
+
+        # user should not be able to set this
+        # pb.add_number(
+        #     "n_jobs",
+        #     "N Jobs",
+        #     "The number of jobs to run in parallel. fit, predict, decision_path and apply are all parallelized over the trees. None means 1 unless in a joblib.parallel_backend context. -1 means using all processors.",
+        #     -1,
+        #     10000,
+        #     None,
+        #     1,
+        #     True,
+        #     False,
+        # )
+
+        pb.add_number(
+            "random_state",
+            "Random State",
+            "Controls both the randomness of the bootstrapping of the samples used when building trees (if bootstrap=True) and the sampling of the features to consider when looking for the best split at each node (if max_features < n_features).",
+            0,
+            2 ** 32 - 1,
+            None,
+            1,
+            True,
+            False,
+        )
+
+        # pb.add_number('verbose', 'Verbosity Level', 'Controls the verbosity when fitting and predicting.', 0, 1000000, 0, 1, True, False)
+
+        pb.add_boolean(
+            "warm_start",
+            "Warm Start",
+            "When set to True, reuse the solution of the previous call to fit and add more estimators to the ensemble, otherwise, just fit a whole new forest.",
+            False,
+            True,
+        )
+
+        # TODO not properly implemented
         pb.add_selection(
             "class_weight",
             "Class Weight",
-            "Weights associated with classes in the form {class_label: weight}. If None, all classes are supposed to have weight one. The “balanced” mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data as n_samples / (n_classes * np.bincount(y))",
-            ["balanced"],
+            "Weights associated with classes in the form {class_label: weight}. If not given, all classes are supposed to have weight one. For multi-output problems, a list of dicts can be provided in the same order as the columns of y.",
+            ["balanced", "balanced_subsample"],
             None,
             False,
             True,
@@ -163,45 +199,56 @@ class DecisionTree(BaseClassififer):
             False,
         )
 
-        return pb.parameters
+        # TODO not properly implemented, different max values by ints and floats
+        pb.add_number(
+            "max_samples",
+            "Max Samples",
+            "If bootstrap is True, the number of samples to draw from X to train each base estimator. If None (default), then draw X.shape[0] samples. If int, then draw max_samples samples. If float, then draw max_samples * X.shape[0] samples. Thus, max_samples should be in the interval (0.0, 1.0]",
+            0,
+            1000000,
+            None,
+            0.01,
+            True,
+            False,
+        )
 
+        print(pb.parameters)
+
+        return pb.parameters
 
     @staticmethod
     def get_name():
-        return "Decision Tree Classifier"
+        return "Random Forest Classifier"
 
     @staticmethod
     def get_description():
-        return "A simple decision tree classifier."
+        return "A simple random forest classifier."
 
     @staticmethod
     def get_platforms():
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
 
-    # def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
-    #     if platform == InferenceFormats.PYTHON:
-    #         return m2c.export_to_python(self.clf)
-    #     elif platform == InferenceFormats.C_EMBEDDED:
-    #     #     return port(self.clf)
-    #     # elif platform == InferenceFormats.C:
-    #         return m2c.export_to_c(self.clf)
-    #     elif platform == InferenceFormats.JAVASCRIPT:
-    #         return export_javascript(self)
-    #     elif platform == InferenceFormats.CPP:
-    #         return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.CPP)
-    #     elif platform == InferenceFormats.C:
-    #         return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.C)
-    #     else:
-    #         print(platform)
-    #         raise NotImplementedError
-
-    def exportC(self):
-        return convert(self.clf)
+    def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
+        if platform == InferenceFormats.PYTHON:
+            return m2c.export_to_python(self.clf)
+        elif platform == InferenceFormats.C_EMBEDDED:
+            return port(self.clf)
+        # elif platform == InferenceFormats.C:
+        #     return m2c.export_to_c(self.clf)
+        elif platform == InferenceFormats.JAVASCRIPT:
+            return export_javascript(self)
+        elif platform == InferenceFormats.CPP:
+            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.CPP)
+        elif platform == InferenceFormats.C:
+            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.C)
+        else:
+            print(platform)
+            raise NotImplementedError
 
     # class methods
-    def __init__(self, parameters=[]):
-        super().__init__(parameters)
-        self.clf = DecisionTreeClassifier() # TODO: Set the parameters for this classifier
+    def __init__(self, hyperparameters={}):
+        super().__init__(hyperparameters)
+        self.clf = RandomForestClassifier()
 
     def fit(self, X_train, y_train):
         X_train_reshaped = reshapeSklearn(X_train)
@@ -216,6 +263,15 @@ class DecisionTree(BaseClassififer):
             return
             # TODO: throw error
     
+    # @staticmethod
+    # def config():
+    #     return {
+    #     "name": RandomForest.get_name(),
+    #     "description": RandomForest.get_description(),
+    #     "parameters": RandomForest.get_parameters(),
+    #     "platforms": RandomForest.get_platforms()
+    #     }
+
     def get_state(self):
         return {"data_id": self.data_id}
 

@@ -1,7 +1,7 @@
-from app.ml.FeatureExtraction.BaseFeatureExtractor import BaseFeatureExtractor
-from app.ml.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
-from app.ml.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
-from app.ml.FeatureExtraction.FFTFeatureExtractor import FFTFeatureExtractor
+from app.ml.Pipelines.Categories.FeatureExtraction.BaseFeatureExtractor import BaseFeatureExtractor
+from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
+from app.ml.Pipelines.Categories.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
+from app.ml.Pipelines.Categories.FeatureExtraction.FFTFeatureExtractor import FFTFeatureExtractor
 from typing import List
 
 # FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor, FFTFeatureExtractor]

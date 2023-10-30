@@ -1,24 +1,24 @@
 from app.codegen.export_javascript import export_javascript
 from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Classifier import BaseClassififer
+from app.ml.Pipelines.Categories.Classifier import BaseClassififer
 from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
 from sklearn.cluster import KMeans, SpectralClustering
 import numpy as np
 import copy
-from app.ml.Classifier.utils import reshapeSklearn
+from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
 from app.internal.config import CLASSIFIER_STORE
-import pickle 
+import pickle
 import os
 from app.ml.BaseConfig import Platforms
 from app.Deploy.Sklearn.exportC_decisionTree import convert
-from app.StorageProvider import StorageProvider
 
-class KMeansClassifier(BaseClassififer):
+class SVMClassifier(BaseClassififer):
 
     def __init__(self, parameters):
         super().__init__(parameters)
@@ -34,11 +34,11 @@ class KMeansClassifier(BaseClassififer):
 
     @staticmethod
     def get_name():
-        return "K-Means Classifier"
+        return "SVM Classififer"
 
     @staticmethod
     def get_description():
-        return "K-Means Classifier for anomaly detection"
+        return "SVM"
 
     @staticmethod
     def get_platforms():
@@ -67,12 +67,11 @@ class KMeansClassifier(BaseClassififer):
     # class methods
     def __init__(self, parameters=[]):
         super().__init__(parameters)
-        self.clf = KMeans() # TODO: Set the parameters for this classifier
+        self.clf = SVC() # TODO: Set the parameters for this classifier
 
     def fit(self, X_train, y_train):
         X_train_reshaped = reshapeSklearn(X_train)
-        self.clf = KMeans(n_clusters=len(np.unique(y_train)))
-        self.clf.fit(X_train_reshaped)
+        self.clf.fit(X_train_reshaped, y_train)
 
     def predict(self, X_test):
         X_train_reshaped = reshapeSklearn(X_test)
@@ -88,11 +87,16 @@ class KMeansClassifier(BaseClassififer):
 
     def restore(self, dict):
         self.data_id = dict.state["data_id"]
-        byte_clf = StorageProvider.load(self.data_id)
-        self.clf = pickle.loads(byte_clf)
+        path = f'{CLASSIFIER_STORE}/{self.data_id}'
+        with open(path + "/clf.pkl", "rb") as f:
+            self.clf = pickle.load(f)
 
     def persist(self):
         self.data_id = ObjectId()
-        byte_clf = pickle.dumps(self.clf)
-        StorageProvider.save(self.data_id, byte_clf)
-        return {**super().persist()}
+        path = f'{CLASSIFIER_STORE}/{self.data_id}'
+        isExist = os.path.exists(path)
+        if not isExist:
+            os.makedirs(path)
+        with open(path + "/clf.pkl", 'wb') as f:
+            pickle.dump(self.clf, f)  
+        return super().persist()

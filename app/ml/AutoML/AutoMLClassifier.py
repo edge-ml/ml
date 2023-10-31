@@ -18,6 +18,7 @@ from app.StorageProvider import StorageProvider
 
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 
+
 class AutoMLClassifier(AbstractPipelineStep):
     def __init__(self, parameters):
         super().__init__(parameters)

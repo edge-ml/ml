@@ -2,6 +2,7 @@ from app.ml.Pipelines.Categories.FeatureExtraction.BaseFeatureExtractor import B
 from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
 from app.ml.Pipelines.Categories.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
 from app.ml.Pipelines.Categories.FeatureExtraction.FFTFeatureExtractor import FFTFeatureExtractor
+from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory
 from typing import List
 
 # FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor, FFTFeatureExtractor]
@@ -15,3 +16,5 @@ def get_feature_extractor_by_name(name):
 
 
 FEATURES_CONFIG = [x.get_train_config() for x in FEATURE_EXTRACTORS]
+
+FEATUREEXTRACTION_CATEGORY = PipelineCategory("Feature extraction", "The features to be extracted", FEATURES_CONFIG)

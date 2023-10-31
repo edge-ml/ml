@@ -1,6 +1,7 @@
 from app.ml.Pipelines.Categories.Evaluation.BaseEvaluation import BaseEvaluation
 from app.ml.Pipelines.Categories.Evaluation.KFold import KFold
 from app.ml.Pipelines.Categories.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
+from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory
 from typing import List
 
 EVALAUTIONS : List[BaseEvaluation] = [
@@ -18,3 +19,5 @@ def get_eval_by_name(name):
     raise KeyError(f"Evlaluation {name} not found")
     
 EVALUATION_CONFIG = [x.get_train_config() for x in EVALAUTIONS]
+
+EVALUATION_CATEGORY =  PipelineCategory("Evaluator", "Defines the evaluation strategy to be used.", EVALUATION_CONFIG)

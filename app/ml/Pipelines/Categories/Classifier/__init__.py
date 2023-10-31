@@ -18,5 +18,5 @@ def get_classifier_by_name(name):
 
 CLASSIFIER_CONFIG = [x.get_train_config() for x in CLASSIFIERS]
 
-classifierCategory = PipelineCategory("Classifier", "Classification for time-series data", [DecisionTree])
+CLASSIFIER_CATEGORY = PipelineCategory("Classifier", "Classification for time-series data", CLASSIFIER_CONFIG)
     

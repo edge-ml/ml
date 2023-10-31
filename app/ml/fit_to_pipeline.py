@@ -6,7 +6,7 @@ from app.ml.Pipelines.Categories.Evaluation import BaseEvaluation, get_eval_by_n
 from app.ml.Pipelines.Categories.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
 from app.ml.Pipeline import Pipeline
-from app.ml.Windowing import get_windower_by_name
+from app.ml.Pipelines.Categories.Windowing import get_windower_by_name
 
 def fit_to_pipeline(trainReq : TrainRequest, datasets, labels) -> Tuple[Pipeline, BaseEvaluation]:
     windower = get_windower_by_name(trainReq.windowing.name)(trainReq.windowing.parameters)

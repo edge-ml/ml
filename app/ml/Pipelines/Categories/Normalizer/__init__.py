@@ -1,6 +1,7 @@
 from app.ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
 from app.ml.Pipelines.Categories.Normalizer.MinMaxNormalizer import MinMaxNormalizer
 from app.ml.Pipelines.Categories.Normalizer.ZNormalizer import ZNormalizer
+from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory
 from typing import List
 
 NORMALIZERS : List[BaseNormalizer]  = [MinMaxNormalizer, ZNormalizer]
@@ -12,3 +13,5 @@ def get_normalizer_by_name(name) -> BaseNormalizer:
         
 
 NORMALIZER_CONFIG = [x.get_train_config() for x in NORMALIZERS]
+
+NORMALIZER_CATEGORY = PipelineCategory("Normalizer", "Defines how data is normalized", NORMALIZER_CONFIG)

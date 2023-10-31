@@ -6,8 +6,10 @@ from app.DataModels.trainRequest import TrainRequest
 from app.ml.Pipelines.Categories.Normalizer import NORMALIZER_CONFIG
 from app.ml.Pipelines.Categories.Classifier import CLASSIFIER_CONFIG
 from app.ml.Pipelines.Categories.Evaluation import EVALUATION_CONFIG
-from app.ml.Windowing import WIDNOWING_CONFIG
+from app.ml.Pipelines.Categories.Windowing import WIDNOWING_CONFIG
 from app.ml.Pipelines.Categories.FeatureExtraction import FEATURES_CONFIG
+from app.ml.Pipelines import PIPELINES_CONFIG
+
 import json
 
 
@@ -37,4 +39,4 @@ async def models_train(body: TrainRequest, background_tasks: BackgroundTasks, pr
 
 @router.get("/pipelines")
 async def get_pipelines():
-    return [ManualClassificationPipeline.get_train_config()]
+    return PIPELINES_CONFIG

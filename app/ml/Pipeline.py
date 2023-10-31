@@ -1,4 +1,4 @@
-from app.ml.Windowing import BaseWindower
+from app.ml.Pipelines.Categories.Windowing import BaseWindower
 from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
 from app.ml.Pipelines.Categories.Normalizer import BaseNormalizer
 from app.ml.Pipelines.Categories.Classifier import BaseClassififer
@@ -8,7 +8,7 @@ from app.Deploy.CPP.cPart import CPart
 from app.utils.zipfile import zipFiles
 from app.utils.StringFile import StringFile
 
-from app.ml.Windowing import get_windower_by_name
+from app.ml.Pipelines.Categories.Windowing import get_windower_by_name
 from app.ml.Pipelines.Categories.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
 from app.ml.Pipelines.Categories.Classifier import get_classifier_by_name

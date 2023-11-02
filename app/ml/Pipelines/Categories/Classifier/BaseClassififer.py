@@ -1,11 +1,8 @@
 
-
-from app.codegen.inference import InferenceFormats
-from app.internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
-from app.utils.parameter_builder import ParameterBuilder
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 from app.ml.BaseConfig import BaseConfig
 
-class BaseClassififer(BaseConfig):
+class BaseClassififer(AbstractPipelineStep):
 
     def __init__(self, parameters):
         super().__init__(parameters)

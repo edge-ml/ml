@@ -22,6 +22,11 @@ class SampleWindower(BaseWindower):
     def get_description():
         return "Sample based windowing using a sliding window approach"
 
+    def fit_exec(self, data):
+        return self.window(data)
+    
+    def exec(self, data):
+        return self.exec(data)
 
     @staticmethod
     def get_parameters():
@@ -48,11 +53,14 @@ class SampleWindower(BaseWindower):
         self.parameters = config.parameters
 
 
-    def window(self, datasets):
+    def window(self, data):
+        datasets = data["datasets"]
+        datasetMetadata = data["datasetMetadata"]
         window_size = int(self.get_param_value_by_name("window_size"))
         stride = int(self.get_param_value_by_name("sliding_step"))
         train_X = []
         train_Y = []
+        metadata = []
         for dataset in datasets:
             print("Dataset_shape: ", dataset.shape)
             fused = []
@@ -65,18 +73,22 @@ class SampleWindower(BaseWindower):
 
             X = []
             Y = []
+            Meta = []
 
             for w in fused:
                 X.append(w[:, :-1])
                 counts = np.bincount(w[:,-1].astype(int))
                 label = np.argmax(counts)
                 Y.append(label)
+                Meta.append(datasetMetadata)
 
             train_X.extend(X)
             train_Y.extend(Y)
+            metadata.extend(Meta)
+            
             print("PRE - filter")
             print(train_Y)
-        return self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y))
+        return self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y), metadata)
 
     def exportC(self):
         global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}

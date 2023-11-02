@@ -7,8 +7,13 @@ from app.ml.Pipelines.Categories.FeatureExtraction import get_feature_extractor_
 from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
 from app.ml.Pipeline import Pipeline
 from app.ml.Pipelines.Categories.Windowing import get_windower_by_name
+from app.DataModels.PipelineRequest import PipelineRequest
+from app.ml.Pipelines import getProcessor, getCategory
+from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategoryType
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 
-def fit_to_pipeline(trainReq : TrainRequest, datasets, labels) -> Tuple[Pipeline, BaseEvaluation]:
+def fit_to_pipeline2(trainReq : TrainRequest, datasets, labels) -> Tuple[Pipeline, BaseEvaluation]:
+
     windower = get_windower_by_name(trainReq.windowing.name)(trainReq.windowing.parameters)
     featureExtractor = get_feature_extractor_by_name(trainReq.featureExtractor.name)(trainReq.featureExtractor.parameters)
     evaluator = get_eval_by_name(trainReq.evaluation.name)(trainReq.normalizer, trainReq.classifier, trainReq.evaluation)
@@ -31,3 +36,24 @@ def fit_to_pipeline(trainReq : TrainRequest, datasets, labels) -> Tuple[Pipeline
         classifier.fit(rX, rY)
 
     return Pipeline(windower, featureExtractor, normalizer, classifier), evaluator
+
+
+def fit_to_pipeline(req: PipelineRequest, datasets, datasetMetaData, labels) -> Tuple[Pipeline, BaseEvaluation]:
+
+    data = {"datasets": datasets, "datasetMetadata": datasetMetaData}
+    pipelineSteps = []
+    for step in req.selectedPipeline.steps:
+        category = getCategory(step.name)
+        print(category.name, category.type)
+        stepProcessor = getProcessor(step.options.name)
+        print(stepProcessor)
+        pipelineSteps.append(stepProcessor)
+        if category.type == PipelineCategoryType.CORE or category.type == PipelineCategoryType.PRE:
+            processor : AbstractPipelineStep = stepProcessor(step.options.parameters)
+            data = processor.fit_exec(data)
+
+    pipeline = Pipeline(pipelineSteps)
+
+    # pipeline.exec(datasets)
+
+    assert(False)

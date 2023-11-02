@@ -34,8 +34,7 @@ class SelectedPipeline(BaseModel):
     steps: List[PipelineStep]
 
 
-class TrainRequest(BaseModel):
-    userBestModelFromEvaluation: bool = False
+class PipelineRequest(BaseModel):
     datasets: List[TrainDatasetModel]
     labeling: TrainLabelingModel
     selectedPipeline: SelectedPipeline

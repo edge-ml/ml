@@ -1,7 +1,7 @@
 from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
 from app.ml.Pipelines.Categories.Classifier.decision_tree import DecisionTree
 from app.ml.Pipelines.Categories.Classifier.random_forest import RandomForest
-from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
+
 from app.ml.Pipelines.Categories.Classifier.KMeansClassifier import KMeansClassifier
 
 from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory

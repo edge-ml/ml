@@ -2,7 +2,7 @@ from app.utils.parameter_builder import ParameterBuilder
 
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 
-class NameCategory(AbstractPipelineStep):
+class ModelMetadata(AbstractPipelineStep):
     def __init__(self, parameters):
         super().__init__(parameters)
         self.data_id = None

@@ -23,7 +23,6 @@ class BaseConfig():
     def get_platforms():
         return []
 
-    # Hyperparameters that can be set for the config
     @staticmethod
     def get_parameters():
         return []

@@ -1,6 +1,7 @@
-from app.ml.BaseConfig import BaseConfig
+from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 
-class BaseFeatureExtractor(BaseConfig):
+class BaseFeatureExtractor(AbstractPipelineStep):
 
     def __init__(self, parameters):
         super().__init__(parameters)

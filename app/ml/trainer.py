@@ -12,6 +12,7 @@ from app.DataModels.trainRequest import TrainRequest
 
 from app.ml.Pipeline import Pipeline
 from app.DataModels.PipeLine import PipelineModel
+from app.DataModels import PipelineRequest
 import traceback
 
 from app.ml.fit_to_pipeline import fit_to_pipeline
@@ -25,10 +26,9 @@ from app.ml.fit_to_pipeline import fit_to_pipeline
 #     return clf
 
 
-async def init_train(trainReq : TrainRequest, id, project):
+async def init_train(trainReq : PipelineRequest, id, project):
     try:
-        print("init training")
-        await update_model_status(id, project, ModelStatus.preprocessing)
+        await update_model_status(id, project, ModelStatus.training)
         # Get the datasets and lableings used for training
         datasets = [await get_dataset(x.id, project) for x in trainReq.datasets]
         labeling = await get_labeling(trainReq.labeling.id, project)
@@ -53,10 +53,10 @@ async def init_train(trainReq : TrainRequest, id, project):
         if trainReq.labeling.useZeroClass:
             labels.append("Zero")
 
-        datasets_processed, samplingRate = processDatasets(datasets, trainReq.labeling, labelMap)
+        datasets_processed, datasetMetaData, samplingRate = processDatasets(datasets, trainReq.labeling, labelMap)
 
-        await update_model_status(id, project, ModelStatus.fitting_model)
-        pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, labels)
+
+        pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, datasetMetaData, labels)
 
         pipeline.persist()
 
@@ -74,9 +74,13 @@ async def init_train(trainReq : TrainRequest, id, project):
         await set_train_error(id, project, str(e))
 
 
-async def train(trainReq, project, background_tasks):
-    data = trainReq.dict(by_alias=True)
-    model = Model(name = trainReq.name, trainRequest=data, projectId=project)
-    id = await add_model(model=model.dict(by_alias=True))
-    background_tasks.add_task(init_train, trainReq, id, project)
+async def train(req: PipelineRequest, project, background_tasks):
+    data = req.dict(by_alias=True)
+    modelName = req.selectedPipeline.steps[-1].options.parameters[0].value
+    print("model_name: ", modelName)
+
+    model = Model(name=modelName, pipeLineRequest=req, projectId=project)
+    id = await add_model(model)
+
+    background_tasks.add_task(init_train, req, id, project)
     return id

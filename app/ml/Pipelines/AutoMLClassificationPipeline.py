@@ -1,6 +1,8 @@
 from app.ml.Pipelines.Abstract.AbstractPipelineCreator import AbstractPipeLineCreator
 from app.ml.Pipelines.Categories.Windowing import WINDOWING_CATEGORY
-from app.ml.AutoML import AUTOMLCLASSIFIER_CATEGORY
+from app.ml.Pipelines.AutoML import AUTOMLCLASSIFIER_CATEGORY
+from app.ml.Pipelines.Categories.Evaluation import EVALUATION_CATEGORY
+from app.ml.Pipelines.Categories.Common import COMMON_CATEGORY
 
 class AutoMLClassificationPipeline(AbstractPipeLineCreator):
 
@@ -14,4 +16,4 @@ class AutoMLClassificationPipeline(AbstractPipeLineCreator):
     
     @staticmethod
     def get_categories():
-        return [WINDOWING_CATEGORY, AUTOMLCLASSIFIER_CATEGORY]
+        return [WINDOWING_CATEGORY, AUTOMLCLASSIFIER_CATEGORY, COMMON_CATEGORY, EVALUATION_CATEGORY]

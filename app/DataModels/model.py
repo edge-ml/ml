@@ -6,13 +6,14 @@ from enum import Enum
 from app.DataModels.trainRequest import TrainRequest
 from app.DataModels.parameter import Parameter
 from app.DataModels.PipeLine import PipelineModel
+from app.DataModels.PipelineRequest import PipelineRequest
 
 
 class ModelStatus(str, Enum):
     waiting = "waiting"
-    preprocessing = "preprocessing"
-    fitting_model = "fitting model"
+    training = "training"
     done = "done"
+    error = "error"
 
 
 class Hyperparameter(BaseModel):
@@ -49,6 +50,7 @@ class TrainRequest(BaseModel):
     normalizer: ConfigObj
     featureExtractor: ConfigObj
 
+
 class ModelStoreObj(BaseModel):
     name: str
     parameters: List[Parameter]
@@ -62,12 +64,23 @@ class ModelConfig(BaseModel):
     featureExtractor: ModelStoreObj
 
 
+# class Model(BaseModel):
+#     id : PyObjectId = Field(default_factory=ObjectId, alias="_id")
+#     projectId: PyObjectId = Field(default_factory=ObjectId)
+#     name: str
+#     trainRequest: TrainRequest
+#     pipeline: Optional[PipelineModel]
+#     timeSeries: Optional[List[str]]
+#     status: ModelStatus = ModelStatus.waiting
+#     error: str = Field(default="")
+
 class Model(BaseModel):
-    id : PyObjectId = Field(default_factory=ObjectId, alias="_id")
-    projectId: PyObjectId = Field(default_factory=ObjectId)
+    id: PyObjectId = Field(default_factory=ObjectId, alias="_id")
+    projectId: PyObjectId
     name: str
-    trainRequest: TrainRequest
-    pipeline: Optional[PipelineModel]
+    pipeLineRequest: PipelineRequest
     timeSeries: Optional[List[str]]
-    status: ModelStatus = ModelStatus.waiting
-    error: str = Field(default="")
+    trainStatus: ModelStatus = ModelStatus.waiting
+    errorText: str = Field(default="")
+
+

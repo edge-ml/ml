@@ -9,7 +9,7 @@ def _models() -> AsyncIOMotorCollection:
     return get_db()['models']
 
 async def add_model(model: Model) -> ObjectId:
-    res = await _models().insert_one(model)
+    res = await _models().insert_one(model.dict(by_alias=True))
     return res.inserted_id
 
 async def get_model(id: str, project_id: str) -> Model:

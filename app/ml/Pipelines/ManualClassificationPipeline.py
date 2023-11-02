@@ -5,7 +5,7 @@ from app.ml.Pipelines.Categories.Classifier import CLASSIFIER_CONFIG, CLASSIFIER
 from app.ml.Pipelines.Categories.Evaluation import EVALUATION_CONFIG, EVALUATION_CATEGORY
 from app.ml.Pipelines.Categories.Windowing import WIDNOWING_CONFIG, WINDOWING_CATEGORY
 from app.ml.Pipelines.Categories.FeatureExtraction import FEATURES_CONFIG, FEATUREEXTRACTION_CATEGORY
-from app.ml.Pipelines.Categories.Common import COMMON_NAME_CATEGORY
+from app.ml.Pipelines.Categories.Common import COMMON_CATEGORY
 
 class ManualClassificationPipeline(AbstractPipeLineCreator):
 
@@ -19,4 +19,4 @@ class ManualClassificationPipeline(AbstractPipeLineCreator):
     
     @staticmethod
     def get_categories():
-        return [WINDOWING_CATEGORY, FEATUREEXTRACTION_CATEGORY, NORMALIZER_CATEGORY, CLASSIFIER_CATEGORY, EVALUATION_CATEGORY, COMMON_NAME_CATEGORY]
+        return [WINDOWING_CATEGORY, FEATUREEXTRACTION_CATEGORY, NORMALIZER_CATEGORY, CLASSIFIER_CATEGORY, EVALUATION_CATEGORY, COMMON_CATEGORY]

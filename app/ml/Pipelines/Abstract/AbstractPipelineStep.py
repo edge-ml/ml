@@ -20,6 +20,16 @@ class AbstractPipelineStep():
     def get_parameters():
         return []
     
+    @staticmethod
+    def get_platforms():
+        return []
+    
+    def fit_exec(self, data):
+        raise NotImplementedError()
+    
+    def exec(self, data):
+        raise NotImplementedError()
+
     def persist(self):
         return {"name": self.get_name(), "parameters": self.parameters, "state": self.get_state()}
     

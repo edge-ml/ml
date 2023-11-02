@@ -13,7 +13,8 @@ from app.ml.Pipelines.Categories.Classifier import get_classifier_by_name
 class KFold(BaseEvaluation):
 
     def __init__(self, normalizer_config: PipeLineStep, classifier_config: PipeLineStep, evaluation_config: PipeLineStep):
-        super().__init__(normalizer_config, classifier_config, evaluation_config)
+        self.normalizer_config = normalizer_config
+        self.classifier_config = classifier_config
 
     @staticmethod
     def get_name():

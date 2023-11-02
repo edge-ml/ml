@@ -19,6 +19,9 @@ from app.StorageProvider import StorageProvider
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 
 
+# from micronas import search
+
+
 class AutoMLClassifier(AbstractPipelineStep):
     def __init__(self, parameters):
         super().__init__(parameters)
@@ -62,6 +65,14 @@ class AutoMLClassifier(AbstractPipelineStep):
     # class methods
     def __init__(self, parameters=[]):
         super().__init__(parameters)
+
+    def fit_exec(self, data):
+        print(data)
+        print("DATASHAPE: ", data[0].shape)
+
+    def exec(self, data):
+        pass
+
 
     def fit(self, X_train, y_train):
         X_train_reshaped = reshapeSklearn(X_train)

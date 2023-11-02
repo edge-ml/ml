@@ -11,11 +11,12 @@ from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
 from app.ml.Pipelines.Categories.Classifier import get_classifier_by_name
 
 from app.ml.Pipelines.Categories.Classifier import BaseClassififer
+from app.ml.Pipeline import Pipeline
 
 class TestTrainSplitEvaluation(BaseEvaluation):
 
-    def __init__(self, normalizer_config: PipeLineStep, classifier_config: PipeLineStep, evaluation_config: PipeLineStep):
-        super().__init__(normalizer_config, classifier_config, evaluation_config)
+    def __init__(self, pipeline: Pipeline, parameters):
+        super().__init__(pipeline, parameters)
 
     @staticmethod
     def get_name():
@@ -32,16 +33,7 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         pb.add_number("Train_test_split", "split", "Ratio between training and testing data", 0, 100, 80, 1, required=True)
         return pb.parameters
 
-    def eval(self, X, Y, labels) -> Tuple[dict, Tuple[BaseNormalizer, BaseClassififer]]:
-        # part = int(self.get_param_value_by_name("Train_test_split") / 100 * len(X))
-        # p = np.random.permutation(len(X))
-        # random_train_x = X[p]
-        # random_train_y = Y[p]
-
-        # train_x = random_train_x[:part]
-        # train_y = random_train_y[:part]
-        # test_x = random_train_x[part:]
-        # test_y = random_train_y[part:]
+    def eval(self, X, Y, labels, metaData) -> Pipeline:
         test_percentage = 1 - (self.get_param_value_by_name("Train_test_split") / 100)
         train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=test_percentage, stratify=Y)
 

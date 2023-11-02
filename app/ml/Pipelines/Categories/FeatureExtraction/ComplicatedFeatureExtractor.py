@@ -1,10 +1,10 @@
-from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 import numpy as np
 from app.Deploy.CPP.cPart import CPart
 from app.utils.StringFile import StringFile
 
 
-class ComplicatedFeatureExtractor(BaseFeatureExtractor):
+class ComplicatedFeatureExtractor(BaseException):
 
     def __init__(self, parameters=[]):
         super().__init__(parameters)

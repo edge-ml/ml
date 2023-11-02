@@ -1,4 +1,11 @@
+from enum import Enum
 
+
+class PipelineCategoryType(Enum):
+    CORE = 1
+    INFO = 2
+    eval = 3
+    PRE = 4
 
 class AbstractPipelineCategory():
     
@@ -15,7 +22,8 @@ class AbstractPipelineCategory():
         raise NotImplementedError()
     
 class PipelineCategory():
-    def __init__(self, name, description, options):
+    def __init__(self, name, description, options, type: PipelineCategoryType = PipelineCategoryType.CORE):
         self.name = name
         self.description = description
         self.options = options
+        self.type = type

@@ -4,7 +4,7 @@ from app.ml.Pipelines.Categories.Classifier.random_forest import RandomForest
 
 from app.ml.Pipelines.Categories.Classifier.KMeansClassifier import KMeansClassifier
 
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import PipelineCategory
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 
 from typing import List
 
@@ -16,7 +16,5 @@ def get_classifier_by_name(name):
             return cls
     raise Exception()
 
-CLASSIFIER_CONFIG = [x.get_train_config() for x in CLASSIFIERS]
-
-CLASSIFIER_CATEGORY = PipelineCategory("Classifier", "Classification for time-series data", CLASSIFIER_CONFIG)
+CLASSIFIER_CATEGORY = AbstractPipelineStep("Classifier", "Classification for time-series data", CLASSIFIERS)
     

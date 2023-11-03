@@ -7,12 +7,13 @@ from typing import Optional, Tuple
 from app.ml.Pipeline import Pipeline
 import numpy as np
 
+from app.ml.Pipelines.PipelineContainer import PipelineContainer
+
 class BaseEvaluation(AbstractPipelineOption):
 
-    def __init__(self, pipeline: Pipeline, parameters):
+    def __init__(self, parameters=[]):
         super().__init__(parameters)
-        self.pipeline = pipeline
 
     # Performs evaluation using the pipeline steps and then returns the metrics and the best normalizer + classifier created during evaluation.
-    def eval(self, X, Y, labels, metaData) -> Pipeline:
+    def eval(self, pipeline, datasets, labelNames) -> Pipeline:
         raise NotImplementedError("Eval is not implemented")

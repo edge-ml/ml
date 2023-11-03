@@ -1,22 +1,7 @@
-from app.ml.Pipelines.Categories.Windowing import BaseWindower
-from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
-from app.ml.Pipelines.Categories.Normalizer import BaseNormalizer
-from app.ml.Pipelines.Categories.Classifier import BaseClassififer
-from app.DataModels.PipeLine import PipelineModel
-from app.ml.BaseConfig import Platforms
-from app.Deploy.CPP.cPart import CPart
-from app.utils.zipfile import zipFiles
-from app.utils.StringFile import StringFile
 
-from app.ml.Pipelines.Categories.Windowing import get_windower_by_name
-from app.ml.Pipelines.Categories.FeatureExtraction import get_feature_extractor_by_name
-from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
-from app.ml.Pipelines.Categories.Classifier import get_classifier_by_name
-from app.utils.parameter_builder import ParameterBuilder
-from jinja2 import Template, FileSystemLoader
-from io import BytesIO, StringIO
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType
-from typing import List
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType, AbstractPipelineStep
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from typing import List, Union
 
 # class Pipeline():
 
@@ -86,13 +71,28 @@ from typing import List
 
 class Pipeline():
     
-    def __init__(self, steps):
-        self.steps = steps
+    def __init__(self, options, steps):
+        self.options : List[AbstractPipelineOption] = options
+        self.steps: List[AbstractPipelineStep] = steps
 
-    def exec(self, data, categories : List[StepType]):
-        for step in self.steps:
-            data = step.exec(data)
+    def exec(self, data, types : Union[StepType, List[StepType]]):
+        for step in self.options:
+            if step.type in types:
+                data = step.exec(data)
         return data
     
+    def fit_exec(self, data, types: Union[StepType, List[StepType]]):
+        for step in self.options:
+            if step.type in types:
+                print("Fit_exec: ", step.get_name())
+                data = step.fit_exec(data)
+        return data
+
     def clone(self):
-        return Pipeline([x.__class__() for x in self.steps])
+        return Pipeline([x.__class__(x.parameters) for x in self.options])
+    
+    def __str__(self) -> str:
+        return ", ".join([x.get_name() for x in self.options])
+    
+    def persist(self):
+        return {"options": [x.persist() for x in self.options], "steps": [x.get_train_config() for x in self.steps]}

@@ -1,4 +1,5 @@
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from app.ml.Pipelines.PipelineContainer import PipelineContainer
 import numpy as np
 
 class BaseWindower(AbstractPipelineOption):
@@ -6,7 +7,7 @@ class BaseWindower(AbstractPipelineOption):
     def __init__(self, parameters):
         super().__init__(parameters)
 
-    def window(self, datasets):
+    def window(self, datasets) -> PipelineContainer:
         raise NotImplementedError()
 
     def _filterLabelings(self, train_X, train_Y, metaData):

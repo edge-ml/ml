@@ -30,7 +30,7 @@ async def delete_model(id: ObjectId, projectId: ObjectId) -> None:
 
 async def update_model_status(id: str, project_id: str, status: ModelStatus):
     print(id, project_id, status.value)
-    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": {"status": status.value}})
+    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": {"trainStatus": status.value}})
 
 async def set_model_data(id: str, project_id: str, data):
     await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": data})

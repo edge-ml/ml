@@ -1,7 +1,7 @@
 from app.ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower 
 from app.ml.Pipelines.Categories.Windowing.SampleWindower import SampleWindower
 from app.ml.Pipelines.Categories.Windowing.TimeWindower import TimeWindower
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import PipelineCategory, StepType
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep, StepType
 from typing import List
 
 
@@ -14,6 +14,4 @@ def get_windower_by_name(name) -> BaseWindower:
             return cls
     raise Exception()
 
-WIDNOWING_CONFIG = [x.get_train_config() for x in WINDOWER]
-
-WINDOWING_CATEGORY = PipelineCategory("Windowing", "Defines how the training dataset is split into smaller segments", WIDNOWING_CONFIG, type=StepType.PRE)
+WINDOWING_CATEGORY = AbstractPipelineStep("Windowing", "Defines how the training dataset is split into smaller segments", WINDOWER, type=StepType.PRE)

@@ -1,6 +1,7 @@
 
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from app.ml.BaseConfig import BaseConfig
+from app.ml.Pipelines.PipelineContainer import PipelineContainer
 
 class BaseClassififer(AbstractPipelineOption):
 
@@ -16,3 +17,9 @@ class BaseClassififer(AbstractPipelineOption):
     def predict(self, X_test):
         raise NotImplementedError
     
+    def exec(self, data: PipelineContainer) -> PipelineContainer:
+        return PipelineContainer(self.predict(data.data), data.labels, data.meta)
+    
+    def fit_exec(self, data: PipelineContainer) -> PipelineContainer:
+        self.fit(data.data, data.labels)
+        return PipelineContainer(self.predict(data.data), data.labels, data.meta)

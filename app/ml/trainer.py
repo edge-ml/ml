@@ -13,9 +13,10 @@ from app.DataModels.trainRequest import TrainRequest
 from app.ml.Pipeline import Pipeline
 from app.DataModels.PipeLine import PipelineModel
 from app.DataModels import PipelineRequest
+from app.ml.Pipelines.PipelineContainer import PipelineContainer
 import traceback
 
-from app.ml.fit_to_pipeline import fit_to_pipeline
+from app.ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
 
 
 # def trainClassifier(windows, labels, modelInfo):
@@ -59,17 +60,24 @@ async def init_train(trainReq : PipelineRequest, id, project):
         datasets_processed, datasetMetaData, samplingRate = processDatasets(datasets, trainReq.labeling, labelMap)
 
 
-        pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, datasetMetaData, labels)
+        # pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, datasetMetaData, labels)
 
-        pipeline.persist()
+        pipeline : Pipeline = buildPipeline(trainReq)
+        evaluator = getEvaluator(trainReq)
+
+        data = PipelineContainer(datasets_processed, None, datasetMetaData)
+
+        performance = evaluator.eval(pipeline, data, labels)
 
         timeSeries = [x.name for x in datasets[0].timeSeries]
         # print(timeSeries)
-        pipeline_data = pipeline.persist()
-        pipeline_data["labels"] = labels
-        pipeline_data["timeSeries"] = timeSeries
-        pipeline_data["samplingRate"] = samplingRate
-        await set_model_data(id, project, {"pipeline": PipelineModel.parse_obj(pipeline_data).dict(by_alias=True), "evaluator": evaluator.persist(), "timeSeries": timeSeries})
+        ml_data = {}
+        ml_data["steps"] = pipeline.persist()
+        ml_data["labels"] = labels
+        ml_data["timeSeries"] = timeSeries
+        ml_data["samplingRate"] = samplingRate
+        ml_data["performance"] = performance
+        await set_model_data(id, project, ml_data)
         await update_model_status(id, project, ModelStatus.done)
     except Exception as e:
         print(e)

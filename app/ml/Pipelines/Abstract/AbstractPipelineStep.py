@@ -1,29 +1,16 @@
 from enum import Enum
-
-
-class StepType(Enum):
-    CORE = "CORE"
-    INFO = "INFO"
-    EVAL = "EVAL"
-    PRE = "PRE"
-
+from typing import List
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from app.ml.Pipelines.Abstract.StepType import StepType
+    
 class AbstractPipelineStep():
-    
-    @staticmethod
-    def get_steps():
-        return []
-    
-    @staticmethod
-    def get_name():
-        raise NotImplementedError()
-    
-    @staticmethod
-    def get_description():
-        raise NotImplementedError()
-    
-class PipelineCategory():
     def __init__(self, name, description, options, type: StepType = StepType.CORE):
         self.name = name
         self.description = description
         self.options = options
+        for option in self.options:
+            option.type = type
         self.type = type
+
+    def get_train_config(self):
+        return {"name": self.name, "description": self.description, "type": self.type, "options": [x.get_train_config() for x in self.options]}

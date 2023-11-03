@@ -1,10 +1,10 @@
 from app.ml.Pipelines.Abstract.AbstractPipelineCreator import AbstractPipeLineCreator
 
-from app.ml.Pipelines.Categories.Normalizer import NORMALIZER_CONFIG, NORMALIZER_CATEGORY
-from app.ml.Pipelines.Categories.Classifier import CLASSIFIER_CONFIG, CLASSIFIER_CATEGORY
-from app.ml.Pipelines.Categories.Evaluation import EVALUATION_CONFIG, EVALUATION_CATEGORY
-from app.ml.Pipelines.Categories.Windowing import WIDNOWING_CONFIG, WINDOWING_CATEGORY
-from app.ml.Pipelines.Categories.FeatureExtraction import FEATURES_CONFIG, FEATUREEXTRACTION_CATEGORY
+from app.ml.Pipelines.Categories.Normalizer import NORMALIZER_CATEGORY
+from app.ml.Pipelines.Categories.Classifier import CLASSIFIER_CATEGORY
+from app.ml.Pipelines.Categories.Evaluation import EVALUATION_CATEGORY
+from app.ml.Pipelines.Categories.Windowing import WINDOWING_CATEGORY
+from app.ml.Pipelines.Categories.FeatureExtraction import FEATUREEXTRACTION_CATEGORY
 from app.ml.Pipelines.Categories.Common import COMMON_CATEGORY
 
 class ManualClassificationPipeline(AbstractPipeLineCreator):

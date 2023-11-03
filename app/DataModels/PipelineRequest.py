@@ -2,6 +2,7 @@ from typing import Dict, List
 from pydantic import BaseModel, Field
 from app.utils.PyObjectId import PyObjectId
 from app.DataModels.parameter import Parameter
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType
 
 class ConfigObj(BaseModel):
     name: str
@@ -26,6 +27,7 @@ class PipelineStep(BaseModel):
     name: str
     description: str
     options: PipelineStepOption 
+    type: StepType
 
 
 class SelectedPipeline(BaseModel):

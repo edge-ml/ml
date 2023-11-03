@@ -26,5 +26,5 @@ class NoFeatureExtractor(BaseFeatureExtractor):
     def persist(self):
         return {}
 
-    def extract_features(self, windows, labels):
-        return windows, labels
+    def extract_features(self, windows):
+        return windows

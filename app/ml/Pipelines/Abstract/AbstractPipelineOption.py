@@ -1,12 +1,13 @@
 from typing import List
 from app.DataModels.parameter import Parameter
-
+from app.ml.Pipelines.PipelineContainer import PipelineContainer
 from app.utils.enums import Platforms
 
 class AbstractPipelineOption():
 
     def __init__(self, parameters : List[Parameter] = []):
         self.parameters = parameters
+        type = None
 
     @staticmethod
     def get_name():
@@ -24,10 +25,10 @@ class AbstractPipelineOption():
     def get_platforms():
         return []
     
-    def fit_exec(self, data):
+    def fit_exec(self, data : PipelineContainer) -> PipelineContainer:
         raise NotImplementedError()
     
-    def exec(self, data):
+    def exec(self, data : PipelineContainer) -> PipelineContainer:
         raise NotImplementedError()
 
     def persist(self):
@@ -54,7 +55,8 @@ class AbstractPipelineOption():
         "name": cls.get_name(),
         "description":  cls.get_description(),
         "parameters":  cls.get_parameters(),
-        "platforms":  cls.get_platforms()
+        "platforms":  cls.get_platforms(),
+        "type": cls.type
         }
 
     def get_param_value_by_name(self, name):

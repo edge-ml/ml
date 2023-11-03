@@ -16,4 +16,4 @@ class AbstractPipeLineCreator():
 
     @classmethod
     def get_train_config(cls):
-        return {"name": cls.get_name(), "description": cls.get_description(), "steps": cls.get_categories()}
+        return {"name": cls.get_name(), "description": cls.get_description(), "steps": [x.get_train_config() for x in cls.get_categories()]}

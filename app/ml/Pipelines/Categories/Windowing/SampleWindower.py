@@ -4,6 +4,7 @@ import numpy as np
 from app.ml.BaseConfig import Platforms
 from jinja2 import Template
 from app.Deploy.CPP.cPart import CPart
+from app.ml.Pipelines.PipelineContainer import PipelineContainer
 
 class SampleWindower(BaseWindower):
 
@@ -22,11 +23,11 @@ class SampleWindower(BaseWindower):
     def get_description():
         return "Sample based windowing using a sliding window approach"
 
-    def fit_exec(self, data):
+    def fit_exec(self, data) -> PipelineContainer:
         return self.window(data)
     
-    def exec(self, data):
-        return self.exec(data)
+    def exec(self, data) -> PipelineContainer:
+        return self.window(data)
 
     @staticmethod
     def get_parameters():
@@ -53,9 +54,9 @@ class SampleWindower(BaseWindower):
         self.parameters = config.parameters
 
 
-    def window(self, data):
-        datasets = data["datasets"]
-        datasetMetadata = data["datasetMetadata"]
+    def window(self, data: PipelineContainer) -> PipelineContainer:
+        datasets = data.data
+        datasetMetadata = data.meta
         window_size = int(self.get_param_value_by_name("window_size"))
         stride = int(self.get_param_value_by_name("sliding_step"))
         train_X = []
@@ -88,7 +89,7 @@ class SampleWindower(BaseWindower):
             
             print("PRE - filter")
             print(train_Y)
-        return self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y), metadata)
+        return PipelineContainer(*self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y), metadata))
 
     def exportC(self):
         global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}

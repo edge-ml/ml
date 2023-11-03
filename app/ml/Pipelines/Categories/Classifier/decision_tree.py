@@ -17,8 +17,9 @@ from app.Deploy.Sklearn.exportC_decisionTree import convert
 from app.StorageProvider import StorageProvider
 
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from app.ml.Pipelines.PipelineContainer import PipelineContainer
 
-class DecisionTree(AbstractPipelineOption):
+class DecisionTree(BaseClassififer):
     def __init__(self, parameters):
         super().__init__(parameters)
         self.data_id = None
@@ -190,7 +191,8 @@ class DecisionTree(AbstractPipelineOption):
 
     def fit(self, X_train, y_train):
         X_train_reshaped = reshapeSklearn(X_train)
-        self.clf.fit(X_train_reshaped, y_train)
+        self.clf.fit(X_train_reshaped, y_train)      
+        
 
     def predict(self, X_test):
         X_train_reshaped = reshapeSklearn(X_test)

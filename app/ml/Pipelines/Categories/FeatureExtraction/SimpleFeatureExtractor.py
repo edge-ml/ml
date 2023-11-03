@@ -26,6 +26,8 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         return np.array([f(data) for f in self._FEATURES])
 
     def extract_features(self, windows):
+        print("Feature_extractor: ")
+        print(windows.shape)
         window_features = []
         for w in windows:
             stack = []

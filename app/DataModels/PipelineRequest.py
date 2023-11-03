@@ -40,5 +40,6 @@ class PipelineRequest(BaseModel):
     datasets: List[TrainDatasetModel]
     labeling: TrainLabelingModel
     selectedPipeline: SelectedPipeline
+    name: str
     
 

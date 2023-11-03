@@ -52,7 +52,7 @@ class TestTrainSplitEvaluation(BaseEvaluation):
     
     def eval(self, pipeline : Pipeline, datasets, labelNames) -> Pipeline:
         data: PipelineContainer = pipeline.exec(datasets, StepType.PRE)
-        print("DATA_EVAL_PRE: ", data)
+        print("DATA_EVAL_PRE: ", data.data.shape)
 
 
         test_percentage = 1 - (self.get_param_value_by_name("Train_test_split") / 100)

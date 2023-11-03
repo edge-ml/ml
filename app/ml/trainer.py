@@ -72,7 +72,7 @@ async def init_train(trainReq : PipelineRequest, id, project):
         timeSeries = [x.name for x in datasets[0].timeSeries]
         # print(timeSeries)
         ml_data = {}
-        ml_data["steps"] = pipeline.persist()
+        ml_data["concreteSteps"] = pipeline.persist()
         ml_data["labels"] = labels
         ml_data["timeSeries"] = timeSeries
         ml_data["samplingRate"] = samplingRate
@@ -87,10 +87,7 @@ async def init_train(trainReq : PipelineRequest, id, project):
 
 async def train(req: PipelineRequest, project, background_tasks):
     data = req.dict(by_alias=True)
-    modelName = req.selectedPipeline.steps[-1].options.parameters[0].value
-    print("model_name: ", modelName)
-
-    model = Model(name=modelName, pipeLineRequest=req, projectId=project)
+    model = Model(name=req.name, pipeLineRequest=req, projectId=project)
     id = await add_model(model)
 
     background_tasks.add_task(init_train, req, id, project)

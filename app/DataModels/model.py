@@ -81,6 +81,6 @@ class Model(BaseModel):
     pipeLineRequest: PipelineRequest
     timeSeries: Optional[List[str]]
     trainStatus: ModelStatus = ModelStatus.waiting
-    errorText: str = Field(default="")
+    error: str = Field(default="")
 
 

@@ -63,7 +63,6 @@ class SampleWindower(BaseWindower):
         train_Y = []
         metadata = []
         for dataset in datasets:
-            print("Dataset_shape: ", dataset.shape)
             fused = []
             idx = 0
             while idx < dataset.shape[0]:
@@ -87,8 +86,6 @@ class SampleWindower(BaseWindower):
             train_Y.extend(Y)
             metadata.extend(Meta)
             
-            print("PRE - filter")
-            print(train_Y)
         return PipelineContainer(*self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y), metadata))
 
     def exportC(self):

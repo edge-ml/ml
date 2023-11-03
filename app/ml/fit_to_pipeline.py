@@ -44,9 +44,7 @@ def fit_to_pipeline(req: PipelineRequest, datasets, datasetMetaData, labels) -> 
     pipelineSteps = []
     for step in req.selectedPipeline.steps:
         category = getCategory(step.name)
-        print(category.name, category.type)
         stepProcessor = getProcessor(step.options.name)
-        print(stepProcessor)
         pipelineSteps.append(stepProcessor)
         if category.type == StepType.CORE or category.type == StepType.PRE:
             processor : AbstractPipelineOption = stepProcessor(step.options.parameters)

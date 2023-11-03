@@ -82,10 +82,14 @@ class Pipeline():
         return data
     
     def fit_exec(self, data, types: Union[StepType, List[StepType]]):
+        print("TYPES: ", types)
         for step in self.options:
+            print("STEP: ", step.get_name(), step.type)
+            print(data.data.shape)
             if step.type in types:
                 print("Fit_exec: ", step.get_name())
                 data = step.fit_exec(data)
+                print(step.get_name(), data)
         return data
 
     def clone(self):

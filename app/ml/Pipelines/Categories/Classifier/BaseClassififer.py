@@ -21,5 +21,9 @@ class BaseClassififer(AbstractPipelineOption):
         return PipelineContainer(self.predict(data.data), data.labels, data.meta)
     
     def fit_exec(self, data: PipelineContainer) -> PipelineContainer:
+        print("0" * 30)
+        print("BaseClassifier")
+        print(data.data.shape)
+
         self.fit(data.data, data.labels)
         return PipelineContainer(self.predict(data.data), data.labels, data.meta)

@@ -17,9 +17,10 @@ from app.Deploy.Sklearn.exportC_decisionTree import convert
 from app.StorageProvider import StorageProvider
 
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from app.ml.Pipelines.AutoML.PytorchAdapter import get_dataloader
 
 
-# from micronas import search
+from micronas import search
 
 
 class AutoMLClassifier(AbstractPipelineOption):
@@ -67,16 +68,25 @@ class AutoMLClassifier(AbstractPipelineOption):
         super().__init__(parameters)
 
     def fit_exec(self, data):
-        print(data)
-        print("DATASHAPE: ", data[0].shape)
+        print("*"*20)
+        print("DATASHAPE: ", data.data.shape)
+        train_data = data.data[:,:,1:]
+        print(train_data.shape)
+
+        dataset_train = get_dataloader(train_data)
+        dataset_vali = get_dataloader(train_data)
+
+        search(dataset_train, dataset_vali, 2)
+
 
     def exec(self, data):
         pass
 
 
     def fit(self, X_train, y_train):
-        X_train_reshaped = reshapeSklearn(X_train)
-        self.clf.fit(X_train_reshaped, y_train)
+        pass
+        # X_train_reshaped = reshapeSklearn(X_train)
+        # self.clf.fit(X_train_reshaped, y_train)
 
     def predict(self, X_test):
         X_train_reshaped = reshapeSklearn(X_test)

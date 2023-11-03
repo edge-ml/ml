@@ -4,7 +4,7 @@ from app.ml.Pipelines.Categories.Classifier.random_forest import RandomForest
 
 from app.ml.Pipelines.Categories.Classifier.KMeansClassifier import KMeansClassifier
 
-from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import PipelineCategory
 
 from typing import List
 

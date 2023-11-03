@@ -16,9 +16,9 @@ from app.ml.BaseConfig import Platforms
 from app.Deploy.Sklearn.exportC_decisionTree import convert
 from app.StorageProvider import StorageProvider
 
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 
-class DecisionTree(AbstractPipelineStep):
+class DecisionTree(AbstractPipelineOption):
     def __init__(self, parameters):
         super().__init__(parameters)
         self.data_id = None

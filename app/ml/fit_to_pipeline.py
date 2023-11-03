@@ -9,8 +9,8 @@ from app.ml.Pipeline import Pipeline
 from app.ml.Pipelines.Categories.Windowing import get_windower_by_name
 from app.DataModels.PipelineRequest import PipelineRequest
 from app.ml.Pipelines import getProcessor, getCategory
-from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategoryType
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 
 def fit_to_pipeline2(trainReq : TrainRequest, datasets, labels) -> Tuple[Pipeline, BaseEvaluation]:
 
@@ -48,8 +48,8 @@ def fit_to_pipeline(req: PipelineRequest, datasets, datasetMetaData, labels) -> 
         stepProcessor = getProcessor(step.options.name)
         print(stepProcessor)
         pipelineSteps.append(stepProcessor)
-        if category.type == PipelineCategoryType.CORE or category.type == PipelineCategoryType.PRE:
-            processor : AbstractPipelineStep = stepProcessor(step.options.parameters)
+        if category.type == StepType.CORE or category.type == StepType.PRE:
+            processor : AbstractPipelineOption = stepProcessor(step.options.parameters)
             data = processor.fit_exec(data)
 
     pipeline = Pipeline(pipelineSteps)

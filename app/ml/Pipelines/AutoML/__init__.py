@@ -1,4 +1,4 @@
-from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory, PipelineCategoryType
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import PipelineCategory, StepType
 from app.ml.Pipelines.AutoML.AutoMLClassifier import AutoMLClassifier
 
 

@@ -1,7 +1,7 @@
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 import numpy as np
 
-class BaseWindower(AbstractPipelineStep):
+class BaseWindower(AbstractPipelineOption):
 
     def __init__(self, parameters):
         super().__init__(parameters)

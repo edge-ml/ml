@@ -26,6 +26,8 @@ from app.ml.fit_to_pipeline import fit_to_pipeline
 #     return clf
 
 
+
+
 async def init_train(trainReq : PipelineRequest, id, project):
     try:
         await update_model_status(id, project, ModelStatus.training)
@@ -43,6 +45,7 @@ async def init_train(trainReq : PipelineRequest, id, project):
 
         # only use selected labels in the map/naming
         selectedLabels = [label for label in labeling.labels if label.id not in trainReq.labeling.disabledLabelIDs]
+
         
         labelMap = {str(x.id): i for i, x in enumerate(selectedLabels)}
         maxIdx = max(labelMap.values())

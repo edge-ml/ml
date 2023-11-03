@@ -16,4 +16,4 @@ class AutoMLClassificationPipeline(AbstractPipeLineCreator):
     
     @staticmethod
     def get_categories():
-        return [WINDOWING_CATEGORY, AUTOMLCLASSIFIER_CATEGORY, COMMON_CATEGORY, EVALUATION_CATEGORY]
+        return [WINDOWING_CATEGORY, AUTOMLCLASSIFIER_CATEGORY, EVALUATION_CATEGORY]

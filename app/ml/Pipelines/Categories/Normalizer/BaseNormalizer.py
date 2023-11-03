@@ -1,7 +1,8 @@
 from app.ml.BaseConfig import BaseConfig
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 
 
-class BaseNormalizer(BaseConfig):
+class BaseNormalizer(AbstractPipelineOption):
     
     def __init__(self, parameters=...):
         super().__init__(parameters)

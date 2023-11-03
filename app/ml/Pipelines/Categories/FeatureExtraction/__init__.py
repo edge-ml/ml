@@ -2,7 +2,7 @@ from app.ml.Pipelines.Categories.FeatureExtraction.BaseFeatureExtractor import B
 from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
 from app.ml.Pipelines.Categories.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
 from app.ml.Pipelines.Categories.FeatureExtraction.FFTFeatureExtractor import FFTFeatureExtractor
-from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import PipelineCategory
 from typing import List
 
 # FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor, FFTFeatureExtractor]

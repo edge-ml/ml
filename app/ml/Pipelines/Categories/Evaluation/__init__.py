@@ -1,7 +1,7 @@
 from app.ml.Pipelines.Categories.Evaluation.BaseEvaluation import BaseEvaluation
 from app.ml.Pipelines.Categories.Evaluation.KFold import KFold
 from app.ml.Pipelines.Categories.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
-from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategory
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import PipelineCategory
 from typing import List
 
 EVALAUTIONS : List[BaseEvaluation] = [

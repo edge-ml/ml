@@ -1,8 +1,8 @@
 
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from app.ml.BaseConfig import BaseConfig
 
-class BaseClassififer(AbstractPipelineStep):
+class BaseClassififer(AbstractPipelineOption):
 
     def __init__(self, parameters):
         super().__init__(parameters)

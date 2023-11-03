@@ -1,8 +1,8 @@
 from app.utils.parameter_builder import ParameterBuilder
 
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
+from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 
-class ModelMetadata(AbstractPipelineStep):
+class ModelMetadata(AbstractPipelineOption):
     def __init__(self, parameters):
         super().__init__(parameters)
         self.data_id = None

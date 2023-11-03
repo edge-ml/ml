@@ -15,7 +15,7 @@ from app.ml.Pipelines.Categories.Classifier import get_classifier_by_name
 from app.utils.parameter_builder import ParameterBuilder
 from jinja2 import Template, FileSystemLoader
 from io import BytesIO, StringIO
-from app.ml.Pipelines.Abstract.AbstractPipelineCategory import PipelineCategoryType
+from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType
 from typing import List
 
 # class Pipeline():
@@ -89,7 +89,7 @@ class Pipeline():
     def __init__(self, steps):
         self.steps = steps
 
-    def exec(self, data, categories : List[PipelineCategoryType]):
+    def exec(self, data, categories : List[StepType]):
         for step in self.steps:
             data = step.exec(data)
         return data

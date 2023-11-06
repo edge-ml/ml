@@ -66,11 +66,17 @@ class NeuralNetwork(BaseClassififer):
     def exportC(self):
         path = f'{CLASSIFIER_STORE}/{self.data_id}/tf_model.tf'
         converter = tf.lite.TFLiteConverter.from_saved_model(path)
+        # converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        # converter.target_spec.supported_types = [tf.float16]
         tflite_model = converter.convert()
         
+        # tflite_model_path = f'{CLASSIFIER_STORE}/{self.data_id}/tf_model.tflite'
+        # with open(tflite_model_path, 'wb') as tflite_file:
+        #     tflite_file.write(tflite_model)
+            
         c_array = self.bytes_to_c_arr(tflite_model)
         array_content = "{}".format(", ".join(c_array))
-        converted_model_str = "const unsigned char converted_model_tflite[] = {\n\t"
+        converted_model_str = '#include "model.h"\n\nalignas(8) const unsigned char g_model[] PROGMEM = {\n\t'
         # pretty printing the bytes
         chunk_size = 6 * 12
         for i in range(0, len(array_content), chunk_size):
@@ -79,6 +85,6 @@ class NeuralNetwork(BaseClassififer):
                 converted_model_str += "\n\t"
 
         converted_model_str += "};\n"
-        converted_model_str += f"const unsigned int converted_model_tflite_len = {len(c_array)};"
+        converted_model_str += f"const int g_model_len = sizeof(g_model);"
        
         return converted_model_str

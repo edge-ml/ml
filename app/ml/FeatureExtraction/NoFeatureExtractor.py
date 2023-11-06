@@ -24,7 +24,7 @@ class NoFeatureExtractor(BaseFeatureExtractor):
         return "Does not extract any feature and returns the time-series as is."
 
     def extract_features(self, windows, labels):
-        return windows[:, 0, 1:, np.newaxis], labels
+        return windows[:, :, 1:], labels
     
     def exportC(self):
         return ''

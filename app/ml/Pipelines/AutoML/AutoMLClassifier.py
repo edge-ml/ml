@@ -1,18 +1,7 @@
-from app.codegen.export_javascript import export_javascript
-from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Pipelines.Categories.Classifier import BaseClassififer
-from sklearn.tree import DecisionTreeClassifier
-import m2cgen as m2c
-from sklearn.tree import DecisionTreeClassifier
-import numpy as np
-import copy
 from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-from app.internal.config import CLASSIFIER_STORE
 import pickle
-import os
-from app.ml.BaseConfig import Platforms
 from app.Deploy.Sklearn.exportC_decisionTree import convert
 from app.StorageProvider import StorageProvider
 
@@ -71,11 +60,14 @@ class AutoMLClassifier(AbstractPipelineOption):
         print("*"*20)
         print("DATASHAPE: ", data.data.shape)
         train_data = data.data[:,:,1:]
+        train_labels = data.labels
         print(train_data.shape)
 
-        dataset_train = get_dataloader(train_data)
-        dataset_vali = get_dataloader(train_data)
-
+        dataset_train = get_dataloader(train_data, train_labels)
+        dataset_vali = get_dataloader(train_data, train_labels)
+        print(next(iter(dataset_train))[0].shape)
+        print(next(iter(dataset_train))[1].shape)
+        
         search(dataset_train, dataset_vali, 2)
 
 

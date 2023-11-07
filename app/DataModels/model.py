@@ -1,11 +1,9 @@
 from app.utils.PyObjectId import PyObjectId
 from bson.objectid import ObjectId
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
 from enum import Enum
-from app.DataModels.trainRequest import TrainRequest
 from app.DataModels.parameter import Parameter
-from app.DataModels.PipeLine import PipelineModel
 from app.DataModels.PipelineRequest import PipelineRequest
 
 
@@ -26,7 +24,6 @@ class TrainingDataset(BaseModel):
 
 class ConfigObj(BaseModel):
     name: str
-
     parameters: List[Parameter]
     state: Optional[Dict]
 
@@ -74,6 +71,16 @@ class ModelConfig(BaseModel):
 #     status: ModelStatus = ModelStatus.waiting
 #     error: str = Field(default="")
 
+class ConcreteStepDefinitions(BaseModel):
+    name: str
+    description: str
+    type: str
+
+class ConcreteSteps(BaseModel):
+    options: List[ConfigObj]
+    steps: List[ConcreteStepDefinitions]
+
+
 class Model(BaseModel):
     id: PyObjectId = Field(default_factory=ObjectId, alias="_id")
     projectId: PyObjectId
@@ -82,5 +89,6 @@ class Model(BaseModel):
     timeSeries: Optional[List[str]]
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
+    concreteSteps: ConcreteSteps
 
 

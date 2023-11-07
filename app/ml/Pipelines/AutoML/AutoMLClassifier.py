@@ -12,6 +12,8 @@ from app.ml.Pipelines.PipelineContainer import PipelineContainer
 from sklearn.model_selection import train_test_split as sklearn_train_test_split
 from micronas import search, exec_tflm, PytorchKerasAdapter
 
+import math
+
 
 class AutoMLClassifier(AbstractPipelineOption):
     def __init__(self, parameters):
@@ -71,7 +73,7 @@ class AutoMLClassifier(AbstractPipelineOption):
 
         dataset_train = get_dataloader(train_split, train_label_split)
         dataset_vali = get_dataloader(vali_split, vali_label_split)
-        
+
         kerasModel, tflmModel = search(dataset_train, dataset_vali, num_labels, config={"train_epochs": 200})
         self.kerasModel = kerasModel
         self.tflmModel = tflmModel

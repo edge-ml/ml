@@ -6,6 +6,6 @@ from io import BytesIO
 import zipfile
 
 def downloadModel(model, platform: Platforms):
-    pipeline = Pipeline.load(model.pipeline)
-    zipFile = pipeline.generateModelData(platform)
-    return zipFile
+    pipeline = Pipeline.load(model)
+    # zipFile = pipeline.generateModelData(platform)
+    # return zipFile

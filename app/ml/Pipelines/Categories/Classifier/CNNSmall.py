@@ -49,10 +49,14 @@ class CNNSmall(NeuralNetwork):
         self.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
         y_train_encoded = to_categorical(y_train, num_classes=num_classes)
         
+        X_train_reshaped = X_train_reshaped.astype('float32')
+        print(X_train_reshaped.dtype)
+        print(y_train_encoded.dtype)
         self.model.fit(X_train_reshaped, y_train_encoded, epochs=20)
 
     def predict(self, X_test):
         X_test_reshaped = reshapeCNN(X_test)
+        X_test_reshaped = X_test_reshaped.astype('float32')
         prediction = self.model.predict(X_test_reshaped)
         prediction = np.argmax(prediction, axis=-1)
         return prediction

@@ -3,6 +3,7 @@ from app.ml.Pipelines.Categories.Classifier.decision_tree import DecisionTree
 from app.ml.Pipelines.Categories.Classifier.random_forest import RandomForest
 from app.ml.Pipelines.Categories.Classifier.NeuralNetwork import NeuralNetwork
 from app.ml.Pipelines.Categories.Classifier.DenseSmall import DenseSmall
+from app.ml.Pipelines.Categories.Classifier.CNNSmall import CNNSmall
 from app.ml.Pipelines.Categories.Classifier.DenseMedium import DenseMedium
 from app.ml.Pipelines.Categories.Classifier.DenseLarge import DenseLarge
 from app.ml.Pipelines.Categories.Classifier.CNNSmall import CNNSmall

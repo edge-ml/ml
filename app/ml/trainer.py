@@ -53,6 +53,7 @@ async def init_train(trainReq : PipelineRequest, id, project):
         if trainReq.labeling.useZeroClass:
             labelMap["Zero"] = maxIdx+1
 
+        print(selectedLabels)
         labels = [x.name for x in selectedLabels]
         if trainReq.labeling.useZeroClass:
             labels.append("Zero")
@@ -73,7 +74,7 @@ async def init_train(trainReq : PipelineRequest, id, project):
         # print(timeSeries)
         ml_data = {}
         ml_data["concreteSteps"] = pipeline.persist()
-        ml_data["labels"] = labels
+        ml_data["labels"] = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
         ml_data["timeSeries"] = timeSeries
         ml_data["samplingRate"] = samplingRate
         ml_data["performance"] = performance

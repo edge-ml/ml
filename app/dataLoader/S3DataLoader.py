@@ -12,7 +12,6 @@ class S3DataLoader(BaseDataLoader):
 
     def load_series(self, id):
         obj = self.s3.get_object(Bucket=S3_BUCKET_NAME, Key=id)
-        print(obj)
         buffer = BytesIO(obj['Body'].read())
         with h5py.File(buffer, 'r') as f:
             time_arr = np.array(f['time'])

@@ -3,6 +3,7 @@ from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType, AbstractPip
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from typing import List, Union
 
+
 # class Pipeline():
 
 #     def __init__(self, windower: BaseWindower = None, featureExtractor: BaseFeatureExtractor = None, normalizer: BaseNormalizer = None, classifier: BaseClassififer = None, pipelineData: PipelineModel = None):
@@ -95,6 +96,13 @@ class Pipeline():
     def clone(self):
         return Pipeline([x.__class__(x.parameters) for x in self.options])
     
+    @staticmethod
+    def load(model):
+        stepOptions = model.concreteSteps.options
+        for step in stepOptions:
+            print(step.name)
+
+
     def __str__(self) -> str:
         return ", ".join([x.get_name() for x in self.options])
     

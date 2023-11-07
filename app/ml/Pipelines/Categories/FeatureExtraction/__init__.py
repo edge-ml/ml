@@ -6,7 +6,7 @@ from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 from typing import List
 
 # FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor, FFTFeatureExtractor]
-FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor]
+FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor]
 
 def get_feature_extractor_by_name(name):
     for ext in FEATURE_EXTRACTORS:

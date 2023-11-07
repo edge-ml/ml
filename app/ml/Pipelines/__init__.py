@@ -23,11 +23,12 @@ from app.ml.Pipelines.Categories.Common.ModelMetadata import ModelMetadata
 from app.ml.Pipelines.Categories.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
 from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
 from app.ml.Pipelines.Categories.Classifier.decision_tree import DecisionTree
+from app.ml.Pipelines.Categories.Classifier.DenseSmall import DenseSmall
 from app.ml.Pipelines.Categories.Normalizer.MinMaxNormalizer import MinMaxNormalizer
 from app.ml.Pipelines.Categories.Normalizer.ZNormalizer import ZNormalizer
 
 
-PipelineSteps = [SampleWindower, AutoMLClassifier, ModelMetadata, TestTrainSplitEvaluation, SimpleFeatureExtractor, DecisionTree, MinMaxNormalizer, ZNormalizer]
+PipelineSteps = [SampleWindower, AutoMLClassifier, ModelMetadata, TestTrainSplitEvaluation, SimpleFeatureExtractor, DecisionTree, MinMaxNormalizer, ZNormalizer, DenseSmall]
 
 _pipelineMap = {x.get_name(): x for x in PipelineSteps}
 

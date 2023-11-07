@@ -89,6 +89,6 @@ class Model(BaseModel):
     timeSeries: Optional[List[str]]
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
-    concreteSteps: ConcreteSteps
+    concreteSteps: Optional[ConcreteSteps]
 
 

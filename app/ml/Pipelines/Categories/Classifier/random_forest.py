@@ -211,9 +211,6 @@ class RandomForest(BaseClassififer):
             True,
             False,
         )
-
-        print(pb.parameters)
-
         return pb.parameters
 
     @staticmethod

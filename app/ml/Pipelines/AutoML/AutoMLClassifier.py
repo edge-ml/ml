@@ -64,20 +64,22 @@ class AutoMLClassifier(AbstractPipelineOption):
         print("DATASHAPE: ", data.data.shape)
         train_data = data.data[:,:,1:]
         train_labels = data.labels
+        num_labels = max(train_labels) + 1
         print(train_data.shape)
 
-        train_split, vali_split, train_label_split, vali_label_split = sklearn_train_test_split(train_data, train_labels)
+        train_split, vali_split, train_label_split, vali_label_split = sklearn_train_test_split(train_data, train_labels, train_size=0.8)
 
         dataset_train = get_dataloader(train_split, train_label_split)
         dataset_vali = get_dataloader(vali_split, vali_label_split)
         
-        kerasModel, tflmModel = search(dataset_train, dataset_vali, 2, config={"train_epochs": 200})
+        kerasModel, tflmModel = search(dataset_train, dataset_vali, num_labels, config={"train_epochs": 200})
         self.kerasModel = kerasModel
         self.tflmModel = tflmModel
 
     def exec(self, data):
         exec_data = data.data[:,:,1:]
-        dataloaderKeras = PytorchKerasAdapter(get_dataloader(exec_data, data.labels), 2)
+        num_labels = max(data.labels) + 1
+        dataloaderKeras = PytorchKerasAdapter(get_dataloader(exec_data, data.labels), num_labels)
         pred = exec_tflm(dataloaderKeras, self.tflmModel)
         return PipelineContainer(pred, data.labels, data.meta)
 

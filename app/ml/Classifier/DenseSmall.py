@@ -36,10 +36,10 @@ class DenseSmall(NeuralNetwork):
     def fit(self, X_train, y_train):
         num_classes = len(np.unique(y_train))
         X_train_reshaped = reshapeSklearn(X_train)
-        
+               
         self.model = Sequential([
-            Dense(units=64, activation='relu', input_shape=(X_train_reshaped.shape[1], )),
-            Dense(units=32, activation='relu'),
+            Dense(units=8, activation='relu', input_shape=(X_train_reshaped.shape[1], )),
+            Dense(units=8, activation='relu'),
             Dense(num_classes, activation='softmax')
         ])
         

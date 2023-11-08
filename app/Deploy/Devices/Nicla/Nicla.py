@@ -18,18 +18,19 @@ class Nicla(BaseDevice):
     
     def getSensorParams(self, tsMap, parameters):
 
-        # TODO: set does not preserve order, needs to be fixed
+        # if anything order sensitive in before_setup or setup is defined 
+        # don't use set, set does not preserve the order
         before_setup = set()
         setup = set()
-        obtain_values = set()
+        obtain_values = dict()
 
         for sensorConf in tsMap:
             sensor = self.sensors[sensorConf.sensor_id]
             before_setup.add(sensor.get_before_setup_code())
             setup.add(sensor.get_setup_code(40))
-            obtain_values.add(sensor.get_obtain_value_code(sensorConf.component_id))
+            obtain_values[sensor.get_obtain_value_code(sensorConf.component_id)] = ""
 
-        return list(before_setup), list(setup), list(obtain_values)
+        return list(before_setup), list(setup), list(obtain_values.keys())
     
     def deploy(self, tsMap, parameters, is_neural_network):
         before_setup, setup, obtain_values = self.getSensorParams(tsMap, parameters)

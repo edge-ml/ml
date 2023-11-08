@@ -17,9 +17,11 @@ from app.ml.Pipelines.PipelineContainer import PipelineContainer
 
 class TestTrainSplitEvaluation(BaseEvaluation):
 
-    def __init__(self, parameters):
+    def __init__(self, parameters=...):
         super().__init__(parameters)
         self.metrics = None
+
+
 
     @staticmethod
     def get_name():

@@ -5,6 +5,9 @@ import json
 from app.utils.jsonEncoder import JSONEncoder
 from jinja2 import Template, FileSystemLoader
 from app.Deploy.CPP.cPart import CPart
+from app.ml.PipelineExport.C.Common.utils import getCode
+from app.ml.PipelineExport.C.Common.Memory import Memory
+from app.ml.PipelineExport.C.Common.CPart import CStep
 
 class MinMaxNormalizer(BaseNormalizer):
 
@@ -39,13 +42,13 @@ class MinMaxNormalizer(BaseNormalizer):
     def get_state(self):
         return {"min": json.dumps(self.min, cls=JSONEncoder), "max": json.dumps(self.max, cls=JSONEncoder)}
 
-    def restore(self, dict):
-        self.min = np.array(json.loads(dict.state["min"]))
-        self.max = np.array(json.loads(dict.state["max"]))
-        self.parameters = dict.parameters
-    
-    def export(self, platforms: Platforms):
-        return self.exportC()
+    def restore(self, config):
+        self.min = np.array(json.loads(config.state["min"]))
+        self.max = np.array(json.loads(config.state["max"]))
+        super().restore(config)
+
+    def export(self, params, platforms: Platforms):
+        return self.exportC(params)
 
     @staticmethod
     def load(self, config):
@@ -60,7 +63,7 @@ class MinMaxNormalizer(BaseNormalizer):
         code += "};"
         return code
     
-    def exportC(self):
+    def exportC2(self, params):
         code = '''
 
         Matrix mins = {{min}}
@@ -83,3 +86,12 @@ class MinMaxNormalizer(BaseNormalizer):
         jinjaVars = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max)}
 
         return CPart([], [], code, jinjaVars)
+    
+    def exportC(self, params):
+
+        variables = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max)}
+        code = getCode("./app/ml/PipelineExport/C/Normalizer/MinMaxNormalizer.cpp")
+        print("Normalizer: ", self.input_shape, self.output_shape)
+        input_mem = Memory(self.input_shape, True)
+        output_Mem = Memory(self.output_shape, True)
+        step = CStep(variables, code, input_mem, output_Mem)

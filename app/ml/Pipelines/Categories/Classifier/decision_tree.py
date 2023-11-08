@@ -181,7 +181,7 @@ class DecisionTree(BaseClassififer):
     def get_platforms():
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
 
-    def exportC(self):
+    def exportC(self, params):
         return convert(self.clf)
 
     # class methods

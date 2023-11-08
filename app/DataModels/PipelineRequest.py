@@ -24,7 +24,7 @@ class PipelineStepOption(BaseModel):
     parameters: List[Parameter]
     state: Optional[Dict]
     input_shape: Optional[List[int]]
-    ouput_shape: Optional[List[int]]
+    output_shape: Optional[List[int]]
 
 class PipelineStep(BaseModel):
     name: str

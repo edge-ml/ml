@@ -93,7 +93,9 @@ def getProcessor(name):
     return _pipelineMap[name]
 
 def getPipeline(model):
-    stepOptions = model.concreteSteps.options
-    options = [getProcessor(x.name)(x.parameters) for x in stepOptions]
+    stepOptions = model.pipeline.selectedPipeline.steps
+    options = [getProcessor(x.options.name)() for x in stepOptions]
+    for o, s in zip(options, stepOptions):
+        o.restore(s.options)
     pipeline = Pipeline(options=options, steps=[])  
     return pipeline

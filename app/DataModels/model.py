@@ -89,8 +89,8 @@ class Model(BaseModel):
     id: PyObjectId = Field(default_factory=ObjectId, alias="_id")
     projectId: PyObjectId
     name: str
-    pipeline: PipelineRequest
-    labels: Optional[Labeling]
+    pipeline: PipelineRequest 
+    labels: Optional[List[Labeling]]
     timeSeries: Optional[List[str]]
     samplingRate: Optional[float]
     trainStatus: ModelStatus = ModelStatus.waiting

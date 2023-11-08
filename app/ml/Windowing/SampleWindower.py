@@ -78,22 +78,46 @@ class SampleWindower(BaseWindower):
         return self._filterLabelings(np.array(train_X), np.array(train_Y))
 
     def exportC(self):
-        global_vars = {"window_size": self.get_param_value_by_name("window_size"), "sliding_step": self.get_param_value_by_name("sliding_step")}
+        # TODO: these params should be saved as integers in the first place
+        global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
 
 
-        code = '''
-        void add_datapoint({{timeSeriesInput}})
-            {
-                {% for ts in timeSeries %}
-                    raw_data[{{loop.index-1}}][ctr] = {{ts}};
-                {% endfor %}
-                ctr++;
-                if (ctr >= {{window_size}})
-                {
-                    ctr = 0;
-                }
-            }
+        # code = '''
+        # void add_datapoint({{timeSeriesInput}})
+        #     {
+        #         {% for ts in timeSeries %}
+        #             raw_data[{{loop.index-1}}][ctr] = {{ts}};
+        #         {% endfor %}
+        #         ctr++;
+        #         if (ctr >= {{window_size}})
+        #         {
+        #             ctr = 0;
+        #         }
+        #     }
+        # '''
+        
+        code = '''constexpr int window_size = {{window_size}};
+constexpr int sensor_stream_count = {{timeSeries|length}};
+float data_window[window_size * sensor_stream_count] = {0};
+int data_count = 0;
+
+void addDataPoint(float *data) {
+  if (data_count < window_size) {
+    for (int i = 0; i < sensor_stream_count; i++) {
+      data_window[data_count * sensor_stream_count + i] = data[i]; 
+    }
+    data_count++;
+  } else {
+    // Slide the window
+    for (int i = 0; i < window_size; i++) {
+      for (int j = 0; j < sensor_stream_count; j++) {
+        data_window[i * sensor_stream_count + j] = (i != window_size - 1) ? data_window[(i+1) * sensor_stream_count + j] : data[j];
+      }
+    }
+  }
+}
         '''
+        
         timeSeries = ["x", "y", "z"]
         jinjaVars = {"timeSeries": timeSeries, "timeSeriesInput": ",".join([f"float {x}" for x in timeSeries]), "num_sensors": len(timeSeries), **global_vars}
 

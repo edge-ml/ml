@@ -1,7 +1,9 @@
 #include <RocksettaTensorFlowLite.h>
 
-#include "model.h"
-#include "normalizer.h"
+#include "model_data.hpp"
+#include "normalizer.hpp"
+#include "windower.hpp"
+#include "predictor.hpp"
 
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
@@ -18,57 +20,12 @@ const tflite::Model* model = nullptr;
 tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input = nullptr;
 TfLiteTensor* output = nullptr;
-
-SensorXYZ accelerometer(SENSOR_ID_ACC); // needs to be read from jinjaVars
-
-constexpr int window_size = 5; // needs to be read from jinjaVars
-constexpr int sensor_stream_count = 3; // needs to be read from jinjaVars
-constexpr int num_classes = 2; // needs to be read from jinjaVars
-
-float data_window[window_size * sensor_stream_count] = {0};
-int data_count = 0;
-
+{% for item in before_setup %}
+{{ item }}
+{% endfor %}
 constexpr int kTensorArenaSize = 1500; // if the program doesn't run try a higher value, it can be later optimized
 uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
-
-
-void addDataPoint(float *data) {
-  if (data_count < window_size) {
-    for (int i = 0; i < sensor_stream_count; i++) {
-      data_window[data_count * sensor_stream_count + i] = data[i]; 
-    }
-    data_count++;
-  } else {
-    // Slide the window
-    for (int i = 0; i < window_size; i++) {
-      for (int j = 0; j < sensor_stream_count; j++) {
-        data_window[i * sensor_stream_count + j] = (i != window_size - 1) ? data_window[(i+1) * sensor_stream_count + j] : data[j];
-      }
-    }
-  }
-}
-
-int getMostLikelyClass() {
-  int prediction = -1;
-  float probability = 0.f;
-  for (int i = 0; i < num_classes; i++) {
-    if (probability < output->data.f[i]) {
-      prediction = i;
-      probability = output->data.f[i];
-    }
-  }
-  return prediction;
-}
-
-void printPrediction() {
-  int prediction = getMostLikelyClass();
-  switch (prediction) {
-    case 0: Serial.println("Still"); break; // needs to be read from jinjaVars
-    case 1: Serial.println("Moving"); break; // needs to be read from jinjaVars
-    case default: Serial.println("")
-  }
-}
 
 void setup() {
   Serial.begin(115200);
@@ -85,7 +42,7 @@ void setup() {
     return;
   }
 
-  static tflite::MicroMutableOpResolver<3> resolver;
+  static tflite::MicroMutableOpResolver<3> resolver; // needs to be read from jinjaVars
 
   resolver.AddFullyConnected(); // needs to be read from jinjaVars
   resolver.AddSoftmax(); // needs to be read from jinjaVars
@@ -112,20 +69,20 @@ void loop() {
   static auto lastPredict = millis();
   BHY2.update();
 
-  if (millis() - lastCheck >= (1000 / 1.0)) {
+  // Check sensor values every second 
+  if (millis() - lastCheck >= (1000 / {{sampling_rate}})) {
+      {% for item in obtain_values %}
+      {{ item }}
+      {% endfor %}
+      float data[] = { {{add_datapoint_vars}} };
 
-      float data[] = {accelerometer.x(), accelerometer.y(), accelerometer.z()}; // needs to be read from jinjaVars
-      
       normalize(data);
       addDataPoint(data);
 
-      Serial.println("Data window");
+      // Update the input tensor
       for (int i = 0; i < window_size * sensor_stream_count; i++) {
         input->data.f[i] = data_window[i];
-        Serial.print(data_window[i]);
-        Serial.print(" ");
       }
-      Serial.println("");
       lastCheck = millis();
   }
   if (millis() - lastPredict >= 1000) {
@@ -140,10 +97,6 @@ void loop() {
       }
       
     }
-
-    prediction = interpreter->output(0)->data.f[0];
-    char strBuf[100];
-    sprintf(strBuf, "x = %f %f, y = %f %f, z = %f %f, prediction = %f %f", x, norm_x, y, norm_y, z, norm_z, interpreter->output(0)->data.f[0], interpreter->output(0)->data.f[1]);
-    Serial.println(strBuf);
+    Serial.println(classToLabel(getMostLikelyClass(output->data.f)).c_str());
   }
 }

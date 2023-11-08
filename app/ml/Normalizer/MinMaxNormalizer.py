@@ -61,25 +61,40 @@ class MinMaxNormalizer(BaseNormalizer):
         return code
     
     def exportC(self):
-        code = '''
+#         code = '''#ifndef Matrix
+# #define Matrix vector<vector<float> >
+# #endif
 
-        Matrix mins = {{min}}
-        Matrix maxs = {{max}}
+# Matrix mins = {{min}}
+# Matrix maxs = {{max}}
 
-        void normalize(Matrix &input)
-        {
-            int num_sensors = input.size();
-            int feature_size = input[0].size();
-            for (int i = 0; i < num_sensors; i++)
-            {
-                for (int j = 0; j < feature_size; j++)
-                {
-                    input[i][j] = (input[i][j] - mins[i][j]) / (maxs[i][j] - mins[i][j]);
-                }
-            }
-        }
-        '''
+# void normalize(Matrix &input)
+# {
+#     int num_sensors = input.size();
+#     int feature_size = input[0].size();
+#     for (int i = 0; i < num_sensors; i++)
+#     {
+#         for (int j = 0; j < feature_size; j++)
+#         {
+#             input[i][j] = (input[i][j] - mins[i][j]) / (maxs[i][j] - mins[i][j]);
+#         }
+#     }
+# }
+# '''
 
-        jinjaVars = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max)}
+        code = '''float mins[{{rows}}][{{cols}}] = {{min}}
+float maxs[{{rows}}][{{cols}}] = {{max}}
+void normalize(float *input)
+{
+    int num_sensors = sizeof(mins) / sizeof(mins[0]);
+    int feature_size = sizeof(mins[0]) / num_sensors;
+    for (int i = 0; i < num_sensors; i++)
+    {
+        input[i] = (input[i] - mins[i][0]) / (maxs[i][0] - mins[i][0]);
+    }
+}
+'''
+        # assumes that min and max has the same shape!
+        jinjaVars = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max), "rows": len(self.min), "cols": len(self.min[0])}
 
         return CPart([], [], code, jinjaVars)

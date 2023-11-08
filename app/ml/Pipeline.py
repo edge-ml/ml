@@ -84,6 +84,15 @@ class Pipeline():
         return zip
     
     def generateModelData_NN(self, data):
-        main_file = StringFile(data["classifier"], "model_data.cc")
-        zip = zipFiles([main_file])
+        model_data = StringFile(data["classifier"], "model_data.hpp")
+        normalizer = Template(data["normalizer"].code).render(data["normalizer"].jinjaVars)
+        normalizer = StringFile(normalizer, "normalizer.hpp")
+        windower = Template(data["windower"].code).render(data["windower"].jinjaVars)
+        windower = StringFile(windower, "windower.hpp")
+        
+        with open('app/Deploy/Tensorflow/Templates/Prediction.cpp') as f:
+            predictor = Template(f.read()).render({"labels": self.piplineData.labels, "samplingRate": self.piplineData.samplingRate})
+            predictor = StringFile(predictor, "predictor.hpp")
+        
+        zip = zipFiles([model_data, normalizer, windower, predictor])
         return zip

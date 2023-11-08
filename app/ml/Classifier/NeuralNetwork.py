@@ -76,7 +76,7 @@ class NeuralNetwork(BaseClassififer):
             
         c_array = self.bytes_to_c_arr(tflite_model)
         array_content = "{}".format(", ".join(c_array))
-        converted_model_str = '#include "model.h"\n\nalignas(8) const unsigned char g_model[] PROGMEM = {\n\t'
+        converted_model_str = 'alignas(8) const unsigned char g_model[] PROGMEM = {\n\t'
         # pretty printing the bytes
         chunk_size = 6 * 12
         for i in range(0, len(array_content), chunk_size):

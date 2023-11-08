@@ -18,7 +18,7 @@ class Nicla(BaseDevice):
     
     def getSensorParams(self, tsMap, parameters):
 
-
+        # TODO: set does not preserve order, needs to be fixed
         before_setup = set()
         setup = set()
         obtain_values = set()
@@ -35,14 +35,17 @@ class Nicla(BaseDevice):
         before_setup, setup, obtain_values = self.getSensorParams(tsMap, parameters)
 
         data = {"before_setup": before_setup, "setup": setup, "obtain_values": obtain_values}
-        data["add_datapoint_vars"] = ",".join([x.split(" = ")[0].split(" ")[1] for x in obtain_values])
+        data["add_datapoint_vars"] = ", ".join([x.split(" = ")[0].split(" ")[1] for x in obtain_values])
+        data["sensor_stream_count"] = len(obtain_values)
         data["sampling_rate"] = parameters[0].value
 
-        base_path = f"app/Deploy/Devices/Nicla/Base{'NN' if is_neural_network else ''}.cpp"
+        if is_neural_network:
+            base_path = f"app/Deploy/Devices/Nicla/BaseNN.cpp"
+        else:
+            base_path = f"app/Deploy/Devices/Nicla/Base.cpp"
         
         with open(base_path, "r") as f:
             base = f.read()
-            print(base)
 
         template = Template(base)
         res = template.render(data)

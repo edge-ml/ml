@@ -78,17 +78,17 @@ async def deployConfig(model_id: str, project: str = Header(...)):
 
 @router.post("/{model_id}")
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
-    device = get_device_by_name(body.device.name)()
-    main_file_content = device.deploy(body.tsMap, body.parameters)
-
     model = await get_model(model_id, project)
+    device = get_device_by_name(body.device.name)()
+    main_file_content = device.deploy(body.tsMap, body.parameters, model.isNeuralNetwork)
+
     code = downloadModel(model, Platforms.C)
 
     zip_file = add_to_zip_file(code, main_file_content, "main.ino")
     file_data = {'file': ('example.zip', zip_file)}
     url = f"{FIRMWARE_COMPILE_URL}compile/nicla"
     response = requests.post(url, files=file_data)
-    print(response.content)
+    # print(response.content)
     return StreamingResponse(iter([response.content]), media_type="application/octet-stream")
 
 @router.post("/{model_id}/download")
@@ -98,7 +98,7 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
     code = downloadModel(model, Platforms.C)
     main_file_content = device.deploy(body.tsMap, body.parameters, model.isNeuralNetwork)
 
-    zip_file = add_to_zip_file(code, main_file_content, "main.ino")
+    zip_file = add_to_zip_file(code, main_file_content, f"{model.name}.ino")
 
     zip_file.seek(0)
     return StreamingResponse(zip_file, media_type="application/zip", headers={'Content-Disposition': f'attachment; filename={model.name}.zip'})

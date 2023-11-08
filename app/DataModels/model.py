@@ -78,17 +78,22 @@ class ConcreteStepDefinitions(BaseModel):
 
 class ConcreteSteps(BaseModel):
     options: List[ConfigObj]
-    steps: List[ConcreteStepDefinitions]
+    # steps: List[ConcreteStepDefinitions]
+
+class Labeling(BaseModel):
+    name: str
+    color: str
 
 
 class Model(BaseModel):
     id: PyObjectId = Field(default_factory=ObjectId, alias="_id")
     projectId: PyObjectId
     name: str
-    pipeLineRequest: PipelineRequest
+    pipeline: PipelineRequest
+    labels: Optional[Labeling]
     timeSeries: Optional[List[str]]
+    samplingRate: Optional[float]
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
-    concreteSteps: Optional[ConcreteSteps]
 
 

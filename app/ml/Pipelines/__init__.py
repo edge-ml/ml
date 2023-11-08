@@ -8,6 +8,8 @@ from app.ml.Pipelines.Abstract.AbstractPipelineCreator import AbstractPipeLineCr
 from app.ml.Pipelines.AutoMLClassificationPipeline import AutoMLClassificationPipeline
 from app.ml.Pipelines.ManualClassificationPipeline import ManualClassificationPipeline
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from app.ml.Pipeline import Pipeline
+
 
 _pipelines : List[AbstractPipeLineCreator] = [ManualClassificationPipeline, AutoMLClassificationPipeline]
 
@@ -89,3 +91,9 @@ for x in _classes:
 
 def getProcessor(name):
     return _pipelineMap[name]
+
+def getPipeline(model):
+    stepOptions = model.concreteSteps.options
+    options = [getProcessor(x.name)(x.parameters) for x in stepOptions]
+    pipeline = Pipeline(options=options, steps=[])  
+    return pipeline

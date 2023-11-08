@@ -7,6 +7,8 @@ class AbstractPipelineOption():
 
     def __init__(self, parameters : List[Parameter] = []):
         self.parameters = parameters
+        self.input_shape = None
+        self.output_shape = None
         type = None
 
     @staticmethod
@@ -14,7 +16,7 @@ class AbstractPipelineOption():
         raise NotImplementedError()
 
     @staticmethod
-    def get_desciption():
+    def get_description():
         raise NotImplementedError()
     
     @staticmethod
@@ -32,7 +34,11 @@ class AbstractPipelineOption():
         raise NotImplementedError()
 
     def persist(self):
-        return {"name": self.get_name(), "parameters": self.parameters, "state": self.get_state()}
+        if self.input_shape is None:
+            raise Exception("Input shape must be set")
+        if self.output_shape is None:
+            raise Exception("Output shape must be set")
+        return {"name": self.get_name(), "parameters": self.parameters, "state": self.get_state(), "input_shape:": self.input_shape, "output_shape": self.output_shape}
     
     def get_state(self):
         return {}
@@ -40,13 +46,13 @@ class AbstractPipelineOption():
     def restore(self, config):
         self.parameters = config.parameters
 
-    def export(self, platform: Platforms):
+    def export(self, params, platform: Platforms):
         if platform == Platforms.C:
-            return self.exportC()
+            return self.exportC(params)
         else:
             raise NotImplementedError()
 
-    def exportC():
+    def exportC(params):
         raise NotImplementedError()
     
     @classmethod

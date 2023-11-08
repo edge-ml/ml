@@ -12,7 +12,7 @@ class NoFeatureExtractor(BaseFeatureExtractor):
         return "None"
 
     @staticmethod
-    def get_desciption():
+    def get_description():
         return "Extracts no features and returns the raw time-series"
 
     @staticmethod

@@ -22,4 +22,7 @@ class BaseNormalizer(AbstractPipelineOption):
         return PipelineContainer(self.normalize(data.data), data.labels, data.meta)
     
     def fit_exec(self, data: PipelineContainer) -> PipelineContainer:
-        return PipelineContainer(self.fit_normalize(data.data), data.labels, data.meta)
+        output = self.fit_normalize(data.data)
+        self.input_shape = data.data.shape
+        self.output_shape = output.shape
+        return PipelineContainer(output, data.labels, data.meta)

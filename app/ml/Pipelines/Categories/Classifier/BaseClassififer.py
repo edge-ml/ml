@@ -26,4 +26,7 @@ class BaseClassififer(AbstractPipelineOption):
         print(data.data.shape)
 
         self.fit(data.data, data.labels)
-        return PipelineContainer(self.predict(data.data), data.labels, data.meta)
+        output = self.predict(data.data)
+        self.input_shape = data.data.shape
+        self.output_shape = output.shape
+        return PipelineContainer(output, data.labels, data.meta)

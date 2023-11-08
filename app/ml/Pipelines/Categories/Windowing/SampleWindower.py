@@ -3,9 +3,10 @@ from app.utils.parameter_builder import ParameterBuilder
 import numpy as np
 from app.ml.BaseConfig import Platforms
 from jinja2 import Template
-from app.Deploy.CPP.cPart import CPart
 from app.ml.Pipelines.PipelineContainer import PipelineContainer
-
+from app.ml.PipelineExport.C.Common.utils import getCode
+from app.ml.PipelineExport.C.Common.Memory import Memory
+from app.ml.PipelineExport.C.Common.CPart import CStep
 class SampleWindower(BaseWindower):
 
     def __init__(self, parameters=[]):
@@ -85,12 +86,25 @@ class SampleWindower(BaseWindower):
             train_X.extend(X)
             train_Y.extend(Y)
             metadata.extend(Meta)
-            
+
+        self.input_shape = train_X[0].shape[0]
+        self.output_shape = train_X[0].shape
         return PipelineContainer(*self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y), metadata))
 
-    def exportC(self):
-        global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
+    def export(self, params, platform):
+        return self.exportC(params)
 
+    def exportC(self, params):
+        input_sensors = params.timeSeries
+        variables = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
+        code = getCode("./app/ml/PipelineExport/C/Windower/SampleWindower.cpp")
+        input_mem = None
+        output_mem = Memory(len(input_sensors) * variables["window_size"], False)
+        cstep = CStep(variables, code, input_mem, output_mem)
+        return cstep
+
+    def exportC2(self):
+        global_vars = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
 
         code = '''
         void add_datapoint({{timeSeriesInput}})

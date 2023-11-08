@@ -2,6 +2,9 @@ from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
 import numpy as np
 from app.Deploy.CPP.cPart import CPart
 from app.utils.StringFile import StringFile
+from app.ml.PipelineExport.C.Common.utils import getCode
+from app.ml.PipelineExport.C.Common.Memory import Memory
+from app.ml.PipelineExport.C.Common.CPart import CStep
 
 
 class SimpleFeatureExtractor(BaseFeatureExtractor):
@@ -36,7 +39,16 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
             window_features.append(np.stack(stack))
         return np.array(window_features)
 
-    def exportC(self):
+    def export(self, params, platform):
+        return self.exportC(params)
+
+    def exportC(self, params):
+        code = getCode("./app/ml/PipelineExport/C/Windower/SampleWindower.cpp")
+        output_memory = Memory(len(params.timeSeries) * 9, True)
+        
+
+
+    def exportC2(self, params):
         code = '''
         void extract_features(Matrix &inputs, Matrix &outputs)
         {

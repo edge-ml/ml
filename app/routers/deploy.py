@@ -47,6 +47,7 @@ async def export(format: str):
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
     model = await get_model(model_id, project)
     code = downloadModel(model, format)
+    print(code)
     # fileName = f"{model.name}_{format.name}.zip"
     # return StreamingResponse(code, media_type='application/zip', headers={
     #     f'Content-Disposition': 'attachment; filename="' + fileName + '"'

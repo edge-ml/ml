@@ -61,9 +61,8 @@ def buildPipeline(req: PipelineRequest) -> Pipeline:
     options = []
     steps = []
     for step in req.selectedPipeline.steps:
-        if step.type == StepType.PRE or step.type == StepType.CORE:
-            steps.append(getCategory(step.name))
-            options.append(getProcessor(step.options.name)(step.options.parameters))
+        steps.append(getCategory(step.name))
+        options.append(getProcessor(step.options.name)(step.options.parameters))
     return Pipeline(options, steps)
 
 def getEvaluator(req: PipelineRequest) -> BaseEvaluation:

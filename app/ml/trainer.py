@@ -5,6 +5,7 @@ from app.db.models import add_model, update_model_status, ModelStatus, set_model
 from app.db.labelings import get_labeling
 from app.db.datasets import get_dataset
 from app.DataProcessor.DataLoader.DataLoader import processDatasets
+from app.DataModels.PipelineRequest import PipelineStep, PipelineStepOption
 
 
 from app.ml.Pipelines.Categories.Evaluation import get_eval_by_name
@@ -29,7 +30,7 @@ from app.ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
 
 
 
-async def init_train(trainReq : PipelineRequest, id, project):
+async def init_train(trainReq : PipelineRequest, model : Model, id, project):
     try:
         await update_model_status(id, project, ModelStatus.training)
         # Get the datasets and lableings used for training
@@ -68,17 +69,26 @@ async def init_train(trainReq : PipelineRequest, id, project):
 
         data = PipelineContainer(datasets_processed, None, datasetMetaData)
 
-        performance = evaluator.eval(pipeline, data, labels)
+        performance = pipeline.eval(data, labels)
 
         timeSeries = [x.name for x in datasets[0].timeSeries]
-        # print(timeSeries)
-        ml_data = {}
-        ml_data["concreteSteps"] = pipeline.persist()
-        ml_data["labels"] = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
-        ml_data["timeSeries"] = timeSeries
-        ml_data["samplingRate"] = samplingRate
-        ml_data["performance"] = performance
-        await set_model_data(id, project, ml_data)
+
+
+        for i, cs in enumerate(pipeline.persist()):
+            model.pipeline.selectedPipeline.steps[i].options = cs
+        
+
+        model.timeSeries = timeSeries
+        model.samplingRate = samplingRate
+        model.labels = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
+        await set_model_data(id, project, model.dict(by_alias=True))
+        # ml_data = {}
+        # ml_data["concreteSteps"] = pipeline.persist()
+        # ml_data["labels"] = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
+        # ml_data["timeSeries"] = timeSeries
+        # ml_data["samplingRate"] = samplingRate
+        # ml_data["performance"] = performance
+        # await set_model_data(id, project, ml_data)
         await update_model_status(id, project, ModelStatus.done)
     except Exception as e:
         print(e)
@@ -88,8 +98,7 @@ async def init_train(trainReq : PipelineRequest, id, project):
 
 async def train(req: PipelineRequest, project, background_tasks):
     data = req.dict(by_alias=True)
-    model = Model(name=req.name, pipeLineRequest=req, projectId=project)
+    model = Model(name=req.name, pipeline=req, projectId=project)
     id = await add_model(model)
-
-    background_tasks.add_task(init_train, req, id, project)
+    background_tasks.add_task(init_train, req, model, id, project)
     return id

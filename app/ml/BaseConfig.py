@@ -16,7 +16,7 @@ class BaseConfig():
         raise NotImplementedError()
 
     @staticmethod
-    def get_desciption():
+    def get_description():
         raise NotImplementedError()
 
     @staticmethod

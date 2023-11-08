@@ -2,6 +2,8 @@
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType, AbstractPipelineStep
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from typing import List, Union
+from app.utils.enums import Platforms
+# from app.ml.Pipelines import getProcessor, getCategory
 
 
 # class Pipeline():
@@ -74,7 +76,7 @@ class Pipeline():
     
     def __init__(self, options, steps):
         self.options : List[AbstractPipelineOption] = options
-        self.steps: List[AbstractPipelineStep] = steps
+        # self.steps: List[AbstractPipelineStep] = steps
 
     def exec(self, data, types : Union[StepType, List[StepType]]):
         for step in self.options:
@@ -85,26 +87,25 @@ class Pipeline():
     def fit_exec(self, data, types: Union[StepType, List[StepType]]):
         print("TYPES: ", types)
         for step in self.options:
-            print("STEP: ", step.get_name(), step.type)
-            print(data.data.shape)
             if step.type in types:
-                print("Fit_exec: ", step.get_name())
                 data = step.fit_exec(data)
-                print(step.get_name(), data)
         return data
 
     def clone(self):
         return Pipeline([x.__class__(x.parameters) for x in self.options])
-    
-    @staticmethod
-    def load(model):
-        stepOptions = model.concreteSteps.options
-        for step in stepOptions:
-            print(step.name)
+
+    def eval(self, data, labels):
+        [evaluator] = [x for x in self.options if x.type == StepType.EVAL]
+        return evaluator.eval(self, data, labels)
+
+    def export(self, params, platform : Platforms):
+        for option in self.options:
+            print("Export: ", option.get_name())
+            option.export(params, platform)
 
 
     def __str__(self) -> str:
         return ", ".join([x.get_name() for x in self.options])
     
     def persist(self):
-        return {"options": [x.persist() for x in self.options], "steps": [x.get_train_config() for x in self.steps]}
+        return [x.persist() for x in self.options]

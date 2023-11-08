@@ -19,6 +19,7 @@ class TestTrainSplitEvaluation(BaseEvaluation):
 
     def __init__(self, parameters):
         super().__init__(parameters)
+        self.metrics = None
 
     @staticmethod
     def get_name():
@@ -35,22 +36,22 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         pb.add_number("Train_test_split", "split", "Ratio between training and testing data", 0, 100, 80, 1, required=True)
         return pb.parameters
 
-    def eval2(self, X, Y, labels, metaData) -> Pipeline:
-        test_percentage = 1 - (self.get_param_value_by_name("Train_test_split") / 100)
-        train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=test_percentage, stratify=Y)
+    # def eval2(self, X, Y, labels, metaData) -> Pipeline:
+    #     test_percentage = 1 - (self.get_param_value_by_name("Train_test_split") / 100)
+    #     train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=test_percentage, stratify=Y)
 
 
-        normalizer = get_normalizer_by_name(self.normalizer_config.name)(self.normalizer_config.parameters)
-        train_x = normalizer.fit_normalize(train_x)
-        test_x = normalizer.normalize(test_x)
+    #     normalizer = get_normalizer_by_name(self.normalizer_config.name)(self.normalizer_config.parameters)
+    #     train_x = normalizer.fit_normalize(train_x)
+    #     test_x = normalizer.normalize(test_x)
 
-        classifier = get_classifier_by_name(self.classifier_config.name)(self.classifier_config.parameters)
-        classifier.fit(train_x, train_y)
+    #     classifier = get_classifier_by_name(self.classifier_config.name)(self.classifier_config.parameters)
+    #     classifier.fit(train_x, train_y)
 
-        self.metrics = calculateMetrics(test_y, classifier.predict(test_x), labels)
-        return self.metrics, (normalizer, classifier)
+    #     self.metrics = calculateMetrics(test_y, classifier.predict(test_x), labels)
+    #     return self.metrics, (normalizer, classifier)
     
-    def eval(self, pipeline : Pipeline, datasets, labelNames) -> Pipeline:
+    def eval(self, pipeline : Pipeline, datasets, labelNames):
         data: PipelineContainer = pipeline.exec(datasets, StepType.PRE)
         print("DATA_EVAL_PRE: ", data.data.shape)
 
@@ -65,8 +66,9 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         res: PipelineContainer = pipeline.exec(pipelineDataTest, StepType.CORE)
         print("-----")
         self.metrics = calculateMetrics(label_test, res.data, labelNames)
+        print("METRICS: ", self.metrics)
         return self.metrics
 
 
     def persist(self):
-        return {"name": self.get_name(), "parameters": self.parameters, "metrics": self.metrics}
+        return {"name": self.get_name(), "description": self.get_description(), "parameters": self.parameters, "metrics": self.metrics}

@@ -71,6 +71,6 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         print("METRICS: ", self.metrics)
         return self.metrics
 
-^
+
     def persist(self):
         return {"name": self.get_name(), "description": self.get_description(), "parameters": self.parameters, "metrics": self.metrics}

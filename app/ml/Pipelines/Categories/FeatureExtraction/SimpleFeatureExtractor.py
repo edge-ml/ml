@@ -43,8 +43,11 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         return self.exportC(params)
 
     def exportC(self, params):
-        code = getCode("./app/ml/PipelineExport/C/Windower/SampleWindower.cpp")
-        output_memory = Memory(len(params.timeSeries) * 9, True)
+        code = getCode("./app/ml/PipelineExport/C/FeatureExtractor/SimpleFeatureExtractor.cpp")
+        input_shape = self.input_shape
+        output_shape = self.output_shape
+        return CStep({}, code, input_shape, output_shape, includes=['#include "feature_extractor.hpp"'])
+
         
 
 

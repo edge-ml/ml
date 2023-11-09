@@ -38,8 +38,8 @@ class DenseSmall(NeuralNetwork):
         X_train_reshaped = reshapeSklearn(X_train)
         
         self.model = Sequential([
-            Dense(units=64, activation='relu', input_shape=(X_train_reshaped.shape[1], )),
-            Dense(units=32, activation='relu'),
+            Dense(units=8, activation='relu', input_shape=(X_train_reshaped.shape[1], )),
+            Dense(units=8, activation='relu'),
             Dense(num_classes, activation='softmax')
         ])
         

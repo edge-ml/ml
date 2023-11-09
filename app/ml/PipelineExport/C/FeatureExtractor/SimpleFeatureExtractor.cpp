@@ -1,7 +1,9 @@
-void extract_features(Matrix &inputs, Matrix &outputs)
+void {{name}}(Matrix &inputs, Matrix &outputs)
 {
+    int num_sensors = {{input_shape[0]}};
+    int num_features = {{output_shape[1]}};
 
-    for (int i = 0; i < {{num_sensors}}; i++)
+    for (int i = 0; i < num_sensors; i++)
     {
         outputs[i][0] = sum(inputs[i]);
         outputs[i][1] = median(inputs[i]);

@@ -19,6 +19,12 @@ from app.StorageProvider import StorageProvider
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from app.ml.Pipelines.PipelineContainer import PipelineContainer
 
+from jinja2 import FileSystemLoader, Template, Environment
+
+
+from app.ml.PipelineExport.C.Common.CPart import CStep
+from app.ml.PipelineExport.C.Common.Memory import Memory
+
 class DecisionTree(BaseClassififer):
     def __init__(self, parameters):
         super().__init__(parameters)
@@ -182,7 +188,33 @@ class DecisionTree(BaseClassififer):
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
 
     def exportC(self, params):
-        return convert(self.clf)
+
+        templateLoader = FileSystemLoader(searchpath="app/Deploy/Sklearn/Templates")
+        templateEnv = Environment(loader=templateLoader)
+
+        tree = {
+            'left': self.clf.tree_.children_left,
+            'right': self.clf.tree_.children_right,
+            'features': self.clf.tree_.feature,
+            'thresholds': self.clf.tree_.threshold,
+            'classes': self.clf.tree_.value,
+            'i': 0
+        }
+
+        functions = {"f": {
+            "enumerate": enumerate,
+            'round': lambda x: round(x, 12),
+        }}
+
+        data = {**functions}
+        code = templateEnv.get_template("decisiontree.jinja").render(tree, **data)
+        
+        variables = {**tree, **functions}
+
+        input_mem = self.input_shape
+        output_mem = self.output_shape
+
+        return CStep(variables, code, input_mem, output_mem)
 
     # class methods
     def __init__(self, parameters=[]):
@@ -210,6 +242,7 @@ class DecisionTree(BaseClassififer):
         self.data_id = dict.state["data_id"]
         byte_clf = StorageProvider.load(self.data_id)
         self.clf = pickle.loads(byte_clf)
+        super().restore(dict)
 
     def persist(self):
         self.data_id = ObjectId()

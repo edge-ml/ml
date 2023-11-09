@@ -20,27 +20,6 @@ def get_configs():
 PIPELINES_CONFIG = get_configs()
 
 
-from app.ml.Pipelines.Categories.Windowing.SampleWindower import SampleWindower
-from app.ml.Pipelines.AutoML.AutoMLClassifier import AutoMLClassifier
-from app.ml.Pipelines.Categories.Common.ModelMetadata import ModelMetadata
-from app.ml.Pipelines.Categories.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
-from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
-from app.ml.Pipelines.Categories.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
-from app.ml.Pipelines.Categories.Classifier.decision_tree import DecisionTree
-from app.ml.Pipelines.Categories.Classifier.DenseSmall import DenseSmall
-from app.ml.Pipelines.Categories.Classifier.CNNSmall import CNNSmall
-from app.ml.Pipelines.Categories.Normalizer.MinMaxNormalizer import MinMaxNormalizer
-from app.ml.Pipelines.Categories.Normalizer.ZNormalizer import ZNormalizer
-
-
-# PipelineSteps = [SampleWindower, AutoMLClassifier, ModelMetadata, TestTrainSplitEvaluation, SimpleFeatureExtractor, DecisionTree, MinMaxNormalizer, ZNormalizer, DenseSmall, NoFeatureExtractor, CNNSmall]
-
-# _pipelineMap = {x.get_name(): x for x in PipelineSteps}
-
-
-# def getProcessor(name):
-#     return _pipelineMap[name]
-
 
 from app.ml.Pipelines.Categories.Windowing import WINDOWING_CATEGORY
 from app.ml.Pipelines.AutoML import AUTOMLCLASSIFIER_CATEGORY
@@ -59,14 +38,12 @@ def getCategory(name):
     return _categoryMap[name]
 
 
-def load_modules():
-    print("LOAD MODULES")
+def load_modules(dictionary, superClass):
     classes = []
-    dic = "./app/ml/Pipelines/"
-    for root, _, files in os.walk(dic):
+    for root, _, files in os.walk(dictionary):
         for file in files:
             if file.endswith(".py"):
-                if "AbstractPipelineOption" in file:
+                if superClass.__name__ in file:
                     continue
                 if file.startswith("__init__"):
                     continue
@@ -74,11 +51,11 @@ def load_modules():
                 module_path = module_path.replace(os.path.sep, ".")[2:-3]
                 module = importlib.import_module(module_path)
                 for name, obj in inspect.getmembers(module):
-                    if inspect.isclass(obj) and issubclass(obj, AbstractPipelineOption):
+                    if inspect.isclass(obj) and issubclass(obj, superClass):
                         classes.append(obj)
     return classes
 
-_classes = load_modules()
+_classes = load_modules("./app/ml/Pipelines/", AbstractPipelineOption)
 
 _pipelineMap = {}
 for x in _classes:
@@ -88,14 +65,17 @@ for x in _classes:
     except Exception as e:
         pass
 
-
-def getProcessor(name):
+def getPipelineOption(name):
     return _pipelineMap[name]
+
+
 
 def getPipeline(model):
     stepOptions = model.pipeline.selectedPipeline.steps
-    options = [getProcessor(x.options.name)() for x in stepOptions]
+    categories = [getCategory(x.name) for x in stepOptions]
+    options = [getPipelineOption(x.options.name)() for x in stepOptions]
     for o, s in zip(options, stepOptions):
+        print("RESTORE_DATA: ", s.options.input_shape, s.options.output_shape)
         o.restore(s.options)
-    pipeline = Pipeline(options=options, steps=[])  
+    pipeline = Pipeline(options=options, steps=categories)  
     return pipeline

@@ -46,6 +46,9 @@ async def export(format: str):
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
     model = await get_model(model_id, project)
+    print("MODEL")
+    for step in model.pipeline.selectedPipeline.steps:
+        print(step.options.input_shape, step.options.output_shape)
     code = downloadModel(model, format)
     print(code)
     # fileName = f"{model.name}_{format.name}.zip"

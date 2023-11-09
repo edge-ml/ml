@@ -34,16 +34,13 @@ class AbstractPipelineOption():
         raise NotImplementedError()
 
     def persist(self):
-        if self.input_shape is None:
-            raise Exception("Input shape must be set")
-        if self.output_shape is None:
-            raise Exception("Output shape must be set")
-        return {"name": self.get_name(), "description": self.get_description(), "parameters": self.parameters, "state": self.get_state(), "input_shape:": self.input_shape, "output_shape": self.output_shape}
+        return {"name": self.get_name(), "description": self.get_description(), "parameters": self.parameters, "state": self.get_state(), "input_shape": self.input_shape, "output_shape": self.output_shape}
     
     def get_state(self):
         return {}
 
     def restore(self, config):
+        print("Restore:", self.get_name(), config.input_shape)
         self.parameters = config.parameters
         self.input_shape = config.input_shape
         self.output_shape = config.output_shape

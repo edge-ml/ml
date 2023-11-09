@@ -50,9 +50,7 @@ class SampleWindower(BaseWindower):
             False
         )
         return pb.parameters
-    
-    def restore(self, config):
-        self.parameters = config.parameters
+
 
 
     def window(self, data: PipelineContainer) -> PipelineContainer:
@@ -87,20 +85,24 @@ class SampleWindower(BaseWindower):
             train_Y.extend(Y)
             metadata.extend(Meta)
 
-        self.input_shape = train_X[0].shape[0]
-        self.output_shape = train_X[0].shape
+        self.input_shape = None
+        self.output_shape = [train_X[0].shape[1], train_X[0].shape[0]]
         return PipelineContainer(*self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y), metadata))
 
     def export(self, params, platform):
         return self.exportC(params)
 
     def exportC(self, params):
-        input_sensors = params.timeSeries
-        variables = {"window_size": int(self.get_param_value_by_name("window_size")), "sliding_step": int(self.get_param_value_by_name("sliding_step"))}
+        variables = {
+            "window_size": int(self.get_param_value_by_name("window_size")),
+            "sliding_step": int(self.get_param_value_by_name("sliding_step")),
+            "timeSeries": params.timeSeries,
+            "timeSeriesInput": ",".join([f"float {x}" for x in params.timeSeries]), "num_sensors": len(params.timeSeries)
+            }
         code = getCode("./app/ml/PipelineExport/C/Windower/SampleWindower.cpp")
-        input_mem = None
-        output_mem = Memory(len(input_sensors) * variables["window_size"], False)
-        cstep = CStep(variables, code, input_mem, output_mem)
+        input_shape = None
+        output_shape = self.output_shape
+        cstep = CStep(variables, code, input_shape, output_shape, globals=["int ctr = 0;", f"Matrix raw_data({self.output_shape[0]}, vector<float>({self.output_shape[1]}));"])
         return cstep
 
     def exportC2(self):

@@ -1,7 +1,7 @@
 Matrix mins = {{min}}
 Matrix maxs = {{max}}
 
-void normalize(Matrix &input)
+void {{name}}(Matrix &input, Matrix &outputs)
 {
     int num_sensors = input.size();
     int feature_size = input[0].size();
@@ -9,7 +9,7 @@ void normalize(Matrix &input)
     {
         for (int j = 0; j < feature_size; j++)
         {
-            input[i][j] = (input[i][j] - mins[i][j]) / (maxs[i][j] - mins[i][j]);
+            outputs[i][j] = (input[i][j] - mins[i][j]) / (maxs[i][j] - mins[i][j]);
         }
     }
 }

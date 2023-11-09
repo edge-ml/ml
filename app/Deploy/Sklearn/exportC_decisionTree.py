@@ -1,4 +1,5 @@
-from app.Deploy.CPP.cPart import CPart
+# from app.Deploy.CPP.cPart import CPart
+from app.ml.PipelineExport.C.Common.CPart import CStep
 from jinja2 import FileSystemLoader, Template, Environment
 
 
@@ -25,4 +26,8 @@ def convert(clf):
     data = {**functions}
     code = templateEnv.get_template("decisiontree.jinja").render(tree, **data)
     
+    variables = {**tree, **functions}
+
+    return CStep(variables, code, input_mem, output_mem)
+
     return CPart([], [], code, {**tree, **functions})

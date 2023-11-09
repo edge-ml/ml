@@ -3,6 +3,8 @@ from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOpt
 from app.ml.BaseConfig import BaseConfig
 from app.ml.Pipelines.PipelineContainer import PipelineContainer
 
+import numpy as np
+
 class BaseClassififer(AbstractPipelineOption):
 
     def __init__(self, parameters):
@@ -27,6 +29,6 @@ class BaseClassififer(AbstractPipelineOption):
 
         self.fit(data.data, data.labels)
         output = self.predict(data.data)
-        self.input_shape = data.data.shape
-        self.output_shape = output.shape
+        self.input_shape = data.data.shape[1:]
+        self.output_shape = [len(np.unique(data.labels))]
         return PipelineContainer(output, data.labels, data.meta)

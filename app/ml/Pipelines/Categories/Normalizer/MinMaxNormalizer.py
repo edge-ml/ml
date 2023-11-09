@@ -92,6 +92,7 @@ class MinMaxNormalizer(BaseNormalizer):
         variables = {"min": self._matrix_to_vector(self.min), "max": self._matrix_to_vector(self.max)}
         code = getCode("./app/ml/PipelineExport/C/Normalizer/MinMaxNormalizer.cpp")
         print("Normalizer: ", self.input_shape, self.output_shape)
-        input_mem = Memory(self.input_shape, True)
-        output_Mem = Memory(self.output_shape, True)
+        input_mem = self.input_shape
+        output_Mem = self.output_shape
         step = CStep(variables, code, input_mem, output_Mem)
+        return step

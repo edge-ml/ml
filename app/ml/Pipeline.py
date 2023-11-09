@@ -3,7 +3,9 @@ from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType, AbstractPip
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from typing import List, Union
 from app.utils.enums import Platforms
-# from app.ml.Pipelines import getProcessor, getCategory
+
+from app.ml.PipelineExport.C.CCompiler import buildCCode
+# from app.ml.Pipelines import getPipelineOption, getCategory
 
 
 # class Pipeline():
@@ -76,7 +78,7 @@ class Pipeline():
     
     def __init__(self, options, steps):
         self.options : List[AbstractPipelineOption] = options
-        # self.steps: List[AbstractPipelineStep] = steps
+        self.steps: List[AbstractPipelineStep] = steps
 
     def exec(self, data, types : Union[StepType, List[StepType]]):
         for step in self.options:
@@ -98,14 +100,21 @@ class Pipeline():
         [evaluator] = [x for x in self.options if x.type == StepType.EVAL]
         return evaluator.eval(self, data, labels)
 
-    def export(self, params, platform : Platforms):
-        for option in self.options:
-            print("Export: ", option.get_name())
-            option.export(params, platform)
+    def export(self, model, platform : Platforms):
+        exportSteps = []
+        for (step, option) in zip(self.steps, self.options):
+            if step.type in [StepType.PRE, StepType.CORE]:
+                print("Export: ", option.get_name())
+                exportStep = option.export(model, platform)
+                exportSteps.append(exportStep)
 
+        buildCCode(exportSteps)
+        
 
     def __str__(self) -> str:
         return ", ".join([x.get_name() for x in self.options])
     
     def persist(self):
+        for x in self.options:
+            print(x.input_shape)
         return [x.persist() for x in self.options]

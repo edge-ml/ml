@@ -8,7 +8,7 @@ from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
 from app.ml.Pipeline import Pipeline
 from app.ml.Pipelines.Categories.Windowing import get_windower_by_name
 from app.DataModels.PipelineRequest import PipelineRequest
-from app.ml.Pipelines import getProcessor, getCategory
+from app.ml.Pipelines import getPipelineOption, getCategory
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 
@@ -44,7 +44,7 @@ def fit_to_pipeline(req: PipelineRequest, datasets, datasetMetaData, labels) -> 
     pipelineSteps = []
     for step in req.selectedPipeline.steps:
         category = getCategory(step.name)
-        stepProcessor = getProcessor(step.options.name)
+        stepProcessor = getPipelineOption(step.options.name)
         pipelineSteps.append(stepProcessor)
         if category.type == StepType.CORE or category.type == StepType.PRE:
             processor : AbstractPipelineOption = stepProcessor(step.options.parameters)
@@ -62,11 +62,11 @@ def buildPipeline(req: PipelineRequest) -> Pipeline:
     steps = []
     for step in req.selectedPipeline.steps:
         steps.append(getCategory(step.name))
-        options.append(getProcessor(step.options.name)(step.options.parameters))
+        options.append(getPipelineOption(step.options.name)(step.options.parameters))
     return Pipeline(options, steps)
 
 def getEvaluator(req: PipelineRequest) -> BaseEvaluation:
     evaluators = [x for x in req.selectedPipeline.steps if x.type == StepType.EVAL]
     if len(evaluators) > 1:
         raise Exception("Only one evaluator in a pipeline allowed")
-    return getProcessor(evaluators[0].options.name)(evaluators[0].options.parameters)
+    return getPipelineOption(evaluators[0].options.name)(evaluators[0].options.parameters)

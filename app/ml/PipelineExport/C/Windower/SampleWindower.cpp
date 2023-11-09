@@ -1,10 +1,12 @@
-void add_datapoint({{timeSeriesInput}})
+void {{name}}({{timeSeriesInput}})
     {
+        int window_size = {{output_shape[1]}};
+
         {% for ts in timeSeries %}
             raw_data[{{loop.index-1}}][ctr] = {{ts}};
         {% endfor %}
         ctr++;
-        if (ctr >= {{window_size}})
+        if (ctr >= window_size)
         {
             ctr = 0;
         }

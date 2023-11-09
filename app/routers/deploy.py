@@ -2,7 +2,7 @@ from fastapi import APIRouter, Header
 from app.db.models import get_model
 from app.Deploy.Base import downloadModel
 from app.ml.BaseConfig import Platforms
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from io import BytesIO
 from app.ml.Pipeline import Pipeline
 from app.Deploy.Devices import DEVICES
@@ -13,7 +13,8 @@ from app.Deploy.Devices import get_device_by_name
 from app.utils.zipfile import add_to_zip_file
 import requests
 from app.internal.config import FIRMWARE_COMPILE_URL
-
+import io
+import tempfile
 class tsMapComponent(BaseModel):
     sensor_id: int
     component_id: int
@@ -50,11 +51,11 @@ async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
     for step in model.pipeline.selectedPipeline.steps:
         print(step.options.input_shape, step.options.output_shape)
     code = downloadModel(model, format)
-    print(code)
-    # fileName = f"{model.name}_{format.name}.zip"
-    # return StreamingResponse(code, media_type='application/zip', headers={
-    #     f'Content-Disposition': 'attachment; filename="' + fileName + '"'
-    # })
+    fileName = f"{model.name}_{format.name}.zip"
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(code)
+            fileName = f"{model.name}_{format.name}.zip"
+            return FileResponse(temp_file.name, filename=fileName, media_type="application/octet-stream")
 
 @router.get("/{model_id}")
 async def deployConfig(model_id: str, project: str = Header(...)):

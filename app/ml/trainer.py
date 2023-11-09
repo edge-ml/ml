@@ -91,6 +91,7 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         # await set_model_data(id, project, ml_data)
         await update_model_status(id, project, ModelStatus.done)
     except Exception as e:
+        print("Train_error!")
         print(e)
         print(traceback.format_exc())
         await set_train_error(id, project, str(e))

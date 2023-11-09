@@ -4,9 +4,17 @@ from app.ml.BaseConfig import Platforms
 from app.ml.Pipelines import getPipeline
 from io import BytesIO
 import zipfile
+import io
 
 def downloadModel(model, platform: Platforms):
     pipeline = getPipeline(model)
-    pipeline.export(model, platform)
-    # zipFile = pipeline.generateModelData(platform)
-    # return zipFile
+    files = pipeline.export(model, platform)
+
+    zip_buffer = io.BytesIO()
+    print(files)
+    with zipfile.ZipFile(zip_buffer, 'w') as zipf:
+        # Add each string as a separate file in the zip archive
+        for i, file in enumerate(files):
+            zipf.writestr(file.name, file.content)
+    zip_buffer.seek(0)
+    return zip_buffer.read()

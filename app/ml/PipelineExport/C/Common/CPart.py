@@ -6,14 +6,20 @@ from jinja2 import Template
 
 from typing import Dict
 
+class ExtraFile():
+    def __init__(self, name, content) -> None:
+        self.content = content
+        self.name = name
+
 class CStep():
-    def __init__(self, variables, code, input_shape: List[int], output_shape: List[int], globals=[], includes=[]) -> None:
+    def __init__(self, variables, code, input_shape: List[int], output_shape: List[int], globals=[], includes=[], extra_files : List[ExtraFile] = []) -> None:
         self.variables : Dict = variables
         self.code : str = code
         self.input_shape = input_shape
         self.output_shape = output_shape
         self.globals : List[str] = globals
         self.includes : List[str] = includes
+        self.extra_files: List[ExtraFile] = extra_files
         
     def compile(self, name):
         template = Template(self.code)

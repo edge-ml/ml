@@ -35,7 +35,7 @@ class TestTrainSplitEvaluation(BaseEvaluation):
     def get_parameters():
         pb = ParameterBuilder()
         pb.parameters = []
-        pb.add_number("Train_test_split", "split", "Ratio between training and testing data", 0, 100, 80, 1, required=True)
+        pb.add_number("Train_test_split", "split", "Ratio between training and testing data", 0, 100, 80, 1, required=True, is_advanced=False)
         return pb.parameters
 
     # def eval2(self, X, Y, labels, metaData) -> Pipeline:
@@ -71,6 +71,6 @@ class TestTrainSplitEvaluation(BaseEvaluation):
         print("METRICS: ", self.metrics)
         return self.metrics
 
-
+^
     def persist(self):
         return {"name": self.get_name(), "description": self.get_description(), "parameters": self.parameters, "metrics": self.metrics}

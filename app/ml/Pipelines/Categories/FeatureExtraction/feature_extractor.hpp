@@ -1,3 +1,6 @@
+
+#ifndef FEATURE_EXTRACTOR_HPP
+#define FEATURE_EXTRACTOR_HPP
 #include <algorithm>
 #include <numeric>
 #include <cmath>
@@ -67,3 +70,5 @@ float abs_min(vector<float>& x) {
     float min_x = min(x);
     return abs(min_x);
 }
+
+#endif

@@ -4,7 +4,7 @@ from app.Deploy.CPP.cPart import CPart
 from app.utils.StringFile import StringFile
 from app.ml.PipelineExport.C.Common.utils import getCode
 from app.ml.PipelineExport.C.Common.Memory import Memory
-from app.ml.PipelineExport.C.Common.CPart import CStep
+from app.ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
 
 
 class SimpleFeatureExtractor(BaseFeatureExtractor):
@@ -46,7 +46,10 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
         code = getCode("./app/ml/PipelineExport/C/FeatureExtractor/SimpleFeatureExtractor.cpp")
         input_shape = self.input_shape
         output_shape = self.output_shape
-        return CStep({}, code, input_shape, output_shape, includes=['#include "feature_extractor.hpp"'])
+
+        with open("./app/ml/Pipelines/Categories/FeatureExtraction/feature_extractor.hpp", "r") as f:
+            extraFile = ExtraFile("feature_extractor.hpp", f.read())
+        return CStep({}, code, input_shape, output_shape, includes=['#include "feature_extractor.hpp"'], extra_files=[extraFile])
 
         
 

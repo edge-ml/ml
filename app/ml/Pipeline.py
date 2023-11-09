@@ -3,6 +3,7 @@ from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType, AbstractPip
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from typing import List, Union
 from app.utils.enums import Platforms
+from app.utils.parameter_builder import ParameterBuilder
 
 from app.ml.PipelineExport.C.CCompiler import buildCCode
 # from app.ml.Pipelines import getPipelineOption, getCategory
@@ -108,7 +109,7 @@ class Pipeline():
                 exportStep = option.export(model, platform)
                 exportSteps.append(exportStep)
 
-        buildCCode(exportSteps)
+        return buildCCode(exportSteps, model)
         
 
     def __str__(self) -> str:
@@ -118,3 +119,11 @@ class Pipeline():
         for x in self.options:
             print(x.input_shape)
         return [x.persist() for x in self.options]
+    
+    @staticmethod
+    def get_parameters():
+        pb = ParameterBuilder()
+        pb.parameters = []
+        pb.add_number("Classification frequency", "Classification frequency", "Sets the frequncy in Hz to predict", 0.1, 10, 1, step_size=0.1, required=True, is_advanced=False)
+        # print(pb.parameters)
+        return pb.parameters

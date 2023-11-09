@@ -214,6 +214,10 @@ class DecisionTree(BaseClassififer):
         input_mem = self.input_shape
         output_mem = self.output_shape
 
+
+        print("DECISION_tREE")
+        print(code)
+
         return CStep(variables, code, input_mem, output_mem)
 
     # class methods

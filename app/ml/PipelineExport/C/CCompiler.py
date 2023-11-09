@@ -1,11 +1,11 @@
-from app.ml.PipelineExport.C.Common.CPart import CStep
+from app.ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
 from app.ml.PipelineExport.C.Common.utils import getCode
-
 from jinja2 import Template
+import math
 
 from typing import List
 
-def buildCCode(steps: List[CStep]):
+def buildCCode(steps: List[CStep], model):
 
     # for (lastStep, step) in zip(steps[:-1], steps[1:]):
     #     mem = lastStep.output_mem.bytes + step.input_mem.bytes
@@ -39,19 +39,33 @@ def buildCCode(steps: List[CStep]):
         if i == 0:
             continue
         if i == len(steps)-1:
-            predictSteps.append(f"return step_{i}(step_{i-1}_output)")
+            predictSteps.append(f"return step_{i}(step_{i-1}_output);")
             continue
         predictSteps.append(f"step_{i}(step_{i-1}_output, step_{i}_output);")
 
 
     template = Template(base_code)
-    rendered_code = template.render({"steps": compiled_steps, "globals": globals, "includes": includes, "predictSteps": predictSteps})
+    rendered_code = template.render({
+        "steps": compiled_steps,
+        "globals": globals,
+        "includes": includes,
+        "predictSteps": predictSteps,
+        "labels": [x.name for x in model.labels],
+        "samplingRate": math.floor(model.samplingRate * 100) / 100,
+        "enumerate": enumerate,})
 
     print("*" * 40, "RENDERED_CODE", "*" * 40)
 
     print(rendered_code)
 
-    with open("/Users/king/Desktop/testCpp/test.cpp", "w") as f:
-        f.write(rendered_code)
+    files = []
+    for step in steps:
+        files.extend(step.extra_files)
+    files.append(ExtraFile("model.cpp", rendered_code))
+
+    return files
+
+    # with open("/Users/king/Desktop/testCpp/test.cpp", "w") as f:
+    #     f.write(rendered_code)
 
         

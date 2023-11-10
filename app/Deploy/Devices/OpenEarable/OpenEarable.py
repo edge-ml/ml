@@ -40,11 +40,11 @@ class OpenEarable(BaseDevice):
     
     def deploy(self, tsMap, parameters, additionalSettings, model):
         print("+"*40)
-        print([x for x in parameters if x.name == "Classification frequency"][0].value)
+        print([x for x in parameters if x.name == "classificationFrequency"][0].value)
         print(additionalSettings)
         print(model.pipeline.samplingRate)
         print("+"*40)
-        classification_frequency = [x for x in parameters if x.name == "Classification frequency"][0].value
+        classification_frequency = [x for x in parameters if x.name == "classificationFrequency"][0].value
         before_setup, setup, before_obtain_values, obtain_values = self.getSensorParams(tsMap, parameters)
 
         data = {"before_setup": before_setup,

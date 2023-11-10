@@ -124,6 +124,6 @@ class Pipeline():
     def get_parameters():
         pb = ParameterBuilder()
         pb.parameters = []
-        pb.add_number("Classification frequency", "Classification frequency", "Sets the frequncy in Hz to predict", 0.1, 10, 1, step_size=0.1, required=True, is_advanced=False)
+        pb.add_number("classificationFrequency", "Classification frequency", "Sets the frequncy in Hz to predict", 0.1, 10, 1, step_size=0.1, required=True, is_advanced=False)
         # print(pb.parameters)
         return pb.parameters

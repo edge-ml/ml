@@ -11,11 +11,7 @@ def buildCCode(steps: List[CStep], model):
     #     mem = lastStep.output_mem.bytes + step.input_mem.bytes
     #     print(mem)
 
-    for i, step in enumerate(steps):
-        print("step: ", step)
-        print(step.compile(name=f"step_{i}"))
-
-    compiled_steps = [step.compile(name=f"step_{i}") for i, step in enumerate(steps)]
+    compiled_steps = [step.compile(name=f"step_{i}" if i > 0 else "add_datapoint", args={"step": i}) for i, step in enumerate(steps)]
     globals = []
     for step in steps:
         globals.extend(step.globals)
@@ -54,14 +50,10 @@ def buildCCode(steps: List[CStep], model):
         "samplingRate": math.floor(model.samplingRate * 100) / 100,
         "enumerate": enumerate,})
 
-    print("*" * 40, "RENDERED_CODE", "*" * 40)
-
-    print(rendered_code)
-
     files = []
     for step in steps:
         files.extend(step.extra_files)
-    files.append(ExtraFile("model.cpp", rendered_code))
+    files.append(ExtraFile("model.hpp", rendered_code))
 
     return files
 

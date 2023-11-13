@@ -39,11 +39,6 @@ class OpenEarable(BaseDevice):
         return list(before_setup), list(setup), list(before_obtain_values), obtain_values
     
     def deploy(self, tsMap, parameters, additionalSettings, model):
-        print("+"*40)
-        print([x for x in parameters if x.name == "classificationFrequency"][0].value)
-        print(additionalSettings)
-        print(model.pipeline.samplingRate)
-        print("+"*40)
         classification_frequency = [x for x in parameters if x.name == "classificationFrequency"][0].value
         before_setup, setup, before_obtain_values, obtain_values = self.getSensorParams(tsMap, parameters)
 
@@ -54,7 +49,7 @@ class OpenEarable(BaseDevice):
                 "classification_frequency": classification_frequency,
                 "additionalSettings": additionalSettings}
         data["add_datapoint_vars"] = ",".join([x.split(" = ")[0].split(" ")[1] for x in obtain_values])
-        data["sampling_rate"] = model.pipeline.samplingRate
+        data["sampling_rate"] = model.samplingRate
 
         with open("app/Deploy/Devices/OpenEarable/Base.cpp", "r") as f:
             base = f.read()

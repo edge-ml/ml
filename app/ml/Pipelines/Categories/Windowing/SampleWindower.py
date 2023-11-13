@@ -86,7 +86,7 @@ class SampleWindower(BaseWindower):
             metadata.extend(Meta)
 
         self.input_shape = None
-        self.output_shape = [train_X[0].shape[1], train_X[0].shape[0]]
+        self.output_shape = [train_X[0].shape[1]-1, train_X[0].shape[0]]
         return PipelineContainer(*self._filterLabelings(np.array(train_X, dtype=object), np.array(train_Y), metadata))
 
     def export(self, params, platform):
@@ -102,7 +102,7 @@ class SampleWindower(BaseWindower):
         code = getCode("./app/ml/PipelineExport/C/Windower/SampleWindower.cpp")
         input_shape = None
         output_shape = self.output_shape
-        cstep = CStep(variables, code, input_shape, output_shape, globals=["int ctr = 0;", f"Matrix raw_data({self.output_shape[0]}, vector<float>({self.output_shape[1]}));"])
+        cstep = CStep(variables, code, input_shape, output_shape, globals=["int ctr = 0;"])
         return cstep
 
     def exportC2(self):

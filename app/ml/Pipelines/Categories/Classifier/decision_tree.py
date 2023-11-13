@@ -24,6 +24,7 @@ from jinja2 import FileSystemLoader, Template, Environment
 
 from app.ml.PipelineExport.C.Common.CPart import CStep
 from app.ml.PipelineExport.C.Common.Memory import Memory
+from app.ml.PipelineExport.C.Common.utils import getCode
 
 class DecisionTree(BaseClassififer):
     def __init__(self, parameters):
@@ -207,8 +208,9 @@ class DecisionTree(BaseClassififer):
         }}
 
         data = {**functions}
-        code = templateEnv.get_template("decisiontree.jinja").render(tree, **data)
-        
+        # code = templateEnv.get_template("decisiontree.jinja").render(tree, **data)
+        code = getCode("./app/ml/PipelineExport/C/Classifier/Tree/decisionTree.jinja")
+
         variables = {**tree, **functions}
 
         input_mem = self.input_shape

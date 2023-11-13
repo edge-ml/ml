@@ -15,6 +15,7 @@ class BaseFeatureExtractor(AbstractPipelineOption):
     
     def fit_exec(self, data: PipelineContainer) -> PipelineContainer:
         features = self.extract_features(data.data)
-        self.input_shape = data.data.shape[1:]
+        input_shape = data.data.shape[1:]
+        self.input_shape = [input_shape[1] -1, input_shape[0]]
         self.output_shape = features.shape[1:]
         return PipelineContainer(features, data.labels, data.meta)

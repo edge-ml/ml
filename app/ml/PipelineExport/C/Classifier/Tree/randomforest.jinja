@@ -1,0 +1,16 @@
+
+{% if data.language == "CPP" %}
+    {% extends 'interface_cpp.jinja' %}
+{% elif data.language == "C" %}
+    {% extends 'interface_c.jinja' %}
+{% endif %}
+
+{% block predict %}
+    uint8_t votes[{{ data.num_classes }}] = { 0 };
+    {% for k, tree in data.f.enumerate(data.trees) %}
+        {% with i = 0 %}
+            {% include 'randomforest/tree.jinja' %}
+        {% endwith %}
+    {% endfor %}
+    {% include 'vote.jinja' %}
+{% endblock %}

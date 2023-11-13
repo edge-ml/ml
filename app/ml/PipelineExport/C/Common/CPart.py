@@ -2,9 +2,12 @@ from app.ml.PipelineExport.C.Common.Memory import Memory
 
 from typing import List
 
-from jinja2 import Template
+from jinja2 import Template, FileSystemLoader, Environment
 
 from typing import Dict
+
+templateLoader = FileSystemLoader(searchpath="app/ml/PipelineExport/C")
+templateEnv = Environment(loader=templateLoader)
 
 class ExtraFile():
     def __init__(self, name, content) -> None:
@@ -21,7 +24,7 @@ class CStep():
         self.includes : List[str] = includes
         self.extra_files: List[ExtraFile] = extra_files
         
-    def compile(self, name):
-        template = Template(self.code)
-        rendered_code = template.render({**self.variables, "name": name, "input_shape": self.input_shape, "output_shape": self.output_shape})
+    def compile(self, name, args={}):
+        template = templateEnv.from_string(self.code)
+        rendered_code = template.render({**self.variables, **args, "name": name, "input_shape": self.input_shape, "output_shape": self.output_shape})
         return rendered_code

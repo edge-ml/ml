@@ -18,7 +18,7 @@ class SampleWindower(BaseWindower):
 
     @staticmethod
     def get_platforms():
-        return []
+        return [Platforms.C]
 
     @staticmethod
     def get_description():

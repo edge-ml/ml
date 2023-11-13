@@ -8,6 +8,7 @@ from app.Deploy.CPP.cPart import CPart
 from app.ml.PipelineExport.C.Common.utils import getCode
 from app.ml.PipelineExport.C.Common.Memory import Memory
 from app.ml.PipelineExport.C.Common.CPart import CStep
+from app.ml.BaseConfig import Platforms
 
 class MinMaxNormalizer(BaseNormalizer):
 
@@ -27,6 +28,10 @@ class MinMaxNormalizer(BaseNormalizer):
     @staticmethod
     def config():
         return {"name": MinMaxNormalizer.get_name(), "parameters": {}}
+    
+    @staticmethod
+    def get_platforms():
+        return [Platforms.C]
     
     def fit_normalize(self, data):
         self.min = np.min(data, axis=0)

@@ -78,9 +78,7 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
     device = get_device_by_name(body.device.name)
     main_file_content = device.deploy(body.tsMap, body.parameters, body.additionalSettings, model)
     code = downloadModel(model, Platforms.C)
-
     zip_file = add_to_zip_file(code, main_file_content, f"{model.name}.ino")
-
     zip_file.seek(0)
     return StreamingResponse(zip_file, media_type="application/zip", headers={'Content-Disposition': f'attachment; filename={model.name}.zip'})
 

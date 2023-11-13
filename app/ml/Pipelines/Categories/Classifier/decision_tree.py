@@ -185,7 +185,7 @@ class DecisionTree(BaseClassififer):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
+        return [Platforms.C]
 
     def exportC(self, params):
 

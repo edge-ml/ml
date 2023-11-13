@@ -5,6 +5,7 @@ from app.utils.StringFile import StringFile
 from app.ml.PipelineExport.C.Common.utils import getCode
 from app.ml.PipelineExport.C.Common.Memory import Memory
 from app.ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
+from app.ml.BaseConfig import Platforms
 
 
 class SimpleFeatureExtractor(BaseFeatureExtractor):
@@ -19,7 +20,7 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
 
     @staticmethod
     def get_platforms():
-        return []
+        return [Platforms.C]
 
     @staticmethod
     def get_description():

@@ -55,20 +55,20 @@ def load_modules(dictionary, superClass):
                         classes.append(obj)
     return classes
 
-_classes = load_modules("./app/ml/Pipelines/", AbstractPipelineOption)
+_pipelineOptions = load_modules("./app/ml/Pipelines/", AbstractPipelineOption)
 
 _pipelineMap = {}
-for x in _classes:
+PIPELINEOPTIONCONFIGS = []
+for x in _pipelineOptions:
     try:
         name = x.get_name()
         _pipelineMap[name] = x
+        PIPELINEOPTIONCONFIGS.append(x.get_train_config())
     except Exception as e:
         pass
 
 def getPipelineOption(name):
     return _pipelineMap[name]
-
-
 
 def getPipeline(model):
     stepOptions = model.pipeline.selectedPipeline.steps

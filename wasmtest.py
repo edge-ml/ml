@@ -15,3 +15,6 @@ if __name__ == '__main__':
     dir = './outdir'
     zip_ref = zipfile.ZipFile(code)
     zip_ref.extractall(dir)
+
+    # in the firmware compile repo:
+    # emcc outdir/model.cpp -o outdir/model.js -sMODULARIZE -s EXPORTED_FUNCTIONS="['_predict', '_add_datapoint']" -s EXPORTED_RUNTIME_METHODS="['cwrap']"

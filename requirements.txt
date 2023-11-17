@@ -21,3 +21,5 @@ h5py
 boto3
 requests
 tensorflow
+torch
+tensorflow-model-optimization

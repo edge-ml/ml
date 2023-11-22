@@ -11,7 +11,7 @@ from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOpt
 from app.ml.Pipeline import Pipeline
 
 
-_pipelines : List[AbstractPipeLineCreator] = [ManualClassificationPipeline]
+_pipelines : List[AbstractPipeLineCreator] = [ManualClassificationPipeline, AutoMLClassificationPipeline]
 
 
 def get_configs():

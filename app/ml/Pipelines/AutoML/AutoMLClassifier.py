@@ -10,7 +10,7 @@ from app.ml.Pipelines.AutoML.PytorchAdapter import get_dataloader
 from tensorflow.keras import Model as KerasModel
 from app.ml.Pipelines.PipelineContainer import PipelineContainer
 from sklearn.model_selection import train_test_split as sklearn_train_test_split
-# from micronas import search, exec_tflm, PytorchKerasAdapter
+from micronas import search, exec_tflm, PytorchKerasAdapter
 
 import math
 

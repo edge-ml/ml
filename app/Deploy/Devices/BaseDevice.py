@@ -1,4 +1,10 @@
 from typing import List
+from enum import Enum
+
+class QuantizationLevels(Enum):
+    NO_QUANT = "No Quantization"
+    DYN_RANGE = "Dynamic Range"
+    INT8 = "Int8 Quantization"
 
 class BaseDevice:
 

@@ -36,7 +36,10 @@ class DenseSmall(NeuralNetwork):
     def fit(self, X_train, y_train):
         num_classes = len(np.unique(y_train))
         X_train_reshaped = reshapeSklearn(X_train)
-               
+
+        random_indices = np.random.choice(len(X_train), size=min(200, X_train_reshaped.shape[0]), replace=False)  
+        self.X_train_representative = X_train_reshaped[random_indices]
+        
         self.model = Sequential([
             Dense(units=8, activation='relu', input_shape=(X_train_reshaped.shape[1], )),
             Dense(units=8, activation='relu'),

@@ -81,8 +81,8 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
     model = await get_model(model_id, project)
     device = get_device_by_name(body.device.name)()
     main_file_content = device.deploy(body.tsMap, body.parameters, model.isNeuralNetwork)
-
-    code = downloadModel(model, Platforms.C)
+    quantization_level = body.parameters[1].value
+    code = downloadModel(model, Platforms.C, quantization_level)
 
     zip_file = add_to_zip_file(code, main_file_content, "main.ino")
     file_data = {'file': ('example.zip', zip_file)}
@@ -95,7 +95,8 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
     device = get_device_by_name(body.device.name)()
     model = await get_model(model_id, project)
-    code = downloadModel(model, Platforms.C)
+    quantization_level = body.parameters[1].value
+    code = downloadModel(model, Platforms.C, quantization_level)
     main_file_content = device.deploy(body.tsMap, body.parameters, model.isNeuralNetwork)
 
     zip_file = add_to_zip_file(code, main_file_content, f"{model.name}.ino")

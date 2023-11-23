@@ -27,6 +27,10 @@ constexpr int kTensorArenaSize = 1500; // if the program doesn't run try a highe
 uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
+{{ quantization_function|trim }}
+
+{{ dequantization_function|trim }}
+
 void setup() {
   Serial.begin(115200);
   BHY2.begin();
@@ -62,6 +66,8 @@ void setup() {
   output = interpreter->output(0);
 
   accelerometer.begin(40); // needs to be read from jinjaVars
+  Serial.print("Actual needed minimum kTensorArenaSize: ");
+  Serial.println(interpreter->arena_used_bytes());
 }
 
 void loop() {
@@ -81,7 +87,7 @@ void loop() {
 
       // Update the input tensor
       for (int i = 0; i < window_size * sensor_stream_count; i++) {
-        input->data.f[i] = data_window[i];
+        {{ fill_tensor_input }}
       }
       lastCheck = millis();
   }
@@ -95,8 +101,8 @@ void loop() {
       while(true) {
         // lock
       }
-      
     }
-    Serial.println(classToLabel(getMostLikelyClass(output->data.f)).c_str());
+    {{ dequantize_output|trim|indent(4, false) }}
+    Serial.println(classToLabel(getMostLikelyClass({{retrieve_tensor_output}})).c_str());
   }
 }

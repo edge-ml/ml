@@ -13,6 +13,7 @@ from app.ml.FeatureExtraction import get_feature_extractor_by_name
 from app.ml.Normalizer import get_normalizer_by_name
 from app.ml.Classifier import get_classifier_by_name
 from app.utils.parameter_builder import ParameterBuilder
+from app.Deploy.Devices.BaseDevice import QuantizationLevels
 from jinja2 import Template, FileSystemLoader
 from io import BytesIO, StringIO
 from typing import List
@@ -34,7 +35,8 @@ class Pipeline():
         pb = ParameterBuilder()
         pb.parameters = []
         pb.add_number("Classification frequency", "Classification frequency", "Sets the frequncy in Hz to predict", 0.1, 10, 1, step_size=0.1, required=True, is_advanced=False)
-        # print(pb.parameters)
+        pb.add_selection("Quantization Method", "Quantization Method", "Choose which quantization method to be used", value=QuantizationLevels.NO_QUANT.value, options=[QuantizationLevels.NO_QUANT.value, QuantizationLevels.DYN_RANGE.value, QuantizationLevels.INT8.value], is_advanced=False)
+        
         return pb.parameters
 
     @staticmethod
@@ -52,12 +54,12 @@ class Pipeline():
         return Pipeline(windower, featureExtractor, normalizer, classifier, pipeline)
     
 
-    def generateModelData(self, platform: Platforms):
+    def generateModelData(self, platform: Platforms, quantization_level: QuantizationLevels = QuantizationLevels.NO_QUANT):
         data = {}
         data["windower"] = self.windower.export(platform)
         data["featureExtractor"] = self.featureExtractor.export(platform)
         data["normalizer"] = self.normalizer.export(platform)
-        data["classifier"] = self.classifier.export(platform)
+        data["classifier"] = self.classifier.export(platform, quantization_level)
         if platform == Platforms.C:
             if self.classifier.is_neural_network():
                 return self.generateModelData_NN(data)

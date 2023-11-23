@@ -3,6 +3,9 @@ from app.utils.parameter_builder import ParameterBuilder
 from app.ml.Classifier import BaseClassififer
 from bson.objectid import ObjectId
 from app.internal.config import CLASSIFIER_STORE
+from app.ml.BaseConfig import Platforms
+from app.Deploy.Devices.BaseDevice import QuantizationLevels
+import numpy as np
 import os
 
 import tensorflow as tf
@@ -11,7 +14,8 @@ class NeuralNetwork(BaseClassififer):
     def __init__(self, parameters=[]):
         super().__init__(parameters)
         self.data_id = None
-
+        self.X_train_representative = None
+        
     # static methods
     @staticmethod
     def get_parameters():
@@ -50,24 +54,43 @@ class NeuralNetwork(BaseClassififer):
 
     def restore(self, dict):
         self.data_id = dict.state["data_id"]
-        path = f'{CLASSIFIER_STORE}/{self.data_id}/tf_model.tf'
-        self.model = tf.saved_model.load(path)
+        path = f'{CLASSIFIER_STORE}/{self.data_id}/'
+        model_path = os.path.join(path, 'tf_model.tf')
+        representative_dataset_path = os.path.join(path, 'repr_dataset.npy')
+        self.model = tf.saved_model.load(model_path)
+        self.X_train_representative = np.load(representative_dataset_path)
 
     def persist(self):
         self.data_id = ObjectId()
         path = f'{CLASSIFIER_STORE}/{self.data_id}'
-        isExist = os.path.exists(path)
-        if not isExist:
+        if not os.path.exists(path):
             os.makedirs(path)
         model_path = os.path.join(path, 'tf_model.tf')
+        representative_dataset_path = os.path.join(path, 'repr_dataset.npy')
         tf.saved_model.save(self.model, model_path)
+        np.save(representative_dataset_path, self.X_train_representative, allow_pickle=False, fix_imports=False)
         return super().persist()
     
-    def exportC(self):
+    def export(self, platform: Platforms, quantization_level: QuantizationLevels = QuantizationLevels.NO_QUANT):
+        if platform == Platforms.C:
+            return self.exportC(quantization_level)
+    
+    def representative_data_gen(self):
+        for sample in self.X_train_representative:
+            yield [sample.astype(np.float32)]
+            
+    def exportC(self, quantization_level: QuantizationLevels = QuantizationLevels.NO_QUANT):
         path = f'{CLASSIFIER_STORE}/{self.data_id}/tf_model.tf'
         converter = tf.lite.TFLiteConverter.from_saved_model(path)
-        # converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        # converter.target_spec.supported_types = [tf.float16]
+        if quantization_level == QuantizationLevels.DYN_RANGE.value:
+            converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        elif quantization_level == QuantizationLevels.INT8.value:
+            converter.optimizations = [tf.lite.Optimize.DEFAULT]
+            converter.representative_dataset = self.representative_data_gen
+            converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+            converter.inference_input_type = tf.int8
+            converter.inference_output_type = tf.int8
+        
         tflite_model = converter.convert()
         
         # tflite_model_path = f'{CLASSIFIER_STORE}/{self.data_id}/tf_model.tflite'

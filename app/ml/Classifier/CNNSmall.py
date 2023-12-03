@@ -1,25 +1,16 @@
 from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Classifier import NeuralNetwork
+from app.ml.Classifier import ConvolutionalNeuralNetwork
 import numpy as np
 from app.ml.Classifier.utils import reshapeCNN
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
-from tensorflow.keras.utils import to_categorical
 
-class CNNSmall(NeuralNetwork):
+class CNNSmall(ConvolutionalNeuralNetwork):
     def __init__(self, parameters=[]):
         super().__init__(parameters)
         self.data_id = None
-
-    # static methods
-    @staticmethod
-    def get_parameters():
-        pb = ParameterBuilder()
-        pb.parameters = []
-        return pb.parameters
 
     @staticmethod
     def get_name():
@@ -45,14 +36,4 @@ class CNNSmall(NeuralNetwork):
             Dense(64, activation='relu'),
             Dense(num_classes, activation='softmax')
         ])
-        
-        self.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-        y_train_encoded = to_categorical(y_train, num_classes=num_classes)
-        
-        self.model.fit(X_train_reshaped, y_train_encoded, epochs=20)
-
-    def predict(self, X_test):
-        X_test_reshaped = reshapeCNN(X_test)
-        prediction = self.model.predict(X_test_reshaped)
-        prediction = np.argmax(prediction, axis=-1)
-        return prediction
+        super().fit(X_train, y_train)

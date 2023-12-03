@@ -1,6 +1,7 @@
 from app.ml.Classifier.BaseClassififer import BaseClassififer
 from app.ml.Classifier.decision_tree import DecisionTree
 from app.ml.Classifier.NeuralNetwork import NeuralNetwork
+from app.ml.Classifier.ConvolutionalNeuralNetwork import ConvolutionalNeuralNetwork
 from app.ml.Classifier.DenseSmall import DenseSmall
 from app.ml.Classifier.DenseMedium import DenseMedium
 from app.ml.Classifier.DenseLarge import DenseLarge

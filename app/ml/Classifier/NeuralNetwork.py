@@ -5,6 +5,11 @@ from bson.objectid import ObjectId
 from app.internal.config import CLASSIFIER_STORE
 from app.ml.BaseConfig import Platforms
 from app.Deploy.Devices.BaseDevice import QuantizationLevels
+from app.ml.Classifier.utils import reshapeSklearn
+
+from tensorflow.keras.utils import to_categorical
+import tensorflow_model_optimization as tfmot
+
 import numpy as np
 import os
 
@@ -45,10 +50,31 @@ class NeuralNetwork(BaseClassififer):
         return True
     
     def fit(self, X_train, y_train):
-        raise NotImplementedError()
+        num_classes = len(np.unique(y_train))
+        X_train_reshaped = reshapeSklearn(X_train)
+
+        random_indices = np.random.choice(len(X_train), size=min(200, X_train_reshaped.shape[0]), replace=False)  
+        self.X_train_representative = X_train_reshaped[random_indices]
+        
+        self.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        y_train_encoded = to_categorical(y_train, num_classes=num_classes)
+
+        self.model.fit(X_train_reshaped, y_train_encoded, epochs=20)
+    
+        quantization_aware_training = next((param.value == 'True' for param in self.parameters if param.name == 'quantization_aware_training'), False)
+        
+        if quantization_aware_training:
+            self.model = tfmot.quantization.keras.quantize_model(self.model)
+            self.model.compile(optimizer='adam',
+                loss='categorical_crossentropy',
+                metrics=['accuracy'])
+            self.model.fit(X_train_reshaped, y_train_encoded, epochs=1, validation_split=0.1)
 
     def predict(self, X_test):
-        raise NotImplementedError()
+        X_test_reshaped = reshapeSklearn(X_test)
+        prediction = self.model.predict(X_test_reshaped)
+        prediction = np.argmax(prediction, axis=-1)
+        return prediction
     
     def get_state(self):
         return {"data_id": self.data_id}

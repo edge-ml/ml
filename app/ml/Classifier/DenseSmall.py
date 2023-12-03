@@ -8,6 +8,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.utils import to_categorical
+import tensorflow_model_optimization as tfmot
 
 class DenseSmall(NeuralNetwork):
     def __init__(self, parameters=[]):
@@ -15,12 +16,6 @@ class DenseSmall(NeuralNetwork):
         self.data_id = None
 
     # static methods
-    @staticmethod
-    def get_parameters():
-        pb = ParameterBuilder()
-        pb.parameters = []
-        return pb.parameters
-
     @staticmethod
     def get_name():
         return "Small Dense Neural Network"
@@ -50,6 +45,16 @@ class DenseSmall(NeuralNetwork):
         y_train_encoded = to_categorical(y_train, num_classes=num_classes)
 
         self.model.fit(X_train_reshaped, y_train_encoded, epochs=20)
+    
+        quantization_aware_training = next((param.value == 'True' for param in self.parameters if param.name == 'quantization_aware_training'), False)
+        
+        if quantization_aware_training:
+            self.model = tfmot.quantization.keras.quantize_model(self.model)
+            self.model.compile(optimizer='adam',
+                loss='categorical_crossentropy',
+                metrics=['accuracy'])
+            self.model.fit(X_train_reshaped, y_train_encoded, epochs=1, validation_split=0.1)
+        
 
     def predict(self, X_test):
         X_test_reshaped = reshapeSklearn(X_test)

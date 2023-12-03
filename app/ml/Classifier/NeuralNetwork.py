@@ -21,6 +21,7 @@ class NeuralNetwork(BaseClassififer):
     def get_parameters():
         pb = ParameterBuilder()
         pb.parameters = []
+        pb.add_boolean("quantization_aware_training", "Quantization Aware Training", "Activates quantization aware training", True)
         return pb.parameters
 
     @staticmethod

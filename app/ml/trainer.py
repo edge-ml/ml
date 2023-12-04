@@ -75,7 +75,7 @@ async def init_train(trainReq : TrainRequest, id, project):
 async def train(trainReq, project, background_tasks):
     data = trainReq.dict(by_alias=True)
     classifier_type = get_classifier_by_name(trainReq.classifier.name)
-    model = Model(name = trainReq.name, trainRequest=data, projectId=project, isNeuralNetwork=classifier_type.is_neural_network())
+    model = Model(name = trainReq.name, trainRequest=data, projectId=project, isNeuralNetwork=classifier_type.is_neural_network(), isConvolutionalNN=classifier_type.is_convolutionalNN())
     id = await add_model(model=model.dict(by_alias=True))
     background_tasks.add_task(init_train, trainReq, id, project)
     return id

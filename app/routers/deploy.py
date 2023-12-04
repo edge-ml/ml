@@ -79,8 +79,9 @@ async def deployConfig(model_id: str, project: str = Header(...)):
 @router.post("/{model_id}")
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
     model = await get_model(model_id, project)
+    model_info = {'is_neural_network': model.isNeuralNetwork, 'is_convolutionalNN': model.isConvolutionalNN}
     device = get_device_by_name(body.device.name)()
-    main_file_content = device.deploy(body.tsMap, body.parameters, model.isNeuralNetwork)
+    main_file_content = device.deploy(body.tsMap, body.parameters, **model_info)
     quantization_level = body.parameters[1].value
     code = downloadModel(model, Platforms.C, quantization_level)
 
@@ -95,9 +96,10 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
     device = get_device_by_name(body.device.name)()
     model = await get_model(model_id, project)
+    model_info = {'is_neural_network': model.isNeuralNetwork, 'is_convolutionalNN': model.isConvolutionalNN}
     quantization_level = body.parameters[1].value
     code = downloadModel(model, Platforms.C, quantization_level)
-    main_file_content = device.deploy(body.tsMap, body.parameters, model.isNeuralNetwork)
+    main_file_content = device.deploy(body.tsMap, body.parameters, **model_info)
 
     zip_file = add_to_zip_file(code, main_file_content, f"{model.name}.ino")
 

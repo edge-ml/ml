@@ -72,3 +72,4 @@ class Model(BaseModel):
     status: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
     isNeuralNetwork: bool = Field(default=False)
+    isConvolutionalNN: bool = Field(default=False)

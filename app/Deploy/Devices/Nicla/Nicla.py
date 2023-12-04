@@ -63,19 +63,22 @@ inline __attribute__((always_inline)) float dequantize(int8_t x_quantized)  {
         
         return fill_tensor_input, retrieve_tensor_output, dequantize_output, quantization_function, dequantization_function
         
-    def deploy(self, tsMap, parameters, is_neural_network):
+    def deploy(self, tsMap, parameters, is_neural_network, is_convolutionalNN):
         before_setup, setup, obtain_values = self.getSensorParams(tsMap, parameters)
                
         data = {"before_setup": before_setup, "setup": setup, "obtain_values": obtain_values}
         data["add_datapoint_vars"] = ", ".join([x.split(" = ")[0].split(" ")[1] for x in obtain_values])
         data["sensor_stream_count"] = len(obtain_values)
         data["sampling_rate"] = parameters[0].value
+        data["resolver_ops"] = ["FullyConnected", "SoftMax", "Relu"]
         
         # parameter[1] is the quantization parameter
         data["fill_tensor_input"], data["retrieve_tensor_output"], data["dequantize_output"], data["quantization_function"], data["dequantization_function"] = self.getQuantizationParams(parameters[1])
         
         if is_neural_network:
             base_path = f"app/Deploy/Devices/Nicla/BaseNN.cpp"
+            if is_convolutionalNN:
+                data["resolver_ops"].extend(["Conv2D", "MaxPool2D", "Reshape"])
         else:
             base_path = f"app/Deploy/Devices/Nicla/Base.cpp"
         

@@ -22,6 +22,10 @@ class ConvolutionalNeuralNetwork(NeuralNetwork):
     def get_description():
         return "Abstract wrapper for convolutional neural network classifier, not intended for actual use."
     
+    @staticmethod
+    def is_convolutionalNN():
+        return True
+    
     def fit(self, X_train, y_train):
         num_classes = len(np.unique(y_train))
         X_train_reshaped = reshapeCNN(X_train)

@@ -16,6 +16,10 @@ class BaseClassififer(BaseConfig):
     def is_neural_network():
         return False
 
+    @staticmethod
+    def is_convolutionalNN():
+        return False
+
     def fit(self, X_train, y_train):
         raise NotImplementedError
 

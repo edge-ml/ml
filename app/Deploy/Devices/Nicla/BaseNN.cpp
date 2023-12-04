@@ -46,11 +46,10 @@ void setup() {
     return;
   }
 
-  static tflite::MicroMutableOpResolver<3> resolver; // needs to be read from jinjaVars
-
-  resolver.AddFullyConnected(); // needs to be read from jinjaVars
-  resolver.AddSoftmax(); // needs to be read from jinjaVars
-  resolver.AddRelu(); // needs to be read from jinjaVars
+  static tflite::MicroMutableOpResolver<{{resolver_ops|length}}> resolver;
+  {% for op in resolver_ops %}
+  resolver.Add{{ op }}();
+  {%- endfor %}
 
   static tflite::MicroInterpreter static_interpreter(
       model, resolver, tensor_arena, kTensorArenaSize, error_reporter);

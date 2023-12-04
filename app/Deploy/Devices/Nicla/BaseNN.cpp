@@ -64,7 +64,9 @@ void setup() {
   input = interpreter->input(0);
   output = interpreter->output(0);
 
-  accelerometer.begin(40); // needs to be read from jinjaVars
+  {% for item in setup -%}
+  {{ item }}
+  {% endfor %}
   Serial.print("Actual needed minimum kTensorArenaSize: ");
   Serial.println(interpreter->arena_used_bytes());
 }

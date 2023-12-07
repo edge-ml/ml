@@ -7,7 +7,7 @@ from io import BytesIO
 from app.ml.Pipeline import Pipeline
 from app.Deploy.Devices import DEVICES
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Union
 from app.DataModels.parameter import Parameter
 from app.Deploy.Devices import get_device_by_name
 from app.utils.zipfile import add_to_zip_file
@@ -45,13 +45,28 @@ async def export(format: str):
     pass
 
 @router.get("/{model_id}/download/{format}")
-async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
+async def dlmodel(model_id: str, format: Platforms, project: str = Header(...), compile_wasm: bool = False, wasm_single_file: bool = False):
     model = await get_model(model_id, project)
-    code = downloadModel(model, format)
+    if format.name == Platforms.WASM.name:
+        code = downloadModel(model, Platforms.C)
+    else:
+        code = downloadModel(model, format)
     fileName = f"{model.name}_{format.name}.zip"
-    return StreamingResponse(code, media_type='application/zip', headers={
-        f'Content-Disposition': 'attachment; filename="' + fileName + '"'
-    })
+    if format.name == Platforms.WASM.name and compile_wasm:
+        file_data = {'file': ('example.zip', code)}
+        if wasm_single_file:
+            url = f"{FIRMWARE_COMPILE_URL}compile/WASM-single-file"
+            media_type = "application/javascript"
+        else:
+            url = f"{FIRMWARE_COMPILE_URL}compile/WASM"
+            media_type = "application/octet-stream"
+        response = requests.post(url, files=file_data)
+        print(response.content)
+        return StreamingResponse(iter([response.content]), media_type=media_type)
+    else:
+        return StreamingResponse(code, media_type='application/zip', headers={
+            f'Content-Disposition': 'attachment; filename="' + fileName + '"'
+        })
 
 @router.get("/{model_id}")
 async def deployConfig(model_id: str, project: str = Header(...)):

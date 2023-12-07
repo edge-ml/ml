@@ -209,7 +209,7 @@ class DecisionTree(BaseClassififer):
 
         data = {**functions}
         # code = templateEnv.get_template("decisiontree.jinja").render(tree, **data)
-        code = getCode("./app/ml/PipelineExport/C/Classifier/Tree/decisionTree.jinja")
+        code = getCode("./app/ml/PipelineExport/C/Classifier/Tree/decisiontree.jinja")
 
         variables = {**tree, **functions}
 

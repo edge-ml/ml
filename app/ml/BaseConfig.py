@@ -4,6 +4,7 @@ from typing import List
 
 class Platforms(Enum):
     C = "C"
+    WASM = "WASM"
 
 
 class BaseConfig():

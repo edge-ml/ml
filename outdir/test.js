@@ -32,7 +32,7 @@ async function main() {
             const y = parseFloat(y_str);
             const z = parseFloat(z_str);
 
-            instance._add_datapoint(x, y, z);
+            instance.add_datapoint(x, y, z);
             data_count++;
 
             if (false) {
@@ -42,7 +42,7 @@ async function main() {
                 // node_json.features.push(features);
                 // normalize(features);
                 // node_json.normalized.push(features);
-                const prediction = instance._predict();
+                const prediction = instance.predict();
 
                 node_json.predictions.push(prediction);
 
@@ -53,9 +53,9 @@ async function main() {
                 // node_json.features.push(features);
                 // normalize(features);
                 // node_json.normalized.push(features);
-                const prediction = instance._predict();
+                const prediction = instance.predict();
 
-                console.log(`${data_count}: ${prediction}`)
+                console.log(`${data_count}: ${prediction} ${instance.class_to_label(prediction)}`)
 
                 node_json.predictions.push(prediction);
             }

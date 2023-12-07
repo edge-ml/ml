@@ -47,9 +47,12 @@ async def export(format: str):
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...), compile_wasm: bool = False, wasm_single_file: bool = False):
     model = await get_model(model_id, project)
-    code = downloadModel(model, format)
+    if format.name == Platforms.WASM.name:
+        code = downloadModel(model, Platforms.C)
+    else:
+        code = downloadModel(model, format)
     fileName = f"{model.name}_{format.name}.zip"
-    if format == Platforms.WASM and compile_wasm:
+    if format.name == Platforms.WASM.name and compile_wasm:
         file_data = {'file': ('example.zip', code)}
         if wasm_single_file:
             url = f"{FIRMWARE_COMPILE_URL}compile/WASM-single-file"

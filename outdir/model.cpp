@@ -1,13 +1,32 @@
+#ifndef EDGEMLPIPELINE_HPP
+#define EDGEMLPIPELINE_HPP
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/bind.h>
+#endif
+
 #include <vector>
 #include <string>
 
     #include "feature_extractor.hpp"
 
 
-#define Matrix vector<vector<float> >
+#define Matrix vector<vector<float>>
+
+
+
+
+    int ctr = 0;
+
+    Matrix step_0_output(3, vector<float>(100));
+
+    Matrix step_1_output(3, vector<float>(9));
+
+    Matrix step_2_output(3, vector<float>(9));
+
 
 float get_sampling_rate() {
-    return 23.168639053254438;
+    return 25.83;
 }
 
 string class_to_label(int cls) {
@@ -24,19 +43,74 @@ string class_to_label(int cls) {
 }
 
 
-    Matrix raw_data(3, vector<float>(20));
 
-    int ctr = 0;
+    void add_datapoint(float AccelerometerX,float AccelerometerY,float AccelerometerZ)
+    {
+        int window_size = 100;
 
-    Matrix features(3, std::vector<float>(9));
+        
+            step_0_output[0][ctr] = AccelerometerX;
+        
+            step_0_output[1][ctr] = AccelerometerY;
+        
+            step_0_output[2][ctr] = AccelerometerZ;
+        
+        ctr++;
+        if (ctr >= window_size)
+        {
+            ctr = 0;
+        }
+    }
 
+    void step_1(Matrix &inputs, Matrix &outputs)
+{
+    int num_sensors = 3;
+    int num_features = 9;
 
+    for (int i = 0; i < num_sensors; i++)
+    {
+        outputs[i][0] = sum(inputs[i]);
+        outputs[i][1] = median(inputs[i]);
+        outputs[i][2] = mean(inputs[i]);
+        outputs[i][3] = standard_deviation(inputs[i]);
+        outputs[i][4] = variance(inputs[i]);
+        outputs[i][5] = max(inputs[i]);
+        outputs[i][6] = abs_max(inputs[i]);
+        outputs[i][7] = min(inputs[i]);
+        outputs[i][8] = abs_min(inputs[i]);
+    }
+}
 
-int predict(Matrix &features) {
+    Matrix mins = {
+    {-3160.0000381469727, -31.600000381469727, -31.600000381469727, 0.0, 0.0, -31.600000381469727, 0.10000000149011612, -78.4000015258789, 0.20000000298023224},
+    {-2905.100025653839, -33.70000076293945, -29.05100025653839, 0.11052594725167089, 0.012215985015879137, -20.0, 0.20000000298023224, -72.0999984741211, 3.5999999046325684},
+    {-2600.0000953674316, -26.000000953674316, -26.000000953674316, 0.2183826997184024, 0.04769100353629792, -11.100000381469727, 9.100000381469727, -75.5999984741211, 6.800000190734863},
+};
+Matrix maxs = {
+    {1979.9999237060547, 19.799999237060547, 19.799999237060547, 26.671739595529353, 711.3816930517283, 44.0, 44.0, 19.799999237060547, 78.4000015258789},
+    {452.7999978065491, 4.5, 4.527999978065491, 21.440398792611315, 459.6907003862087, 15.899999618530273, 20.0, 4.199999809265137, 72.0999984741211},
+    {4965.000152587891, 49.650001525878906, 49.650001525878906, 42.030422666234244, 1766.5564295022973, 78.4000015258789, 78.4000015258789, 21.0, 75.5999984741211},
+};
+
+void step_2(Matrix &input, Matrix &outputs)
+{
+    int num_sensors = input.size();
+    int feature_size = input[0].size();
+    for (int i = 0; i < num_sensors; i++)
+    {
+        for (int j = 0; j < feature_size; j++)
+        {
+            outputs[i][j] = (input[i][j] - mins[i][j]) / (maxs[i][j] - mins[i][j]);
+        }
+    }
+}
+
+    
+int step_3(Matrix &features) {
     int num_sensors = features.size();
     int num_features = features[0].size();
     
-    if (features[12 / num_features][12 % num_features] <= 0.08294957783073187) {
+    if (features[17 / num_features][17 % num_features] <= 0.16131386766210198) {
         
             
     return 0;
@@ -55,75 +129,22 @@ int predict(Matrix &features) {
 
 
 
-        void extract_features(Matrix &inputs, Matrix &outputs)
-        {
-
-            for (int i = 0; i < 3; i++)
-            {
-                outputs[i][0] = sum(inputs[i]);
-                outputs[i][1] = median(inputs[i]);
-                outputs[i][2] = mean(inputs[i]);
-                outputs[i][3] = standard_deviation(inputs[i]);
-                outputs[i][4] = variance(inputs[i]);
-                outputs[i][5] = max(inputs[i]);
-                outputs[i][6] = abs_max(inputs[i]);
-                outputs[i][7] = min(inputs[i]);
-                outputs[i][8] = abs_min(inputs[i]);
-            }
-        }
-        
-
-
-
-        Matrix mins = {
-    {-632.0000076293945, -31.600000381469727, -31.600000381469727, 0.0, 0.0, -31.600000381469727, 0.0, -78.4000015258789, 0.0},
-    {-685.8999910354614, -33.70000076293945, -34.294999551773074, 0.057227656956237945, 0.003275004720700849, -20.0, 0.20000000298023224, -72.0999984741211, 3.5},
-    {-520.0000190734863, -26.000000953674316, -26.000000953674316, 0.1465434578116232, 0.02147498502738699, -11.100000381469727, 8.800000190734863, -75.5999984741211, 6.800000190734863},
-};
-        Matrix maxs = {
-    {395.99998474121094, 19.799999237060547, 19.799999237060547, 30.51205663712726, 930.9856002272616, 44.0, 44.0, 19.799999237060547, 78.4000015258789},
-    {92.49999856948853, 4.699999809265137, 4.624999928474426, 21.144087791595215, 447.0724485386859, 15.899999618530273, 20.0, 4.400000095367432, 72.0999984741211},
-    {993.0000305175781, 49.650001525878906, 49.650001525878906, 41.4136978213715, 1715.0943672398705, 78.4000015258789, 78.4000015258789, 21.0, 75.5999984741211},
-};
-
-        void normalize(Matrix &input)
-        {
-            int num_sensors = input.size();
-            int feature_size = input[0].size();
-            for (int i = 0; i < num_sensors; i++)
-            {
-                for (int j = 0; j < feature_size; j++)
-                {
-                    input[i][j] = (input[i][j] - mins[i][j]) / (maxs[i][j] - mins[i][j]);
-                }
-            }
-        }
-        
-
-extern "C" {
-
-
-        void add_datapoint(float x,float y,float z)
-            {
-                
-                    raw_data[0][ctr] = x;
-                
-                    raw_data[1][ctr] = y;
-                
-                    raw_data[2][ctr] = z;
-                
-                ctr++;
-                if (ctr >= 20)
-                {
-                    ctr = 0;
-                }
-            }
-        
-
 int predict() {
-    extract_features(raw_data, features);
-    normalize(features);
-    return predict(features);
+    
+        step_1(step_0_output, step_1_output);
+    
+        step_2(step_1_output, step_2_output);
+    
+        return step_3(step_2_output);
+    
 }
 
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_BINDINGS(my_module) {
+    emscripten::function("predict", &predict);
+    emscripten::function("add_datapoint", &add_datapoint);
+    emscripten::function("class_to_label", &class_to_label);
 }
+#endif
+
+#endif

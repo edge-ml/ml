@@ -1,6 +1,10 @@
 #ifndef EDGEMLPIPELINE_HPP
 #define EDGEMLPIPELINE_HPP
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/bind.h>
+#endif
+
 #include <vector>
 #include <string>
 {% for include in includes %}
@@ -38,4 +42,13 @@ int predict() {
         {{step}}
     {% endfor %}
 }
+
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_BINDINGS(my_module) {
+    emscripten::function("predict", &predict);
+    emscripten::function("add_datapoint", &add_datapoint);
+    emscripten::function("class_to_label", &class_to_label);
+}
+#endif
+
 #endif

@@ -1,14 +1,14 @@
 from enum import Enum
 
-class InferenceFormats(Enum):
-    JAVASCRIPT = 'javascript', 'Model as javascript code' # https://github.com/BayesWitnesses/m2cgen
-    PYTHON = 'python', 'Model as python code' # https://github.com/BayesWitnesses/m2cgen
-    C = 'c', 'Model as C code' # https://github.com/BayesWitnesses/m2cgen
-    C_EMBEDDED = 'c-embedded', 'Model as C code, low memory usage' # https://github.com/eloquentarduino/micromlgen
-    CPP ="cpp", "Model as C++ Header file"
+class InferenceFormats(str, Enum):
+    JAVASCRIPT = "javascript"
+    PYTHON = "python"
+    C = "c"
+    C_EMBEDDED = "c-embedded"
+    CPP ="cpp"
 
     def __new__(cls, *args, **kwds):
-        obj = object.__new__(cls)
+        obj = str.__new__(cls, args[0])
         obj._value_ = args[0]
         return obj
 

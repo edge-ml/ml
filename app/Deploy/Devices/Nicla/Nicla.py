@@ -1,5 +1,12 @@
 from app.Deploy.Devices.BaseDevice import BaseDevice
-from app.Deploy.Sensors.Accelerometer import Accelerometer
+from app.Deploy.Devices.Nicla.Sensors.Accelerometer import Accelerometer
+from app.Deploy.Devices.Nicla.Sensors.Gyroscope import Gyroscope
+from app.Deploy.Devices.Nicla.Sensors.Gas import Gas
+from app.Deploy.Devices.Nicla.Sensors.Humidity import Humidity
+from app.Deploy.Devices.Nicla.Sensors.Magnetometer import Magnetometer
+from app.Deploy.Devices.Nicla.Sensors.Orientation import Orientation
+from app.Deploy.Devices.Nicla.Sensors.Temperature import Temperature
+
 from typing import List
 from jinja2 import Template
 
@@ -8,7 +15,7 @@ class Nicla(BaseDevice):
 
     def __init__(self) -> None:
 
-        sensors = [Accelerometer()]
+        sensors = [Accelerometer(), Gyroscope(), Gas(), Humidity(), Magnetometer(), Orientation(), Temperature()]
 
         super().__init__(sensors)
 

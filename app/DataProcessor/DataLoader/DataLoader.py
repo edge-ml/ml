@@ -60,4 +60,5 @@ def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):
                     break
                      
         res.append(arr)
-    return res, samplingRate
+    datasetMetadata = [x.metaData for x in datasets]
+    return res, datasetMetadata, samplingRate

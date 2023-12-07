@@ -1,5 +1,6 @@
 from app.Deploy.Devices.BaseDevice import BaseDevice
-from app.Deploy.Devices.OpenEarable.Sensors.Accelerometer import Accelerometer
+from app.Deploy.Devices.OpenEarable.Sensors.IMU import IMU
+from app.Deploy.Devices.OpenEarable.Sensors.Baro import Baro
 from typing import List
 from jinja2 import Template
 
@@ -8,7 +9,7 @@ class OpenEarable(BaseDevice):
 
     def __init__(self) -> None:
 
-        sensors = [Accelerometer()]
+        sensors = [IMU(), Baro()]
 
         super().__init__(sensors)
 
@@ -23,6 +24,7 @@ class OpenEarable(BaseDevice):
         setup = set()
         before_obtain_values = set()
         obtain_values = []
+        incldues = set()
 
         print("-" * 40)
         print(tsMap)
@@ -32,29 +34,26 @@ class OpenEarable(BaseDevice):
             sensor = self.sensors[sensorConf.sensor_id]
             before_setup.add("\n".join(sensor.get_before_setup_code()))
             setup.add("\n".join(sensor.get_setup_code(40)))
+            incldues.add("\n".join(sensor.get_include_code()))
             before_obtain_values.add(sensor.get_before_obtain_values())
             print(sensorConf.component_id)
             obtain_values.append(sensor.get_obtain_value_code(sensorConf.component_id))
 
-        return list(before_setup), list(setup), list(before_obtain_values), obtain_values
+        return list(before_setup), list(setup), list(before_obtain_values), list(incldues), obtain_values
     
     def deploy(self, tsMap, parameters, additionalSettings, model):
-        print("+"*40)
-        print([x for x in parameters if x.name == "Classification frequency"][0].value)
-        print(additionalSettings)
-        print(model.pipeline.samplingRate)
-        print("+"*40)
-        classification_frequency = [x for x in parameters if x.name == "Classification frequency"][0].value
-        before_setup, setup, before_obtain_values, obtain_values = self.getSensorParams(tsMap, parameters)
+        classification_frequency = [x for x in parameters if x.name == "classificationFrequency"][0].value
+        before_setup, setup, before_obtain_values, includes, obtain_values = self.getSensorParams(tsMap, parameters)
 
         data = {"before_setup": before_setup,
                 "setup": setup,
                 "before_obtain_values": before_obtain_values,
                 "obtain_values": obtain_values,
+                "includes": includes,
                 "classification_frequency": classification_frequency,
                 "additionalSettings": additionalSettings}
         data["add_datapoint_vars"] = ",".join([x.split(" = ")[0].split(" ")[1] for x in obtain_values])
-        data["sampling_rate"] = model.pipeline.samplingRate
+        data["sampling_rate"] = model.samplingRate
 
         with open("app/Deploy/Devices/OpenEarable/Base.cpp", "r") as f:
             base = f.read()

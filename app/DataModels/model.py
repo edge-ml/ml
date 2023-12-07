@@ -1,18 +1,17 @@
 from app.utils.PyObjectId import PyObjectId
 from bson.objectid import ObjectId
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
 from enum import Enum
-from app.DataModels.trainRequest import TrainRequest
 from app.DataModels.parameter import Parameter
-from app.DataModels.PipeLine import PipelineModel
+from app.DataModels.PipelineRequest import PipelineRequest
 
 
 class ModelStatus(str, Enum):
     waiting = "waiting"
-    preprocessing = "preprocessing"
-    fitting_model = "fitting model"
+    training = "training"
     done = "done"
+    error = "error"
 
 
 class Hyperparameter(BaseModel):
@@ -25,7 +24,6 @@ class TrainingDataset(BaseModel):
 
 class ConfigObj(BaseModel):
     name: str
-
     parameters: List[Parameter]
     state: Optional[Dict]
 
@@ -49,6 +47,7 @@ class TrainRequest(BaseModel):
     normalizer: ConfigObj
     featureExtractor: ConfigObj
 
+
 class ModelStoreObj(BaseModel):
     name: str
     parameters: List[Parameter]
@@ -62,12 +61,39 @@ class ModelConfig(BaseModel):
     featureExtractor: ModelStoreObj
 
 
-class Model(BaseModel):
-    id : PyObjectId = Field(default_factory=ObjectId, alias="_id")
-    projectId: PyObjectId = Field(default_factory=ObjectId)
+# class Model(BaseModel):
+#     id : PyObjectId = Field(default_factory=ObjectId, alias="_id")
+#     projectId: PyObjectId = Field(default_factory=ObjectId)
+#     name: str
+#     trainRequest: TrainRequest
+#     pipeline: Optional[PipelineModel]
+#     timeSeries: Optional[List[str]]
+#     status: ModelStatus = ModelStatus.waiting
+#     error: str = Field(default="")
+
+class ConcreteStepDefinitions(BaseModel):
     name: str
-    trainRequest: TrainRequest
-    pipeline: Optional[PipelineModel]
+    description: str
+    type: str
+
+class ConcreteSteps(BaseModel):
+    options: List[ConfigObj]
+    # steps: List[ConcreteStepDefinitions]
+
+class Labeling(BaseModel):
+    name: str
+    color: str
+
+
+class Model(BaseModel):
+    id: PyObjectId = Field(default_factory=ObjectId, alias="_id")
+    projectId: PyObjectId
+    name: str
+    pipeline: PipelineRequest 
+    labels: Optional[List[Labeling]]
     timeSeries: Optional[List[str]]
-    status: ModelStatus = ModelStatus.waiting
+    samplingRate: Optional[float]
+    trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
+
+

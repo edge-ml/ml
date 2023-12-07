@@ -2,7 +2,7 @@ from fastapi import APIRouter, Header
 from app.db.models import get_model
 from app.Deploy.Base import downloadModel
 from app.ml.BaseConfig import Platforms
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from io import BytesIO
 from app.ml.Pipeline import Pipeline
 from app.Deploy.Devices import DEVICES
@@ -13,7 +13,8 @@ from app.Deploy.Devices import get_device_by_name
 from app.utils.zipfile import add_to_zip_file
 import requests
 from app.internal.config import FIRMWARE_COMPILE_URL
-
+import io
+import tempfile
 class tsMapComponent(BaseModel):
     sensor_id: int
     component_id: int
@@ -42,32 +43,11 @@ router = APIRouter()
 @router.get("/{model_id}/export/{format}")
 async def export(format: str):
     pass
-    # token = user_data[1]
-
-    # timeseries = model.timeseries if model.timeseries else ["Sensor_A", "Sensor_B", "Sensor_C"]
-    # labels = model.labels if model.labels else ["label1", "label2"]
-    # wsize =  model.window_size if model.window_size else "<WINDOW_SIZE>"
-
-    # form = InferenceFormats.from_str(format)
-    # platform = next(x for x in platforms if form in x.supported_formats())
-
-    # label_defs = fetch_label_definition(project_id, token)
-    # label_names = [ (next(x for x in label_defs["labelTypes"] if x["_id"] == labelId))["name"] for labelId in labels ]
-
-    # return platform.codegen(
-    #     window_size = wsize,
-    #     timeseries = timeseries,
-    #     labels = label_names,
-    #     format = form,
-    #     scaler = model.scaler,
-    #     windowing_mode = model.windowing_mode
-    # )
 
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...), compile_wasm: bool = False, wasm_single_file: bool = False):
     model = await get_model(model_id, project)
     code = downloadModel(model, format)
-    print(code)
     fileName = f"{model.name}_{format.name}.zip"
     if format == Platforms.WASM and compile_wasm:
         file_data = {'file': ('example.zip', code)}
@@ -110,9 +90,7 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
     device = get_device_by_name(body.device.name)
     main_file_content = device.deploy(body.tsMap, body.parameters, body.additionalSettings, model)
     code = downloadModel(model, Platforms.C)
-
     zip_file = add_to_zip_file(code, main_file_content, f"{model.name}.ino")
-
     zip_file.seek(0)
     return StreamingResponse(zip_file, media_type="application/zip", headers={'Content-Disposition': f'attachment; filename={model.name}.zip'})
 

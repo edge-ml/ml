@@ -9,7 +9,7 @@ def _models() -> AsyncIOMotorCollection:
     return get_db()['models']
 
 async def add_model(model: Model) -> ObjectId:
-    res = await _models().insert_one(model)
+    res = await _models().insert_one(model.dict(by_alias=True))
     return res.inserted_id
 
 async def get_model(id: str, project_id: str) -> Model:
@@ -27,10 +27,9 @@ async def delete_model(id: ObjectId, projectId: ObjectId) -> None:
     print("Delete", id, projectId)
     await _models().delete_one({ '_id': ObjectId(id), 'projectId': ObjectId(projectId)})
 
-
 async def update_model_status(id: str, project_id: str, status: ModelStatus):
     print(id, project_id, status.value)
-    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": {"status": status.value}})
+    await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": {"trainStatus": status.value}})
 
 async def set_model_data(id: str, project_id: str, data):
     await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)}, {"$set": data})

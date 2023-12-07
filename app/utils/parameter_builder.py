@@ -1,4 +1,4 @@
-from app.DataModels.parameter import Parameter, NumberParameter, SelectionParameter
+from app.DataModels.parameter import Parameter, NumberParameter, SelectionParameter, TextParameter
 from typing import List
 
 
@@ -46,6 +46,18 @@ class ParameterBuilder:
             'is_advanced': is_advanced
         }))
         return self
+    
+    def add_text(self,parameter_name, display_name, description, value, required=True, is_advanced=True):
+            self.parameters.append(TextParameter.parse_obj({
+                "name": parameter_name,
+                "parameter_name": parameter_name,
+                "parameter_type": "text",
+                "display_name": display_name,
+                "description": description,
+                "value": value,
+                "required": required,
+                "is_advanced": is_advanced
+            }))
 
     def add_boolean(self, parameter_name, display_name, description, value, required=True, is_advanced=True):
         # TODO: parameter validation

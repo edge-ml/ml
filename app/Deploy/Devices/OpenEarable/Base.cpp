@@ -1,7 +1,9 @@
-#include <DFRobot_BMX160.h>
 #include <Wire.h>
 #include "model.hpp"
 #include <ArduinoBLE.h>
+{% for item in includes %}
+    {{item}} 
+{% endfor %}
 
 {% for item in before_setup %}
     {{item}} 
@@ -50,14 +52,6 @@ void loop()
     {% endif %}
     static auto lastChecked = millis();
     static auto lastPredict = millis();
-    // Read accelerometer and gyroscope values
-
-    // Serial.print(accel.x);
-    // Serial.print(", ");
-    // Serial.print(accel.y);
-    // Serial.print(", ");
-    // Serial.print(accel.z);
-    // Serial.println("");
 
     if (millis() - lastChecked >= ({{sampling_rate}}))
     {

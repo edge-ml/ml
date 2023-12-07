@@ -1,4 +1,0 @@
-
-
-class BaseSensor:
-    pass

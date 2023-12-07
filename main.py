@@ -22,7 +22,6 @@ app.include_router(
     prefix="/ml"
 )
 
-print("hi")
 @app.get("/")
 async def root():
     return {"message": "Hello World"}

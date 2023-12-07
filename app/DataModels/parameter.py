@@ -30,6 +30,16 @@ class SelectionParameter(BaseModel):
     required: bool
     is_advanced: bool
 
+class TextParameter(BaseModel):
+    name: str
+    parameter_type: str
+    display_name: str
+    parameter_name: str
+    description: str
+    value: Union[str, None]
+    required: bool
+    is_advanced: bool
 
-Parameter = Union[NumberParameter, SelectionParameter]
+
+Parameter = Union[NumberParameter, SelectionParameter, TextParameter]
 

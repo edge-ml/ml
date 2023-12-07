@@ -16,14 +16,28 @@ class TrainLabelingModel(BaseModel):
     id: PyObjectId = Field(alias="_id")
     useZeroClass: bool
     disabledLabelIDs: List[PyObjectId]
+    
+class PipelineStepOption(BaseModel):
+    name: str
+    description: str
+    parameters: List[Parameter]
+
+class PipelineStep(BaseModel):
+    name: str
+    description: str
+    options: PipelineStepOption 
+
+
+class SelectedPipeline(BaseModel):
+    name: str
+    description: str
+    steps: List[PipelineStep]
+
 
 class TrainRequest(BaseModel):
-    name: str
-    useBestModelFromEvaluation: bool = False
+    userBestModelFromEvaluation: bool = False
     datasets: List[TrainDatasetModel]
     labeling: TrainLabelingModel
-    classifier: ConfigObj
-    evaluation: ConfigObj
-    windowing: ConfigObj
-    normalizer: ConfigObj
-    featureExtractor: ConfigObj
+    selectedPipeline: SelectedPipeline
+    
+

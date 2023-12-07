@@ -1,4 +1,4 @@
-
+from bson.objectid import ObjectId
 
 class BaseStorageProvider():
 

@@ -17,14 +17,13 @@ class BaseConfig():
         raise NotImplementedError()
 
     @staticmethod
-    def get_desciption():
+    def get_description():
         raise NotImplementedError()
 
     @staticmethod
     def get_platforms():
         return []
 
-    # Hyperparameters that can be set for the config
     @staticmethod
     def get_parameters():
         return []
@@ -47,7 +46,6 @@ class BaseConfig():
 
     @classmethod
     def get_train_config(cls):
-        print(cls.get_name())
         return {
         "name": cls.get_name(),
         "description":  cls.get_description(),

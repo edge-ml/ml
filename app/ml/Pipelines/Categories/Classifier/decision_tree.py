@@ -207,9 +207,7 @@ class DecisionTree(BaseClassififer):
             'round': lambda x: round(x, 12),
         }}
 
-        data = {**functions}
-        # code = templateEnv.get_template("decisiontree.jinja").render(tree, **data)
-        code = getCode("./app/ml/PipelineExport/C/Classifier/Tree/decisionTree.jinja")
+        code = getCode("./app/ml/PipelineExport/C/Classifier/Tree/decisiontree.jinja")
 
         variables = {**tree, **functions}
 

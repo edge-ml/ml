@@ -34,7 +34,7 @@ class NNClassifier(BaseClassififer):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
+        return [InferenceFormats.PYTHON]
 
     def exportC(self):
         return convert(self.clf)

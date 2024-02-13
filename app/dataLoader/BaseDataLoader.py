@@ -1,4 +1,4 @@
-
+from io import BytesIO
 
 class BaseDataLoader():
 
@@ -6,6 +6,12 @@ class BaseDataLoader():
         raise NotImplementedError()
 
     def save_series(self, id, time_arr, data_arr):
+        raise NotImplementedError()
+    
+    def saveObj(self, id, obj: BytesIO):
+        raise NotImplementedError()
+
+    def loadObj(self, id) -> BytesIO:
         raise NotImplementedError()
     
     def delete(self, id):

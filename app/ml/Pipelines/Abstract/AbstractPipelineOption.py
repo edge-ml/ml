@@ -38,6 +38,9 @@ class AbstractPipelineOption():
     
     def get_state(self):
         return {}
+    
+    def as_file(self):
+        raise NotImplementedError()
 
     def restore(self, config):
         print("Restore:", self.get_name(), config.input_shape)

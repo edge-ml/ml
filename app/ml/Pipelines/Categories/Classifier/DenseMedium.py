@@ -31,7 +31,7 @@ class DenseMedium(NeuralNetwork):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
+        return [InferenceFormats.PYTHON]
 
     def fit(self, X_train, y_train):
         num_classes = len(np.unique(y_train))

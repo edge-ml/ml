@@ -31,3 +31,10 @@ class S3DataLoader(BaseDataLoader):
     def delete(self, id):
         self.s3.delete_object(Bucket=S3_BUCKET_NAME, Key=id)
         print(f"Object with id {id} deleted successfully.")
+
+    def saveObj(self, id, obj: BytesIO):
+        self.s3.put_object(Bucket=S3_BUCKET_NAME, Key=id, Body=obj.getvalue())
+    
+    def loadObj(self, id) -> BytesIO:
+        obj = self.s3.get_object(Bucket=S3_BUCKET_NAME, Key=id)
+        return BytesIO(obj["Body"].read())

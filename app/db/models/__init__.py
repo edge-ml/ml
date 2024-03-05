@@ -1,9 +1,53 @@
-from typing import List
+from typing import List, Dict, Optional
 from motor.motor_asyncio import AsyncIOMotorCollection
 from bson.objectid import ObjectId
 from app.DataModels.model import ModelStatus, Model
+from app.utils.PyObjectId import PyObjectId
 
 from app.db.db import get_db
+
+
+from pydantic import BaseModel, Field
+
+
+
+class PipelineDbStepOption(BaseModel):
+    name: str
+    desciption: str
+    parameters: List[ParameterDBModel]
+    state: Dict
+    input_shape: Optional[List]
+    output_shape: Optional[List]
+
+class PipelineDbStepModel(BaseModel):
+    name: str
+    desciption: str
+    options: List[PipelineDbStepOption]
+    type: str
+
+
+class SelectedPipelineDbModel(BaseModel):
+    name: str
+    description: str
+    steps: List[]
+
+class PipelineDbModel(BaseModel):
+    datasets: List[PyObjectId]
+    labeling: List[PyObjectId]
+    selectedPipeline: SelectedPipelineDbModel
+    name: str
+
+class MLModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    projectId: PyObjectId
+    name: str
+    pipeline: PipelineDbModel
+    timeSeries: List[str]
+    samplingRate: float
+    trainStatus: str
+    error: str
+
+
 
 def _models() -> AsyncIOMotorCollection:
     return get_db()['models']
@@ -19,8 +63,7 @@ async def get_model(id: str, project_id: str) -> Model:
     return Model.parse_obj(obj)
 
 async def get_project_models(project_id: str):
-    # TODO number of models that can be returned is limited by 10000
-    objs = await _models().find({'projectId': ObjectId(project_id)}).to_list(length=10000)
+    objs = await _models().find({'projectId': ObjectId(project_id)})
     return objs
 
 async def delete_model(id: ObjectId, projectId: ObjectId) -> None:

@@ -13,7 +13,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.db import setup_db_connection
 from app.routers import router
 
-app = FastAPI()
+app_info = {
+    "title": "edge-ml machine learning"
+}
+
+
+app = FastAPI(**app_info)
 
 # TODO: adapt to specific origins
 app.add_middleware(

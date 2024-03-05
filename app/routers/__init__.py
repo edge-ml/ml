@@ -10,15 +10,18 @@ router = APIRouter()
 
 router.include_router(
     train.router,
-    prefix="/train"
+    prefix="/train",
+    tags=["Training"]
 )
 
 router.include_router(
     models.router,
-    prefix="/models"
+    prefix="/models",
+    tags=["Models"]
 )
 
 router.include_router(
     deploy.router,
-    prefix="/deploy"
+    prefix="/deploy",
+    tags=["Deployment"]
 )

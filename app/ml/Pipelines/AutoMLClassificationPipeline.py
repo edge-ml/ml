@@ -4,7 +4,10 @@ from app.ml.Pipelines.AutoML import AUTOMLCLASSIFIER_CATEGORY
 from app.ml.Pipelines.Categories.Evaluation import EVALUATION_CATEGORY
 from app.ml.Pipelines.Categories.Common import COMMON_CATEGORY
 from app.ml.Pipelines.Categories.Normalizer import NORMALIZER_CATEGORY
+from app.ml.Pipelines.Versioning import Version
 
+
+@Version(1,0,0)
 class AutoMLClassificationPipeline(AbstractPipeLineCreator):
 
     @classmethod

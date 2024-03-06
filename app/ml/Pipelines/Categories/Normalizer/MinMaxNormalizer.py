@@ -9,7 +9,9 @@ from app.ml.PipelineExport.C.Common.utils import getCode
 from app.ml.PipelineExport.C.Common.Memory import Memory
 from app.ml.PipelineExport.C.Common.CPart import CStep
 from app.ml.BaseConfig import Platforms
+from app.ml.Pipelines.Versioning import RegisterPipelineOption
 
+@RegisterPipelineOption(1,0,0)
 class MinMaxNormalizer(BaseNormalizer):
 
     def __init__(self, parameters=[]):

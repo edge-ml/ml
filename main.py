@@ -17,7 +17,6 @@ app_info = {
     "title": "edge-ml machine learning"
 }
 
-
 app = FastAPI(**app_info)
 
 # TODO: adapt to specific origins

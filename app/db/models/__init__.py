@@ -11,43 +11,6 @@ from pydantic import BaseModel, Field
 
 
 
-class PipelineDbStepOption(BaseModel):
-    name: str
-    desciption: str
-    parameters: List[ParameterDBModel]
-    state: Dict
-    input_shape: Optional[List]
-    output_shape: Optional[List]
-
-class PipelineDbStepModel(BaseModel):
-    name: str
-    desciption: str
-    options: List[PipelineDbStepOption]
-    type: str
-
-
-class SelectedPipelineDbModel(BaseModel):
-    name: str
-    description: str
-    steps: List[]
-
-class PipelineDbModel(BaseModel):
-    datasets: List[PyObjectId]
-    labeling: List[PyObjectId]
-    selectedPipeline: SelectedPipelineDbModel
-    name: str
-
-class MLModel(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    projectId: PyObjectId
-    name: str
-    pipeline: PipelineDbModel
-    timeSeries: List[str]
-    samplingRate: float
-    trainStatus: str
-    error: str
-
-
 
 def _models() -> AsyncIOMotorCollection:
     return get_db()['models']
@@ -62,9 +25,9 @@ async def get_model(id: str, project_id: str) -> Model:
         raise RuntimeError("Model with given id doesn't exist")
     return Model.parse_obj(obj)
 
-async def get_project_models(project_id: str):
-    objs = await _models().find({'projectId': ObjectId(project_id)})
-    return objs
+async def get_project_models(project_id: str) -> List[Model]:
+    objs = await _models().find({'projectId': ObjectId(project_id)}).to_list(None)
+    return [Model(**x) for x in objs]
 
 async def delete_model(id: ObjectId, projectId: ObjectId) -> None:
     print("Delete", id, projectId)

@@ -1,3 +1,4 @@
+from app.ml.Pipelines.PipelineManager import addPipelineOption
 
 
 class Version():
@@ -14,3 +15,11 @@ def version(major, minor, patch):
     def decorator(cls):
         cls.version = Version(major, minor, patch)
         cls.get_version = cls.__name__ + "_" + cls.version
+
+
+def RegisterPipelineOption(major, minor, patch):
+    def decorator(cls):
+        cls.version = Version(major, minor, patch)
+        addPipelineOption(cls)
+        return cls
+    return decorator

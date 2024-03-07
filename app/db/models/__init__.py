@@ -27,7 +27,8 @@ async def get_model(id: str, project_id: str) -> Model:
 
 async def get_project_models(project_id: str) -> List[Model]:
     objs = await _models().find({'projectId': ObjectId(project_id)}).to_list(None)
-    return [Model(**x) for x in objs]
+    # return [Model(**x) for x in objs]
+    return Model(**objs[0])
 
 async def delete_model(id: ObjectId, projectId: ObjectId) -> None:
     print("Delete", id, projectId)

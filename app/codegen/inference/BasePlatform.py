@@ -1,6 +1,6 @@
 from typing import List
 
-from app.codegen.inference.InferenceFormats import InferenceFormats
+from codegen.inference.InferenceFormats import InferenceFormats
 
 class BasePlatform:
     @property

@@ -1,23 +1,23 @@
 
 
-from app.DataModels.model import Model
-from app.db.models import add_model, update_model_status, ModelStatus, set_model_data, set_train_error
-from app.db.labelings import get_labeling
-from app.db.datasets import get_dataset
-from app.DataProcessor.DataLoader.DataLoader import processDatasets
-from app.DataModels.PipelineRequest import PipelineStep, PipelineStepOption
+from DataModels.model import Model
+from db.models import add_model, update_model_status, ModelStatus, set_model_data, set_train_error
+from db.labelings import get_labeling
+from db.datasets import get_dataset
+from DataProcessor.DataLoader.DataLoader import processDatasets
+from DataModels.PipelineRequest import PipelineStep, PipelineStepOption
 
 
-from app.ml.Pipelines.Categories.Evaluation import get_eval_by_name
-from app.DataModels.trainRequest import TrainRequest
+from ml.Pipelines.Categories.Evaluation import get_eval_by_name
+from DataModels.trainRequest import TrainRequest
 
-from app.ml.Pipeline import Pipeline
-from app.DataModels.PipeLine import PipelineModel
-from app.DataModels import PipelineRequest
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
+from ml.Pipeline import Pipeline
+from DataModels.PipeLine import PipelineModel
+from DataModels import PipelineRequest
+from ml.Pipelines.PipelineContainer import PipelineContainer
 import traceback
 
-from app.ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
+from ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
 
 
 # def trainClassifier(windows, labels, modelInfo):

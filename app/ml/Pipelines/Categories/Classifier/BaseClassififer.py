@@ -1,7 +1,7 @@
 
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
-from app.ml.BaseConfig import BaseConfig
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.BaseConfig import BaseConfig
+from ml.Pipelines.PipelineContainer import PipelineContainer
 
 import numpy as np
 

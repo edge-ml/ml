@@ -9,7 +9,7 @@ from sklearn.metrics import (
 )
 
 import json
-from app.utils.jsonEncoder import JSONEncoder
+from utils.jsonEncoder import JSONEncoder
 
 
 

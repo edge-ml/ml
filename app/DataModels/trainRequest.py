@@ -1,7 +1,7 @@
 from typing import Dict, List
 from pydantic import BaseModel, Field
-from app.utils.PyObjectId import PyObjectId
-from app.DataModels.parameter import Parameter
+from utils.PyObjectId import PyObjectId
+from DataModels.parameter import Parameter
 
 class ConfigObj(BaseModel):
     name: str

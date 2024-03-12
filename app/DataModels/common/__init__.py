@@ -1,1 +1,1 @@
-from app.DataModels.common.parameters import Parameter
+from DataModels.common.parameters import Parameter

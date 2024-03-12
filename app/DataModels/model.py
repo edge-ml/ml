@@ -1,10 +1,10 @@
-from app.utils.PyObjectId import PyObjectId
+from utils.PyObjectId import PyObjectId
 from bson.objectid import ObjectId
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
 from enum import Enum
-from app.DataModels.parameter import Parameter
-from app.DataModels.PipelineRequest import PipelineRequest
+from DataModels.parameter import Parameter
+from DataModels.PipelineRequest import PipelineRequest
 
 
 class ModelStatus(str, Enum):

@@ -1,5 +1,5 @@
-# from app.Deploy.CPP.cPart import CPart
-from app.ml.PipelineExport.C.Common.CPart import CStep
+# from Deploy.CPP.cPart import CPart
+from ml.PipelineExport.C.Common.CPart import CStep
 from jinja2 import FileSystemLoader, Template, Environment
 
 

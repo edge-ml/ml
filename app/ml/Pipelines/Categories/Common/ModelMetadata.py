@@ -1,6 +1,6 @@
-from app.utils.parameter_builder import ParameterBuilder
+from utils.parameter_builder import ParameterBuilder
 
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 
 class ModelMetadata(AbstractPipelineOption):
     def __init__(self, parameters):

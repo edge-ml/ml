@@ -1,6 +1,6 @@
 import requests
 
-from app.internal.config import API_URI
+from internal.config import API_URI
 
 # TODO handle exceptions more informatively
 def fetch_project_datasets(project_id, token):

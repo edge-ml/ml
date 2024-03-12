@@ -1,7 +1,7 @@
 from typing import List
-from app.DataModels.parameter import Parameter
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
-from app.utils.enums import Platforms
+from DataModels.parameter import Parameter
+from ml.Pipelines.PipelineContainer import PipelineContainer
+from utils.enums import Platforms
 
 class AbstractPipelineOption():
 

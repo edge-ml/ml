@@ -1,5 +1,5 @@
 from bson.codec_options import CodecOptions, TypeEncoder, TypeRegistry, TypeCodec
-from app.DataModels.parameter import SelectionParameter, NumberParameter
+from DataModels.parameter import SelectionParameter, NumberParameter
 from pydantic import BaseModel
 from typing import Dict
 
@@ -16,7 +16,7 @@ class SelectionParamterEncoder(TypeCodec):
         return value.dict(by_alias=True)
 
     def transform_bson(self, value):
-        return SelectionParameter.parse_obj(value)
+        return SelectionParameter.model_validate(value)
 
 class NumberParameterEncoder(TypeCodec):
     python_type = NumberParameter
@@ -26,7 +26,7 @@ class NumberParameterEncoder(TypeCodec):
         return value.dict(by_alias=True)
 
     def transform_bson(self, value):
-        return NumberParameter.parse_obj(value)
+        return NumberParameter.model_validate(value)
 
 registry = TypeRegistry([SelectionParamterEncoder(), NumberParameterEncoder()])
 

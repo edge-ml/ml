@@ -1,4 +1,4 @@
-from app.ml.Pipelines.PipelineManager import addPipelineOption
+from ml.Pipelines.PipelineManager import addPipelineOption
 
 
 class Version():

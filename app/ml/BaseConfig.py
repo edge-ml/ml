@@ -1,4 +1,4 @@
-from app.DataModels.parameter import Parameter
+from DataModels.parameter import Parameter
 from enum import Enum
 from typing import List
 

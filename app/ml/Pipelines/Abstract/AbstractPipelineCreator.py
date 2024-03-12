@@ -1,4 +1,4 @@
-
+from DataModels.api import PipelineModel
 
 class AbstractPipeLineCreator():
 
@@ -16,4 +16,5 @@ class AbstractPipeLineCreator():
 
     @classmethod
     def get_train_config(cls):
-        return {"name": cls.get_name(), "description": cls.get_description(), "steps": [x.get_train_config() for x in cls.get_categories()]}
+        dict = {"name": cls.get_name(), "description": cls.get_description(), "steps": [x.get_train_config() for x in cls.get_categories()]}    
+        return dict

@@ -1,8 +1,8 @@
-from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Pipelines.Categories.Classifier.NeuralNetwork import NeuralNetwork
+from codegen.inference.InferenceFormats import InferenceFormats
+from utils.parameter_builder import ParameterBuilder
+from ml.Pipelines.Categories.Classifier.NeuralNetwork import NeuralNetwork
 import numpy as np
-from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
+from ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential

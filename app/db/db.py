@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from app.internal.config import AUTH_DATABASE_NAME, DATABASE_URI, DATABASE_NAME, DATASTORE_DB_NAME
+from internal.config import AUTH_DATABASE_NAME, DATABASE_URI, DATABASE_NAME, DATASTORE_DB_NAME
 import asyncio
-from app.DataModels.Encoder import codec_options
+from DataModels.Encoder import codec_options
 
 _db = None
 _auth_db = None

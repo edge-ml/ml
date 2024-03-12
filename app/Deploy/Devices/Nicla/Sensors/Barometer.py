@@ -1,4 +1,4 @@
-from app.Deploy.Devices.Nicla.Sensors.SensorComponent import SensorComponent
+from Deploy.Devices.Nicla.Sensors.SensorComponent import SensorComponent
 
 class Barometer():
 

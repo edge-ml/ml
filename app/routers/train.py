@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Header, Response, BackgroundTasks
-from app.utils.jsonEncoder import JSONEncoder
-from app.ml.trainer import train
-from app.ml.Pipelines import PIPELINES_CONFIG
-from app.DataModels import PipelineRequest
-from app.ml.Pipelines import PIPELINEOPTIONCONFIGS
+from utils.jsonEncoder import JSONEncoder
+from ml.trainer import train
+from ml.Pipelines import PIPELINES_CONFIG
+from DataModels import PipelineRequest
+from ml.Pipelines import PIPELINEOPTIONCONFIGS
+from DataModels.parameter import Parameter, NumberParameter, SelectionParameter, TextParameter
 
-from app.DataModels.api import PipelineModel
+from DataModels.api import PipelineModel
 
 from pydantic import BaseModel
 from typing import List, Dict
-from app.DataModels.parameter import Parameter
+from DataModels.parameter import Parameter
+from DataModels.api.train import PipelineStepOption
 
 import json
 
@@ -17,9 +19,22 @@ import json
 router = APIRouter()
 
 
-@router.get("/", response_model=List[PipelineModel])
+# @router.get("/", response_model=List[PipelineModel])
+@router.get("/")
 async def get_pipelines():
-    return [PipelineModel(**x) for x in PIPELINES_CONFIG]
+
+    for step in PIPELINES_CONFIG[0]["steps"]:
+        for option in step["options"]:
+            for parameter in option["parameters"]:
+                # Parameter.model_validate(parameter)
+                print(type(parameter))
+                print("+"*40)
+            PipelineStepOption.model_validate(option)
+            return
+    # parameter = PIPELINES_CONFIG[0]["steps"][0]["options"][0]["parameters"][0]
+    # number_param = NumberParameter.model_validate(parameter)
+    return None
+    # return [PipelineModel.model_validate(x) for x in PIPELINES_CONFIG]
 
 
 # @router.get("/")

@@ -1,16 +1,16 @@
 import numpy as np
 from typing import Tuple
-from app.DataModels.trainRequest import TrainRequest
-from app.ml.Pipelines.Categories.Classifier import get_classifier_by_name
-from app.ml.Pipelines.Categories.Evaluation import BaseEvaluation, get_eval_by_name
-from app.ml.Pipelines.Categories.FeatureExtraction import get_feature_extractor_by_name
-from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
-from app.ml.Pipeline import Pipeline
-from app.ml.Pipelines.Categories.Windowing import get_windower_by_name
-from app.DataModels.PipelineRequest import PipelineRequest
-from app.ml.Pipelines import getPipelineOption, getCategory
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from DataModels.trainRequest import TrainRequest
+from ml.Pipelines.Categories.Classifier import get_classifier_by_name
+from ml.Pipelines.Categories.Evaluation import BaseEvaluation, get_eval_by_name
+from ml.Pipelines.Categories.FeatureExtraction import get_feature_extractor_by_name
+from ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
+from ml.Pipeline import Pipeline
+from ml.Pipelines.Categories.Windowing import get_windower_by_name
+from DataModels.PipelineRequest import PipelineRequest
+from ml.Pipelines import getPipelineOption, getCategory
+from ml.Pipelines.Abstract.AbstractPipelineStep import StepType
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 
 def fit_to_pipeline2(trainReq : TrainRequest, datasets, labels) -> Tuple[Pipeline, BaseEvaluation]:
 

@@ -1,5 +1,5 @@
-from app.StorageProvider.BaseStorageProvider import BaseStorageProvider
-from app.internal.config import TSDATA, S3_URL, S3_MODEL_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_KEY
+from StorageProvider.BaseStorageProvider import BaseStorageProvider
+from internal.config import TSDATA, S3_URL, S3_MODEL_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_KEY
 import boto3
 import numpy as np
 from io import BytesIO

@@ -1,5 +1,5 @@
-from app.ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
-from app.ml.PipelineExport.C.Common.utils import getCode
+from ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
+from ml.PipelineExport.C.Common.utils import getCode
 from jinja2 import Template
 import math
 

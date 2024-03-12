@@ -1,1 +1,1 @@
-from app.DataModels.api.train import PipelineModel
+from DataModels.api.train import PipelineModel

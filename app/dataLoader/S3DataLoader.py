@@ -1,5 +1,5 @@
-from app.dataLoader.BaseDataLoader import BaseDataLoader
-from app.internal.config import S3_URL, S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_KEY
+from dataLoader.BaseDataLoader import BaseDataLoader
+from internal.config import S3_URL, S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_KEY
 import boto3
 import h5py
 import numpy as np

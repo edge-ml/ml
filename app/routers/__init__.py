@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routers import train, models, deploy
+from routers import train, models, deploy
 
 router = APIRouter()
 

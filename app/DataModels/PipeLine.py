@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.DataModels.parameter import Parameter
+from DataModels.parameter import Parameter
 from typing import List, Dict, Optional
 
 class PipeLineStep(BaseModel):

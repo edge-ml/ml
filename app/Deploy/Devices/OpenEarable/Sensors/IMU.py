@@ -1,5 +1,5 @@
-from app.Deploy.Devices.Nicla.Sensors.SensorComponent import SensorComponent
-from app.Deploy.Devices.BaseSensor import BaseSensor
+from Deploy.Devices.Nicla.Sensors.SensorComponent import SensorComponent
+from Deploy.Devices.BaseSensor import BaseSensor
 
 class IMU(BaseSensor):
 

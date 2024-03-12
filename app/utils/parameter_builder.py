@@ -1,4 +1,4 @@
-from app.DataModels.parameter import Parameter, NumberParameter, SelectionParameter, TextParameter
+from DataModels.parameter import Parameter, NumberParameter, SelectionParameter, TextParameter
 from typing import List
 
 
@@ -12,7 +12,7 @@ class ParameterBuilder:
 
         # self.__validateParameterName(self.parameters, parameter_name)
 
-        self.parameters.append(NumberParameter.parse_obj({
+        self.parameters.append(NumberParameter.model_validate({
             'name': parameter_name,
             'parameter_type': 'number',
             'display_name': display_name,
@@ -33,7 +33,7 @@ class ParameterBuilder:
 
         # self.__validateParameterName(self.parameters, parameter_name)
 
-        self.parameters.append(SelectionParameter.parse_obj({
+        self.parameters.append(SelectionParameter.model_validate({
             'name': parameter_name,
             'parameter_type': 'selection',
             'display_name': display_name,
@@ -48,7 +48,7 @@ class ParameterBuilder:
         return self
     
     def add_text(self,parameter_name, display_name, description, value, required=True, is_advanced=True):
-            self.parameters.append(TextParameter.parse_obj({
+            self.parameters.append(TextParameter.model_validate({
                 "name": parameter_name,
                 "parameter_name": parameter_name,
                 "parameter_type": "text",

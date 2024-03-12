@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
-from app.ml.Pipelines.Abstract.StepType import StepType
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.Pipelines.Abstract.StepType import StepType
     
 class AbstractPipelineStep():
     def __init__(self, name, description, options, type: StepType = StepType.CORE):

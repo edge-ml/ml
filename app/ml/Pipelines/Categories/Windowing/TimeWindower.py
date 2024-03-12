@@ -1,9 +1,9 @@
-from app.ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower
-from app.utils.parameter_builder import ParameterBuilder
+from ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower
+from utils.parameter_builder import ParameterBuilder
 import numpy as np
-from app.ml.BaseConfig import Platforms
+from ml.BaseConfig import Platforms
 from jinja2 import Template
-from app.Deploy.CPP.cPart import CPart
+from Deploy.CPP.cPart import CPart
 
 class TimeWindower(BaseWindower):
 

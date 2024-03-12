@@ -1,8 +1,8 @@
-from app.db.models import get_model
-from app.ml.Pipelines import getPipeline
-from app.dataLoader import DATASTORE
+from db.models import get_model
+from ml.Pipelines import getPipeline
+from dataLoader import DATASTORE
 
-from app.codegen.inference.InferenceFormats import InferenceFormats
+from codegen.inference.InferenceFormats import InferenceFormats
 
 from fastapi.responses import Response
 import zipfile

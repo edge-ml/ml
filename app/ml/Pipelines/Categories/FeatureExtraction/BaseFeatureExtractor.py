@@ -1,6 +1,6 @@
-from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
+from ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.Pipelines.PipelineContainer import PipelineContainer
 
 class BaseFeatureExtractor(AbstractPipelineOption):
 

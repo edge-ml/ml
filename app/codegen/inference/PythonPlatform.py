@@ -1,6 +1,6 @@
-from app.codegen.inference.BasePlatform import BasePlatform
-from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.internal.consts import SAMPLE_BASED_WINDOWING
+from codegen.inference.BasePlatform import BasePlatform
+from codegen.inference.InferenceFormats import InferenceFormats
+from internal.consts import SAMPLE_BASED_WINDOWING
 
 def formatimport(format):
     if format == InferenceFormats.PYTHON:

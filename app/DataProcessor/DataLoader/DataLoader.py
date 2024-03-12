@@ -2,10 +2,10 @@ from typing import List
 import numpy as np
 import pandas as pd
 import math
-from app.DataModels.dataset import DatasetSchema
+from DataModels.dataset import DatasetSchema
 
 
-from app.DataProcessor.DataLoader.binaryStore import BinaryStore
+from DataProcessor.DataLoader.binaryStore import BinaryStore
 
 
 def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):

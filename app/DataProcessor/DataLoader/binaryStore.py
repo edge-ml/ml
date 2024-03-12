@@ -8,9 +8,9 @@ import lttbc
 import h5py
 import functools
 import tempfile
-from app.internal.config import TS_STORE_MECHANISM
-from app.dataLoader.FileSystemDataLoader import FileSystemDataLoader
-from app.dataLoader.S3DataLoader import S3DataLoader
+from internal.config import TS_STORE_MECHANISM
+from dataLoader.FileSystemDataLoader import FileSystemDataLoader
+from dataLoader.S3DataLoader import S3DataLoader
 
 dataLoader = None
 

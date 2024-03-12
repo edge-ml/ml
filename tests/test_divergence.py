@@ -10,11 +10,11 @@ import shutil
 import asyncio
 import joblib
 
-from app.Deploy.Base import downloadModel
-from app.db.db import setup_db_connection
-from app.db.models import get_model, _models
-from app.ml.BaseConfig import Platforms
-from app.ml.Pipeline import Pipeline
+from Deploy.Base import downloadModel
+from db.db import setup_db_connection
+from db.models import get_model, _models
+from ml.BaseConfig import Platforms
+from ml.Pipeline import Pipeline
 
 fixture_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
 

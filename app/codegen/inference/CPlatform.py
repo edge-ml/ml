@@ -1,5 +1,5 @@
-from app.codegen.inference.BasePlatform import BasePlatform
-from app.codegen.inference.InferenceFormats import InferenceFormats
+from codegen.inference.BasePlatform import BasePlatform
+from codegen.inference.InferenceFormats import InferenceFormats
 
 class CPlatform(BasePlatform):
     @property

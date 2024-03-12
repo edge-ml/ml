@@ -1,8 +1,8 @@
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
-from app.utils.PyObjectId import PyObjectId
-from app.DataModels.parameter import Parameter
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType
+from utils.PyObjectId import PyObjectId
+from DataModels.parameter import Parameter
+from ml.Pipelines.Abstract.AbstractPipelineStep import StepType
 
 class ConfigObj(BaseModel):
     name: str

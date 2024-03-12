@@ -1,4 +1,4 @@
-from app.Deploy.CPP.cPart import cPart
+from Deploy.CPP.cPart import cPart
 from typing import List
 
 class cRenderer():

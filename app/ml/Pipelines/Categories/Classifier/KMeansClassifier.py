@@ -1,7 +1,7 @@
-from app.codegen.export_javascript import export_javascript
-from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Pipelines.Categories.Classifier import BaseClassififer
+from codegen.export_javascript import export_javascript
+from codegen.inference.InferenceFormats import InferenceFormats
+from utils.parameter_builder import ParameterBuilder
+from ml.Pipelines.Categories.Classifier import BaseClassififer
 from sklearn.tree import DecisionTreeClassifier
 from micromlgen import port
 import m2cgen as m2c
@@ -9,14 +9,14 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.cluster import KMeans, SpectralClustering
 import numpy as np
 import copy
-from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
+from ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-from app.internal.config import CLASSIFIER_STORE
+from internal.config import CLASSIFIER_STORE
 import pickle 
 import os
-from app.ml.BaseConfig import Platforms
-from app.Deploy.Sklearn.exportC_decisionTree import convert
-from app.StorageProvider import StorageProvider
+from ml.BaseConfig import Platforms
+from Deploy.Sklearn.exportC_decisionTree import convert
+from StorageProvider import StorageProvider
 
 class KMeansClassifier(BaseClassififer):
 

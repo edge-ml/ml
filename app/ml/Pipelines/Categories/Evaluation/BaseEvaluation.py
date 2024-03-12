@@ -1,13 +1,13 @@
-from app.ml.Pipelines.Categories.Classifier import BaseClassififer
-from app.ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
-from app.ml.BaseConfig import BaseConfig
-from app.DataModels.PipeLine import PipeLineStep
+from ml.Pipelines.Categories.Classifier import BaseClassififer
+from ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.BaseConfig import BaseConfig
+from DataModels.PipeLine import PipeLineStep
 from typing import Optional, Tuple
-from app.ml.Pipeline import Pipeline
+from ml.Pipeline import Pipeline
 import numpy as np
 
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
+from ml.Pipelines.PipelineContainer import PipelineContainer
 
 class BaseEvaluation(AbstractPipelineOption):
 

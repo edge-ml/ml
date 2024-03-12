@@ -1,4 +1,4 @@
-from app.ml.PipelineExport.C.Common.Memory import Memory
+from ml.PipelineExport.C.Common.Memory import Memory
 
 from typing import List
 

@@ -1,15 +1,15 @@
-from app.ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
-from app.ml.BaseConfig import Platforms
+from ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
+from ml.BaseConfig import Platforms
 import numpy as np
 import json
-from app.utils.jsonEncoder import JSONEncoder
+from utils.jsonEncoder import JSONEncoder
 from jinja2 import Template, FileSystemLoader
-from app.Deploy.CPP.cPart import CPart
-from app.ml.PipelineExport.C.Common.utils import getCode
-from app.ml.PipelineExport.C.Common.Memory import Memory
-from app.ml.PipelineExport.C.Common.CPart import CStep
-from app.ml.BaseConfig import Platforms
-from app.ml.Pipelines.Versioning import RegisterPipelineOption
+from Deploy.CPP.cPart import CPart
+from ml.PipelineExport.C.Common.utils import getCode
+from ml.PipelineExport.C.Common.Memory import Memory
+from ml.PipelineExport.C.Common.CPart import CStep
+from ml.BaseConfig import Platforms
+from ml.Pipelines.Versioning import RegisterPipelineOption
 
 @RegisterPipelineOption(1,0,0)
 class MinMaxNormalizer(BaseNormalizer):

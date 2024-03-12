@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Header, Response
-from app.utils.jsonEncoder import JSONEncoder
-from app.db.models import get_project_models, delete_model
-from app.ml.Exporter import download_model
-from app.utils.PyObjectId import PyObjectId
-from app.controller.modelController import get_models
+from utils.jsonEncoder import JSONEncoder
+from db.models import get_project_models, delete_model
+from ml.Exporter import download_model
+from utils.PyObjectId import PyObjectId
+from controller.modelController import get_models
 
 import json
 

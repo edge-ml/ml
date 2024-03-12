@@ -1,13 +1,13 @@
-from app.codegen.export_javascript import export_javascript
-from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.utils.parameter_builder import ParameterBuilder
+from codegen.export_javascript import export_javascript
+from codegen.inference.InferenceFormats import InferenceFormats
+from utils.parameter_builder import ParameterBuilder
 from sklearn.ensemble import RandomForestClassifier
-from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
+from ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
 from micromlgen import port
 import m2cgen as m2c
-from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
+from ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-from app.StorageProvider import StorageProvider
+from StorageProvider import StorageProvider
 import pickle
 
 

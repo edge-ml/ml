@@ -1,4 +1,4 @@
 # from ml.app.ml.Pipelines.Categories.Classifier.decision_tree import DecisionTree
-# from app.models.random_forest import RandomForest
+# from models.random_forest import RandomForest
 
 EDGE_MODELS = []

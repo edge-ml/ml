@@ -1,14 +1,14 @@
-from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Pipelines.Categories.Classifier import BaseClassififer
+from codegen.inference.InferenceFormats import InferenceFormats
+from utils.parameter_builder import ParameterBuilder
+from ml.Pipelines.Categories.Classifier import BaseClassififer
 from sklearn.cluster import KMeans
 import numpy as np
-from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
+from ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-from app.internal.config import CLASSIFIER_STORE
+from internal.config import CLASSIFIER_STORE
 import pickle 
 import os
-from app.Deploy.Sklearn.exportC_decisionTree import convert
+from Deploy.Sklearn.exportC_decisionTree import convert
 
 class NNClassifier(BaseClassififer):
 

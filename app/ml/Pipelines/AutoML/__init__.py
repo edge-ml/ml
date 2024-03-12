@@ -1,5 +1,5 @@
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep, StepType
-from app.ml.Pipelines.AutoML.AutoMLClassifier import AutoMLClassifier
+from ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep, StepType
+from ml.Pipelines.AutoML.AutoMLClassifier import AutoMLClassifier
 
 
 

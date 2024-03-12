@@ -1,9 +1,9 @@
 # from fastapi import APIRouter, Depends
 
-# from app.routers.dependencies import validate_user
-# from app.routers.models import models
-# from app.routers.train import train
-# from app.routers.deploy import deploy
+# from routers.dependencies import validate_user
+# from routers.models import models
+# from routers.train import train
+# from routers.deploy import deploy
 
 # router = APIRouter()
 # router.include_router(

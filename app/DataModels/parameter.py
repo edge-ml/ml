@@ -1,11 +1,11 @@
-from pydantic import BaseModel
-from typing import Union, List
+from pydantic import BaseModel, RootModel, Field
+from typing import Union, List, Literal
 
 Number = Union[float, int]
 
 class NumberParameter(BaseModel):
     name: str
-    parameter_type: str
+    parameter_type: Literal["number"]
     display_name: str
     parameter_name: str
     description: str
@@ -20,7 +20,7 @@ class NumberParameter(BaseModel):
 
 class SelectionParameter(BaseModel):
     name: str
-    parameter_type: str
+    parameter_type: Literal["selection"]
     display_name: str
     parameter_name: str
     description: str
@@ -32,7 +32,7 @@ class SelectionParameter(BaseModel):
 
 class TextParameter(BaseModel):
     name: str
-    parameter_type: str
+    parameter_type: Literal["text"]
     display_name: str
     parameter_name: str
     description: str
@@ -41,5 +41,7 @@ class TextParameter(BaseModel):
     is_advanced: bool
 
 
-Parameter = Union[NumberParameter, SelectionParameter, TextParameter]
+class Parameter(RootModel):
+    root: Union[NumberParameter, SelectionParameter, TextParameter] = Field(..., discriminator="parameter_type")
+
 

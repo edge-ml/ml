@@ -1,6 +1,6 @@
-from app.Deploy.Devices.BaseDevice import BaseDevice
-from app.Deploy.Devices.OpenEarable.Sensors.IMU import IMU
-from app.Deploy.Devices.OpenEarable.Sensors.Baro import Baro
+from Deploy.Devices.BaseDevice import BaseDevice
+from Deploy.Devices.OpenEarable.Sensors.IMU import IMU
+from Deploy.Devices.OpenEarable.Sensors.Baro import Baro
 from typing import List
 from jinja2 import Template
 

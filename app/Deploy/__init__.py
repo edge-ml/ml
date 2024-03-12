@@ -1,5 +1,5 @@
-from app.Deploy.Devices.BaseDevice import BaseDevice
-from app.Deploy.Devices.Nicla.Nicla import Nicla
+from Deploy.Devices.BaseDevice import BaseDevice
+from Deploy.Devices.Nicla.Nicla import Nicla
 
 from typing import List
 

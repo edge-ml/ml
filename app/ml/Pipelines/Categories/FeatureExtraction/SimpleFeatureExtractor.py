@@ -1,11 +1,11 @@
-from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
+from ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
 import numpy as np
-from app.Deploy.CPP.cPart import CPart
-from app.utils.StringFile import StringFile
-from app.ml.PipelineExport.C.Common.utils import getCode
-from app.ml.PipelineExport.C.Common.Memory import Memory
-from app.ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
-from app.ml.BaseConfig import Platforms
+from Deploy.CPP.cPart import CPart
+from utils.StringFile import StringFile
+from ml.PipelineExport.C.Common.utils import getCode
+from ml.PipelineExport.C.Common.Memory import Memory
+from ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
+from ml.BaseConfig import Platforms
 
 
 class SimpleFeatureExtractor(BaseFeatureExtractor):

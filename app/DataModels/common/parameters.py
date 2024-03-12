@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
-from typing import Union, List, Literal, Annotated
+from pydantic import BaseModel, RootModel, Field
+from typing import Union, List, Literal
+from typing_extensions import TypeAliasType, Annotated
 
 Number = Union[float, int]
 
@@ -11,11 +12,12 @@ class NumberParameter(BaseModel):
     description: str
     number_min: Number
     number_max: Number
-    value: Number = None
+    value: Union[Number, None]
     step_size: Number
     required: bool
     log: bool
     is_advanced: bool
+
 
 class SelectionParameter(BaseModel):
     name: str
@@ -24,7 +26,7 @@ class SelectionParameter(BaseModel):
     parameter_name: str
     description: str
     options: List[str]
-    value: str = None
+    value: Union[str, None]
     multi_select: bool
     required: bool
     is_advanced: bool
@@ -35,8 +37,12 @@ class TextParameter(BaseModel):
     display_name: str
     parameter_name: str
     description: str
-    value: str = None
+    value: Union[str, None]
     required: bool
     is_advanced: bool
 
-Parameter = Annotated[Union[NumberParameter, SelectionParameter, TextParameter], Field(discriminator="parameter_type")]
+
+# class Parameter(RootModel):
+#     root: Union[NumberParameter, SelectionParameter, TextParameter] = Field(..., discriminator="parameter_type")
+
+Parameter = TypeAliasType("Parameter", Annotated[Union[NumberParameter, TextParameter, SelectionParameter], Field(discriminator="parameter_type")])

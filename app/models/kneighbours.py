@@ -1,6 +1,6 @@
-from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel
+from codegen.inference.InferenceFormats import InferenceFormats
+from utils.parameter_builder import ParameterBuilder
+from models.edge_model import EdgeModel
 from sklearn.neighbors import KNeighborsClassifier
 import copy
 

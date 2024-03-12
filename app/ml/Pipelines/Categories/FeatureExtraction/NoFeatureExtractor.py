@@ -1,4 +1,4 @@
-from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
+from ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
 import numpy as np
 
 

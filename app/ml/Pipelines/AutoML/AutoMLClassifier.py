@@ -1,14 +1,14 @@
-from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
+from utils.parameter_builder import ParameterBuilder
+from ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
 import pickle
-from app.Deploy.Sklearn.exportC_decisionTree import convert
-from app.StorageProvider import StorageProvider
+from Deploy.Sklearn.exportC_decisionTree import convert
+from StorageProvider import StorageProvider
 
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
-from app.ml.Pipelines.AutoML.PytorchAdapter import get_dataloader
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.Pipelines.AutoML.PytorchAdapter import get_dataloader
 from tensorflow.keras import Model as KerasModel
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
+from ml.Pipelines.PipelineContainer import PipelineContainer
 from sklearn.model_selection import train_test_split as sklearn_train_test_split
 from micronas import search, exec_tflm, PytorchKerasAdapter
 

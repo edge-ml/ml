@@ -1,12 +1,12 @@
 
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import StepType, AbstractPipelineStep
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.Pipelines.Abstract.AbstractPipelineStep import StepType, AbstractPipelineStep
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from typing import List, Union
-from app.utils.enums import Platforms
-from app.utils.parameter_builder import ParameterBuilder
+from utils.enums import Platforms
+from utils.parameter_builder import ParameterBuilder
 
-from app.ml.PipelineExport.C.CCompiler import buildCCode
-# from app.ml.Pipelines import getPipelineOption, getCategory
+from ml.PipelineExport.C.CCompiler import buildCCode
+# from ml.Pipelines import getPipelineOption, getCategory
 
 
 # class Pipeline():

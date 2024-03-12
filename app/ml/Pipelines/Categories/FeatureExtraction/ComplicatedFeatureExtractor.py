@@ -1,7 +1,7 @@
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
+from ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 import numpy as np
-from app.Deploy.CPP.cPart import CPart
-from app.utils.StringFile import StringFile
+from Deploy.CPP.cPart import CPart
+from utils.StringFile import StringFile
 
 
 class ComplicatedFeatureExtractor(BaseException):

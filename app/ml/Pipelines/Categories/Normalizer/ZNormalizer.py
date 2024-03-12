@@ -1,7 +1,7 @@
-from app.ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
+from ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
 import numpy as np
 import json
-from app.utils.jsonEncoder import JSONEncoder
+from utils.jsonEncoder import JSONEncoder
 
 class ZNormalizer(BaseNormalizer):
 

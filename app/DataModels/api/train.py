@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 
-from app.DataModels.common import Parameter
+from DataModels.common import Parameter
 
 
 class PipelineStepOption(BaseModel):

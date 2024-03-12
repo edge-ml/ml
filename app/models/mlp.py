@@ -1,5 +1,5 @@
-from app.utils.parameter_builder import ParameterBuilder
-from app.models.edge_model import EdgeModel
+from utils.parameter_builder import ParameterBuilder
+from models.edge_model import EdgeModel
 from sklearn.neural_network import MLPClassifier
 import copy
 

@@ -1,7 +1,7 @@
-from app.ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower 
-from app.ml.Pipelines.Categories.Windowing.SampleWindower import SampleWindower
-from app.ml.Pipelines.Categories.Windowing.TimeWindower import TimeWindower
-from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep, StepType
+from ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower 
+from ml.Pipelines.Categories.Windowing.SampleWindower import SampleWindower
+from ml.Pipelines.Categories.Windowing.TimeWindower import TimeWindower
+from ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep, StepType
 from typing import List
 
 

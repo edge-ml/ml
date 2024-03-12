@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Header
-from app.db.models import get_model
-from app.Deploy.Base import downloadModel
-from app.ml.BaseConfig import Platforms
+from db.models import get_model
+from Deploy.Base import downloadModel
+from ml.BaseConfig import Platforms
 from fastapi.responses import StreamingResponse, FileResponse
 from io import BytesIO
-from app.ml.Pipeline import Pipeline
-from app.Deploy.Devices import DEVICES
+from ml.Pipeline import Pipeline
+from Deploy.Devices import DEVICES
 from pydantic import BaseModel
 from typing import List, Dict
-from app.DataModels.parameter import Parameter
-from app.Deploy.Devices import get_device_by_name
-from app.utils.zipfile import add_to_zip_file
+from DataModels.parameter import Parameter
+from Deploy.Devices import get_device_by_name
+from utils.zipfile import add_to_zip_file
 import requests
-from app.internal.config import FIRMWARE_COMPILE_URL
+from internal.config import FIRMWARE_COMPILE_URL
 import io
 import tempfile
 class tsMapComponent(BaseModel):

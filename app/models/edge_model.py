@@ -1,6 +1,6 @@
-from app.codegen.inference import InferenceFormats
-from app.internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
-from app.utils.parameter_builder import ParameterBuilder
+from codegen.inference import InferenceFormats
+from internal.consts import SAMPLE_BASED_WINDOWING, TIME_BASED_WINDOWING
+from utils.parameter_builder import ParameterBuilder
 
 class EdgeModel:
     # static methods

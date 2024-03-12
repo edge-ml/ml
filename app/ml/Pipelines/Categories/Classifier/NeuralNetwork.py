@@ -1,9 +1,9 @@
-from app.codegen.inference.InferenceFormats import InferenceFormats
-from app.utils.parameter_builder import ParameterBuilder
-from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
+from codegen.inference.InferenceFormats import InferenceFormats
+from utils.parameter_builder import ParameterBuilder
+from ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
 from bson.objectid import ObjectId
-from app.internal.config import CLASSIFIER_STORE
-from app.dataLoader import DATASTORE
+from internal.config import CLASSIFIER_STORE
+from dataLoader import DATASTORE
 import tempfile
 
 

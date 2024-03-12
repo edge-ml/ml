@@ -3,17 +3,17 @@
 # from typing import List
 # from fastapi import status, HTTPException, Response
 # from starlette.requests import Request
-# from app.routers.dependencies import extract_project_id, validate_user
+# from routers.dependencies import extract_project_id, validate_user
 
-# from app.routers.models.models import edge_models
-# from app.validation import ValidationBody
-# from app.utils.PyObjectId import PyObjectId
+# from routers.models.models import edge_models
+# from validation import ValidationBody
+# from utils.PyObjectId import PyObjectId
 
 # import json
 # import orjson
-# from app.utils.jsonEncoder import JSONEncoder
+# from utils.jsonEncoder import JSONEncoder
 
-# from app.ml.trainer import train
+# from ml.trainer import train
 
 # router = APIRouter()
 

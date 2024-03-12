@@ -1,12 +1,12 @@
-from app.ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower
-from app.utils.parameter_builder import ParameterBuilder
+from ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower
+from utils.parameter_builder import ParameterBuilder
 import numpy as np
-from app.ml.BaseConfig import Platforms
+from ml.BaseConfig import Platforms
 from jinja2 import Template
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
-from app.ml.PipelineExport.C.Common.utils import getCode
-from app.ml.PipelineExport.C.Common.Memory import Memory
-from app.ml.PipelineExport.C.Common.CPart import CStep
+from ml.Pipelines.PipelineContainer import PipelineContainer
+from ml.PipelineExport.C.Common.utils import getCode
+from ml.PipelineExport.C.Common.Memory import Memory
+from ml.PipelineExport.C.Common.CPart import CStep
 class SampleWindower(BaseWindower):
 
     def __init__(self, parameters=[]):

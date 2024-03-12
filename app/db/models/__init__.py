@@ -1,10 +1,10 @@
 from typing import List, Dict, Optional
 from motor.motor_asyncio import AsyncIOMotorCollection
 from bson.objectid import ObjectId
-from app.DataModels.model import ModelStatus, Model
-from app.utils.PyObjectId import PyObjectId
+from DataModels.model import ModelStatus, Model
+from utils.PyObjectId import PyObjectId
 
-from app.db.db import get_db
+from db.db import get_db
 
 
 from pydantic import BaseModel, Field
@@ -23,7 +23,7 @@ async def get_model(id: str, project_id: str) -> Model:
     obj = await _models().find_one({'_id': ObjectId(id), 'projectId': ObjectId(project_id)})
     if obj is None:
         raise RuntimeError("Model with given id doesn't exist")
-    return Model.parse_obj(obj)
+    return Model.model_validate(obj)
 
 async def get_project_models(project_id: str) -> List[Model]:
     objs = await _models().find({'projectId': ObjectId(project_id)}).to_list(None)

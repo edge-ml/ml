@@ -1,6 +1,6 @@
-from app.Deploy.Devices.BaseDevice import BaseDevice
-from app.Deploy.Devices.Nicla.Nicla import Nicla
-from app.Deploy.Devices.OpenEarable.OpenEarable import OpenEarable
+from Deploy.Devices.BaseDevice import BaseDevice
+from Deploy.Devices.Nicla.Nicla import Nicla
+from Deploy.Devices.OpenEarable.OpenEarable import OpenEarable
 from typing import List
 
 DEVICES : List[BaseDevice] = [Nicla(), OpenEarable()]

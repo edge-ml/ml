@@ -10,8 +10,8 @@ import uvicorn
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.db.db import setup_db_connection
-from app.routers import router
+from db.db import setup_db_connection
+from routers import router
 
 app_info = {
     "title": "edge-ml machine learning"

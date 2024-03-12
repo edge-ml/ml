@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from bson.objectid import ObjectId
-from app.utils.PyObjectId import PyObjectId
+from utils.PyObjectId import PyObjectId
 from typing import List
 
 class LabelModel(BaseModel):

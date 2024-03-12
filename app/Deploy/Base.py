@@ -1,10 +1,10 @@
-from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
-from app.DataModels.model import Model
-from app.ml.BaseConfig import Platforms
-from app.ml.Pipelines import getPipeline
+from ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
+from DataModels.model import Model
+from ml.BaseConfig import Platforms
+from ml.Pipelines import getPipeline
 from io import BytesIO
-from app.utils.zipfile import zipFiles
-from app.utils.StringFile import StringFile
+from utils.zipfile import zipFiles
+from utils.StringFile import StringFile
 import zipfile
 import io
 

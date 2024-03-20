@@ -97,9 +97,10 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         await set_train_error(id, project, str(e))
 
 
-async def train(req: PipelineRequest, project, background_tasks):
+async def train(req: PipelineRequest, project):
     data = req.dict(by_alias=True)
     model = Model(name=req.name, pipeline=req, projectId=project)
     id = await add_model(model)
-    background_tasks.add_task(init_train, req, model, id, project)
+    # background_tasks.add_task(init_train, req, model, id, project)
+    await init_train(req, model, id, project)
     return id

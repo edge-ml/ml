@@ -22,10 +22,10 @@ class PipelineStepOption(BaseModel):
     name: str
     description: str
     parameters: List[Parameter]
-    state: Optional[Dict]
-    input_shape: Optional[List[int]]
-    output_shape: Optional[List[int]]
-    type: Optional[StepType]
+    # state: Optional[Dict]
+    # input_shape: Optional[List[int]]
+    # output_shape: Optional[List[int]]
+    # type: Optional[StepType]
 
 class PipelineStep(BaseModel):
     name: str
@@ -46,5 +46,3 @@ class PipelineRequest(BaseModel):
     labeling: TrainLabelingModel
     selectedPipeline: SelectedPipeline
     name: str
-    
-

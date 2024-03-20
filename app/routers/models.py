@@ -1,21 +1,11 @@
 from fastapi import APIRouter, Header, Response
-from utils.jsonEncoder import JSONEncoder
-from db.models import get_project_models, delete_model
+from db.models import delete_model
 from ml.Exporter import download_model
 from utils.PyObjectId import PyObjectId
 from controller.modelController import get_models
 
-import json
 
 router = APIRouter()
-
-
-# Typing
-from pydantic import BaseModel
-
-class ReturnModel(BaseModel):
-    pass
-
 
 
 @router.get("/")

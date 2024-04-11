@@ -9,7 +9,8 @@ class S3StorageProvider(BaseStorageProvider):
 
     def __init__(self):
         self.s3 = boto3.client(service_name='s3', endpoint_url=S3_URL, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_KEY)
-        self.s3.create_bucket(Bucket=S3_MODEL_BUCKET_NAME)
+        if not self.s3.head_bucket(Bucket=S3_BUCKET_NAME):
+            self.s3.create_bucket(Bucket=S3_BUCKET_NAME)
 
     def save(self, id, data):
         id = str(id)

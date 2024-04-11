@@ -17,7 +17,7 @@ uvicorn==0.13.4
 Pebble==4.6.3
 orjson==3.8.9
 lttbc
-h5py
+h5py==3.10
 boto3
 requests
 tensorflow

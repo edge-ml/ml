@@ -3,8 +3,11 @@ import argparse
 parser = argparse.ArgumentParser(description="Run the ml service")
 
 parser.add_argument('--env', default="dev", choices=["dev", "docker"])
+parser.add_argument('--workers', type=int, default=20)
 args = parser.parse_args()
 env = args.env
+workers = args.workers
+print("num_workers", workers)
 
 import uvicorn
 
@@ -38,4 +41,4 @@ if __name__ == "__main__":
     if env == "dev":
         uvicorn.run("main:app", host="0.0.0.0", port=3003, reload=True)
     if env == "docker":
-        uvicorn.run("main:app", host="0.0.0.0", port=3003, workers=20)
+        uvicorn.run("main:app", host="0.0.0.0", port=3003, workers=workers)

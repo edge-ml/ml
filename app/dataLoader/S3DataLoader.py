@@ -8,7 +8,10 @@ from io import BytesIO
 class S3DataLoader(BaseDataLoader):
     def __init__(self):
         self.s3 = boto3.client(service_name='s3', endpoint_url=S3_URL, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_KEY)
-        if not self.s3.head_bucket(Bucket=S3_BUCKET_NAME):
+        try:
+            self.s3.head_bucket(Bucket=S3_BUCKET_NAME)
+        except:
+            print(f"Bucket {S3_BUCKET_NAME} does not exist. Creating!")
             self.s3.create_bucket(Bucket=S3_BUCKET_NAME)
 
     def load_series(self, id):

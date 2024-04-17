@@ -1,7 +1,7 @@
 from app.Deploy.Devices.Nicla.Sensors.SensorComponent import SensorComponent
 from app.Deploy.Devices.BaseSensor import BaseSensor
 
-class IMU(BaseSensor):
+class IMU_ACC(BaseSensor):
 
     def get_name(self):
         return "IMU"

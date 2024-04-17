@@ -1,6 +1,7 @@
 from app.Deploy.Devices.BaseDevice import BaseDevice
 from app.Deploy.Devices.OpenEarable.Sensors.IMU import IMU
 from app.Deploy.Devices.OpenEarable.Sensors.Baro import Baro
+from app.Deploy.deploy_features import DEPLOY_FEATURES
 from typing import List
 from jinja2 import Template
 
@@ -16,6 +17,10 @@ class OpenEarable(BaseDevice):
     @staticmethod
     def get_name():
         return "Open Earable v3"
+    
+    @staticmethod
+    def get_deploy_features():
+        return [DEPLOY_FEATURES.BLE_DEPLOY]
     
     def getSensorParams(self,tsMap, parameters):
 

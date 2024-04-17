@@ -23,6 +23,10 @@ class Nicla(BaseDevice):
     def get_name():
         return "Nicla Sense ME"
     
+    @staticmethod
+    def get_deploy_features():
+        return []
+    
     def get_ota_update(self):
         return True
     

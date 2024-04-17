@@ -1,29 +1,18 @@
-from app.codegen.export_javascript import export_javascript
-from app.codegen.inference.InferenceFormats import InferenceFormats
 from app.utils.parameter_builder import ParameterBuilder
 from app.ml.Pipelines.Categories.Classifier import BaseClassififer
 from sklearn.tree import DecisionTreeClassifier
-import m2cgen as m2c
 from sklearn.tree import DecisionTreeClassifier
-import numpy as np
-import copy
 from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-from app.internal.config import CLASSIFIER_STORE
 import pickle
-import os
 from app.ml.BaseConfig import Platforms
-from app.Deploy.Sklearn.exportC_decisionTree import convert
 from app.StorageProvider import StorageProvider
 
-from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
-from app.ml.Pipelines.PipelineContainer import PipelineContainer
 
-from jinja2 import FileSystemLoader, Template, Environment
+from jinja2 import FileSystemLoader, Environment
 
 
 from app.ml.PipelineExport.C.Common.CPart import CStep
-from app.ml.PipelineExport.C.Common.Memory import Memory
 from app.ml.PipelineExport.C.Common.utils import getCode
 
 class DecisionTree(BaseClassififer):

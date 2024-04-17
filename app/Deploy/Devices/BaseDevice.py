@@ -15,4 +15,4 @@ class BaseDevice:
         return False
 
     def get_config(self):
-        return {"name": self.get_name(), "sensors": self.get_sensor_config(), "ota_update": self.get_ota_update()}
+        return {"name": self.get_name(), "sensors": self.get_sensor_config(), "ota_update": self.get_ota_update(), "deploy_features": self.get_deploy_features()}

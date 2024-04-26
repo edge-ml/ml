@@ -31,5 +31,5 @@ class IMU_GYRO(BaseSensor):
     def get_obtain_value_code(self, component):
         component = self.get_components()[component]
         print(component)
-        return f"float {component.name} = x;"
+        return f"float {component.name} = " +  component.name.split("_")[-1] + ";"
 

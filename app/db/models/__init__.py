@@ -24,7 +24,6 @@ async def get_project_models(project_id: str):
     return objs
 
 async def delete_model(id: ObjectId, projectId: ObjectId) -> None:
-    print("Delete", id, projectId)
     await _models().delete_one({ '_id': ObjectId(id), 'projectId': ObjectId(projectId)})
 
 async def update_model_status(id: str, project_id: str, status: ModelStatus):
@@ -36,3 +35,9 @@ async def set_model_data(id: str, project_id: str, data):
 
 async def set_train_error(id: ObjectId, projectId: ObjectId, errorMsg: str) -> None:
     await _models().update_one({'_id': ObjectId(id), 'projectId': ObjectId(projectId)}, {"$set": {"error": errorMsg}})
+
+async def update_model(project, model_id, model):
+    model = Model(**model)
+    query = {'_id': ObjectId(model_id), 'projectId': ObjectId(project)}
+    operation = {"$set": model.model_dump(by_alias=True)}
+    await _models().update_one(query, operation)

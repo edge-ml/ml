@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 from app.utils.PyObjectId import PyObjectId
 from app.DataModels.parameter import Parameter
@@ -26,6 +26,7 @@ class PipelineStepOption(BaseModel):
     input_shape: Optional[List[int]]
     output_shape: Optional[List[int]]
     type: Optional[StepType]
+    metrics: Optional[Dict[str, Any]]
 
 class PipelineStep(BaseModel):
     name: str

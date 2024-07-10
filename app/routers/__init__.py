@@ -1,13 +1,7 @@
 from fastapi import APIRouter
-from app.routers import train, models, deploy
+from app.routers import models, deploy
 
 router = APIRouter()
-
-router.include_router(
-    train.router,
-    prefix="/train",
-    tags=["Train a model"]
-)
 
 router.include_router(
     models.router,

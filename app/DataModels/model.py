@@ -60,17 +60,6 @@ class ModelConfig(BaseModel):
     normalizer: ModelStoreObj
     featureExtractor: ModelStoreObj
 
-
-# class Model(BaseModel):
-#     id : PyObjectId = Field(default_factory=ObjectId, alias="_id")
-#     projectId: PyObjectId = Field(default_factory=ObjectId)
-#     name: str
-#     trainRequest: TrainRequest
-#     pipeline: Optional[PipelineModel]
-#     timeSeries: Optional[List[str]]
-#     status: ModelStatus = ModelStatus.waiting
-#     error: str = Field(default="")
-
 class ConcreteStepDefinitions(BaseModel):
     name: str
     description: str
@@ -95,5 +84,11 @@ class Model(BaseModel):
     samplingRate: Optional[float]
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
+
+    class Config:
+        json_encoders = {
+            PyObjectId: str,
+            ObjectId: str
+        }
 
 

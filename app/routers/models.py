@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Header, Response, Depends, Request
 from app.utils.jsonEncoder import JSONEncoder
-from app.db.models import get_project_models, delete_model, get_model
-from app.ml.Exporter import download_model
-from app.utils.PyObjectId import PyObjectId
 from app.routers.dependencies import validate_user
 from app.controller.ModelController import ModelController
+from pydantic.v1.json import ENCODERS_BY_TYPE
+from bson.objectid import ObjectId
 
 import json
+
+
+ENCODERS_BY_TYPE[ObjectId] = str
+
 
 router = APIRouter()
 
@@ -19,7 +22,8 @@ async def get_model_by_id(model_id, project: str = Header(...), user=Depends(val
 
 @router.get("/")
 async def get_models(project: str = Header(...)):
-    res = await model_controller.get_models(project)
+    res = model_controller.get_models(project)
+    res = [res.dict(by_alias=True) for res in res]
     return Response(json.dumps(res, cls=JSONEncoder), media_type="application/json")
 
 @router.delete("/{model_id}")

@@ -2,7 +2,6 @@ from fastapi.param_functions import Depends
 import jwt
 from bson.objectid import ObjectId
 from fastapi import status, Header, HTTPException
-from app.db.models import get_model
 from app.db.projects import get_project
 from app.internal.config import SECRET_KEY
 
@@ -28,16 +27,3 @@ async def validate_user(Authorization: str = Header(...), project: str = Header(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
     except jwt.ExpiredSignatureError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Token expired")
-    
-
-async def validate_model(model_id: str, user_data=Depends(validate_user), project_id=Depends(extract_project_id)):
-    try:
-        model = await get_model(model_id)
-        if model.project_id != project_id:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Unauthorized access to the model")
-        return model
-    except Exception as e:
-        print("exception is:")
-        print(e)
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Model not found")
-

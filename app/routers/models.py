@@ -16,8 +16,8 @@ router = APIRouter()
 model_controller = ModelController()
 
 @router.get("/{model_id}")
-async def get_model_by_id(model_id, project: str = Header(...), user=Depends(validate_user)):
-    res = await model_controller.get_model_by_id(project, model_id)
+async def get_model_by_id(model_id, project: str = Header(...)):
+    res = model_controller.get_model_by_id(project, model_id)
     return Response(json.dumps(res, cls=JSONEncoder), media_type="application/json")
 
 @router.get("/")
@@ -27,15 +27,19 @@ async def get_models(project: str = Header(...)):
     return Response(json.dumps(res, cls=JSONEncoder), media_type="application/json")
 
 @router.delete("/{model_id}")
-async def deleteModel(model_id, project: str = Header(...), user=Depends(validate_user)):
-    res = await model_controller.delete_model(project, model_id)
-    return Response(status_code=200)
+async def deleteModel(model_id, project: str = Header(...)):
+    success = model_controller.delete_model(project, model_id)
+    if success:
+        return Response(status_code=200)
+    return Response(status_code=400)
 
 @router.put("/{model_id}")
-async def update_model(model_id, body: Request, project: str = Header(...), user=Depends(validate_user)):
+async def update_model(model_id, body: Request, project: str = Header(...)):
     model = await body.json()
-    res = await model_controller.update_model(project, model_id, model)
-    return Response(json.dumps(res, cls=JSONEncoder), media_type="application/json")
+    success = model_controller.update_model(project, model_id, model)
+    if success:
+        return Response(status_code=200)
+    return Response(status_code=400)
 
 # @router.get("/download/{model_id}/{language}")
 # async def download_pipeline(model_id: PyObjectId, language: str, project: str = Header(...),  user=Depends(validate_user)):

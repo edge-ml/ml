@@ -79,9 +79,9 @@ class Model(BaseModel):
     projectId: PyObjectId
     name: str
     pipeline: PipelineRequest 
-    labels: Optional[List[Labeling]]
-    timeSeries: Optional[List[str]]
-    samplingRate: Optional[float]
+    labels: List[Labeling] | None = None
+    timeSeries: List[str] | None = None
+    samplingRate: float | None = None
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
 

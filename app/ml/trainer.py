@@ -1,11 +1,13 @@
 
 
-from app.DataModels.model import Model
-from app.db.models import add_model, update_model_status, ModelStatus, set_model_data, set_train_error
+from app.DataModels.model import Model, ModelStatus
+from app.db.models import ModelDB
 from app.db.labelings import get_labeling
 from app.db.datasets import get_dataset
 from app.DataProcessor.DataLoader.DataLoader import processDatasets
 from app.DataModels.PipelineRequest import PipelineStep, PipelineStepOption
+
+from app.DataModels.model import Labeling
 
 
 from app.ml.Pipelines.Categories.Evaluation import get_eval_by_name
@@ -20,6 +22,9 @@ import traceback
 from app.ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
 
 
+modelDB = ModelDB()
+
+
 # def trainClassifier(windows, labels, modelInfo):
 #     clf = model_map[modelInfo.classifier]()
 #     # clf.hyperparameters = modelInfo.hyperparameters
@@ -32,7 +37,8 @@ from app.ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
 
 async def init_train(trainReq : PipelineRequest, model : Model, id, project):
     try:
-        await update_model_status(id, project, ModelStatus.training)
+        model.trainStatus = ModelStatus.training
+        modelDB.update_model(id, project, model)
         # Get the datasets and lableings used for training
         datasets = [await get_dataset(x.id, project) for x in trainReq.datasets]
         labeling = await get_labeling(trainReq.labeling.id, project)
@@ -54,7 +60,6 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         if trainReq.labeling.useZeroClass:
             labelMap["Zero"] = maxIdx+1
 
-        print(selectedLabels)
         labels = [x.name for x in selectedLabels]
         if trainReq.labeling.useZeroClass:
             labels.append("Zero")
@@ -81,25 +86,33 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         model.timeSeries = timeSeries
         model.samplingRate = samplingRate
         model.labels = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
-        await set_model_data(id, project, model.dict(by_alias=True))
-        # ml_data = {}
-        # ml_data["concreteSteps"] = pipeline.persist()
-        # ml_data["labels"] = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
-        # ml_data["timeSeries"] = timeSeries
-        # ml_data["samplingRate"] = samplingRate
-        # ml_data["performance"] = performance
-        # await set_model_data(id, project, ml_data)
-        await update_model_status(id, project, ModelStatus.done)
+
+        model.labels = [Labeling(**x) for x in model.labels]
+
+        print(model.labels)
+
+        model.trainStatus = ModelStatus.done
+
+        modelDB.update_model(id, project, model)
     except Exception as e:
         print("Train_error!")
         print(e)
         print(traceback.format_exc())
-        await set_train_error(id, project, str(e))
+        model.error = str(e)
+        model.trainStatus = ModelStatus.error
+        modelDB.update_model(id, project, model)
+        raise e
 
 
 async def train(req: PipelineRequest, project, background_tasks):
-    data = req.dict(by_alias=True)
-    model = Model(name=req.name, pipeline=req, projectId=project)
-    id = await add_model(model)
-    background_tasks.add_task(init_train, req, model, id, project)
-    return id
+    try:
+        data = req.dict(by_alias=True)
+        model = Model(name=req.name, pipeline=req, projectId=project)
+        id = modelDB.add_model(model)
+        background_tasks.add_task(init_train, req, model, id, project)
+        return id
+    except Exception as e:
+        print("Train_error!")
+        print(e)
+        print(traceback.format_exc())
+        raise e

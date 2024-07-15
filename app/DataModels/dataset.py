@@ -14,7 +14,7 @@ class TimeSeries(BaseModel):
     end: int
     unit: str = Field(default="")
     name: str
-    data: Optional[List]
+    data: List | None = None
     samplingRate: SamplingRateSchema
 
 class DatasetLabels(BaseModel):

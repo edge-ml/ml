@@ -35,7 +35,7 @@ class SampleWindower(BaseWindower):
         pb = ParameterBuilder()
         pb.parameters = []
         pb.add_number(
-            "window_size", "Window Size (Samples)", "Sets the window size.", 0, 60000, 100, 1, True, False, False
+            "window_size", "Window Size (Samples)", "Sets the window size.", 0, 60000, 10, 1, True, False, False
         )
         pb.add_number(
             "sliding_step",
@@ -43,7 +43,7 @@ class SampleWindower(BaseWindower):
             "Sets how many steps the sliding window will slide. If it's set less than the window size, the windows will overlap.",
             1,
             60000,
-            50,
+            5,
             1,
             True,
             False,

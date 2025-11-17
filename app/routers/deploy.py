@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Header
-# from app.db.models import get_model
+from app.db.models import ModelDB
 from app.Deploy.Base import downloadModel
 from app.ml.BaseConfig import Platforms
 from fastapi.responses import StreamingResponse
@@ -43,13 +43,13 @@ async def export(format: str):
 
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
-    # model = await get_model(model_id, project)
-    # code = downloadModel(model, format)
-    # fileName = f"{model.name}_{format.name}.zip"
-    # return StreamingResponse(code, media_type='application/zip', headers={
-    #     f'Content-Disposition': 'attachment; filename="' + fileName + '"'
-    # })
-    pass
+    model = ModelDB().get_model(model_id, project)
+    code = downloadModel(model, format)
+    fileName = f"{model.name}_{format.name}.zip"
+    return StreamingResponse(code, media_type='application/zip', headers={
+        f'Content-Disposition': 'attachment; filename="' + fileName + '"'
+    })
+    raise NotImplementedError()
 
 @router.get("/{model_id}")
 async def deployConfig(model_id: str, project: str = Header(...)):
@@ -68,7 +68,8 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
     # url = f"{FIRMWARE_COMPILE_URL}compile/nicla"
     # response = requests.post(url, files=file_data)
     # return StreamingResponse(iter([response.content]), media_type="application/octet-stream")
-    pass
+    raise NotImplementedError()
+    
 
 @router.post("/{model_id}/download")
 async def deploy(body : DeployRquest, model_id: str, project: str = Header(...)):
@@ -79,5 +80,4 @@ async def deploy(body : DeployRquest, model_id: str, project: str = Header(...))
     # zip_file = add_to_zip_file(code, main_file_content, f"{model.name}.ino")
     # zip_file.seek(0)
     # return StreamingResponse(zip_file, media_type="application/zip", headers={'Content-Disposition': f'attachment; filename={model.name}.zip'})
-
-    pass
+    raise NotImplementedError()

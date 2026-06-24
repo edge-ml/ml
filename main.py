@@ -39,6 +39,8 @@ async def startup():
 
 if __name__ == "__main__":
     if env == "dev":
-        uvicorn.run("main:app", host="0.0.0.0", port=3003, reload=True)
+        uvicorn.run("main:app", host="0.0.0.0", port=3003, reload=True,
+                    proxy_headers=True, forwarded_allow_ips="*")
     if env == "docker":
-        uvicorn.run("main:app", host="0.0.0.0", port=3003, workers=workers)
+        uvicorn.run("main:app", host="0.0.0.0", port=3003, workers=workers,
+                    proxy_headers=True, forwarded_allow_ips="*")

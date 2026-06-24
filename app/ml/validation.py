@@ -97,11 +97,26 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
             f"Only {n_unique} class has data after windowing; at least 2 are needed to train. "
             "Check that the selected datasets actually contain the enabled labels in the chosen window.",
         ))
-    elif n_windows < 10:
-        warnings.append(_msg(
-            "windowing",
-            f"Only {n_windows} training windows were produced — the model may train poorly. "
-            "Consider a smaller window/step or more data.",
-        ))
+    else:
+        # The evaluator does a stratified train/test split, which needs at
+        # least 2 windows per class. Catch the under-populated class here
+        # instead of letting training fail with a cryptic sklearn error.
+        from collections import Counter
+
+        counts = Counter(int(x) for x in labels_after)
+        min_count = min(counts.values())
+        if min_count < 2:
+            errors.append(_msg(
+                "windowing",
+                f"At least one class has only {min_count} window after windowing; the "
+                "train/test split needs at least 2 per class. Use a smaller window size / "
+                "sliding step, or add more labeled data.",
+            ))
+        elif n_windows < 10:
+            warnings.append(_msg(
+                "windowing",
+                f"Only {n_windows} training windows were produced — the model may train poorly. "
+                "Consider a smaller window/step or more data.",
+            ))
 
     return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings}

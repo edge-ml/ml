@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Header, Response, BackgroundTasks
 from app.utils.jsonEncoder import JSONEncoder
 from app.ml.trainer import train
+from app.ml.validation import preflight_train
 from app.ml.Pipelines import PIPELINES_CONFIG
 from app.DataModels import PipelineRequest
 from app.ml.Pipelines import PIPELINEOPTIONCONFIGS
@@ -18,6 +19,13 @@ async def models_train(body: PipelineRequest, background_tasks: BackgroundTasks,
     return Response(json.dumps(id, cls=JSONEncoder), media_type="application/json")
 
     
+@router.post("/preflight")
+async def models_preflight(body: PipelineRequest, project: str = Header(...)):
+    # Validate the request against the real data without training (additive,
+    # read-only — does not touch the /train flow).
+    return await preflight_train(body, project)
+
+
 @router.get("/")
 async def get_pipelines():
     return PIPELINES_CONFIG

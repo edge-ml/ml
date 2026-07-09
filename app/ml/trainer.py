@@ -20,6 +20,7 @@ from app.ml.Pipelines.PipelineContainer import PipelineContainer
 import traceback
 
 from app.ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
+from app.ml.PipelineExport.formats import computeFormats
 
 
 modelDB = ModelDB()
@@ -81,10 +82,11 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
 
         for i, cs in enumerate(pipeline.persist()):
             model.pipeline.selectedPipeline.steps[i].options = cs
-        
+
 
         model.timeSeries = timeSeries
         model.samplingRate = samplingRate
+        model.formats = computeFormats(pipeline.options)
         model.labels = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
 
         model.labels = [Labeling(**x) for x in model.labels]

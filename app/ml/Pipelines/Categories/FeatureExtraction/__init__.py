@@ -2,11 +2,12 @@ from app.ml.Pipelines.Categories.FeatureExtraction.BaseFeatureExtractor import B
 from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
 from app.ml.Pipelines.Categories.FeatureExtraction.NoFeatureExtractor import NoFeatureExtractor
 from app.ml.Pipelines.Categories.FeatureExtraction.FFTFeatureExtractor import FFTFeatureExtractor
+from app.ml.Pipelines.Categories.FeatureExtraction.RawSensorExtractor import RawSensorExtractor
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 from typing import List
 
 # FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor, FFTFeatureExtractor]
-FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor]
+FEATURE_EXTRACTORS : List[BaseFeatureExtractor] = [SimpleFeatureExtractor, NoFeatureExtractor, RawSensorExtractor]
 
 def get_feature_extractor_by_name(name):
     for ext in FEATURE_EXTRACTORS:

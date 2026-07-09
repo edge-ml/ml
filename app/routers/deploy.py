@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, HTTPException
 from app.db.models import ModelDB
 from app.Deploy.Base import downloadModel
 from app.ml.BaseConfig import Platforms
+from app.ml.PipelineExport.Executorch.support import ExecutorchExportError
 from fastapi.responses import StreamingResponse
 from app.ml.Pipeline import Pipeline
 from app.Deploy.Devices import DEVICES
@@ -44,12 +45,14 @@ async def export(format: str):
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
     model = ModelDB().get_model(model_id, project)
-    code = downloadModel(model, format)
+    try:
+        code = downloadModel(model, format)
+    except ExecutorchExportError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
     fileName = f"{model.name}_{format.name}.zip"
     return StreamingResponse(code, media_type='application/zip', headers={
         f'Content-Disposition': 'attachment; filename="' + fileName + '"'
     })
-    raise NotImplementedError()
 
 @router.get("/{model_id}")
 async def deployConfig(model_id: str, project: str = Header(...)):

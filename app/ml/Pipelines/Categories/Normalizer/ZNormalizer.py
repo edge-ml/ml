@@ -35,3 +35,8 @@ class ZNormalizer(BaseNormalizer):
     
     def get_state(self):
         return {"name": ZNormalizer.get_name(), "mean": json.dumps(self.mean, cls=JSONEncoder), "std": json.dumps(self.std, cls=JSONEncoder)}
+
+    def restore(self, config):
+        self.mean = np.array(json.loads(config.state["mean"]))
+        self.std = np.array(json.loads(config.state["std"]))
+        super().restore(config)

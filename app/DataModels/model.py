@@ -82,6 +82,7 @@ class Model(BaseModel):
     labels: List[Labeling] | None = None
     timeSeries: List[str] | None = None
     samplingRate: float | None = None
+    formats: List[str] | None = None
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
 

@@ -102,6 +102,11 @@ class Pipeline():
         return evaluator.eval(self, data, labels)
 
     def export(self, model, platform : Platforms):
+        if platform == Platforms.EXECUTORCH:
+            # imported lazily so the service also boots without executorch installed
+            from app.ml.PipelineExport.Executorch.ExecutorchCompiler import buildExecutorchExport
+            return buildExecutorchExport(self.options, model)
+
         exportSteps = []
         for (step, option) in zip(self.steps, self.options):
             if step.type in [StepType.PRE, StepType.CORE]:

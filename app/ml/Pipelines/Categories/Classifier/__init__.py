@@ -9,12 +9,15 @@ from app.ml.Pipelines.Categories.Classifier.DenseLarge import DenseLarge
 from app.ml.Pipelines.Categories.Classifier.CNNSmall import CNNSmall
 
 from app.ml.Pipelines.Categories.Classifier.KMeansClassifier import KMeansClassifier
+from app.ml.Pipelines.Categories.Classifier.TorchNeuralNetwork import TorchNeuralNetwork
+from app.ml.Pipelines.Categories.Classifier.TorchDense import TorchDense
+from app.ml.Pipelines.Categories.Classifier.TorchCNN1D import TorchCNN1D
 
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 
 from typing import List
 
-CLASSIFIERS : List[BaseClassififer] = [DecisionTree, RandomForest, DenseSmall, DenseMedium, DenseLarge, CNNSmall]
+CLASSIFIERS : List[BaseClassififer] = [DecisionTree, RandomForest, DenseSmall, DenseMedium, DenseLarge, CNNSmall, TorchDense, TorchCNN1D]
 
 def get_classifier_by_name(name):
     for cls in CLASSIFIERS:

@@ -46,10 +46,6 @@ class TorchNeuralNetwork(BaseClassififer):
     def get_platforms():
         return [InferenceFormats.PYTHON]
 
-    @staticmethod
-    def get_export_formats():
-        return ["EXECUTORCH"]
-
     def build_arch(self, input_shape, num_classes) -> dict:
         raise NotImplementedError()
 

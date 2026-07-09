@@ -42,7 +42,7 @@ def buildManifest(model, windower, featureExtractor, normalizer, classifier, exe
             "labels": labels,
         },
     }
-    if sampling_rate:
+    if sampling_rate is not None and sliding_step:
         manifest["classification_frequency_hint_hz"] = sampling_rate / sliding_step
 
     return json.dumps(manifest, indent=2)

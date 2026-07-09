@@ -1,8 +1,10 @@
 from importlib.metadata import PackageNotFoundError, version as pkg_version
+from io import BytesIO
 
 import torch
 from torch import nn
 
+from app.dataLoader import DATASTORE
 from app.ml.PipelineExport.C.Common.CPart import ExtraFile
 from app.ml.PipelineExport.Executorch.support import (
     ExecutorchExportError,
@@ -88,23 +90,33 @@ def getExecutorchVersion() -> str:
         return "unknown"
 
 
-def buildExecutorchExport(options, model):
+def buildExecutorchPte(options, model) -> bytes:
+    """The expensive part: trace + XNNPACK-lower the composed module to a .pte.
+
+    Run once at train time (see trainer.init_train) and cached, rather than on
+    every download request."""
     blockers = getExportBlockers(options)
     if blockers:
         raise ExecutorchExportError(" ".join(blockers), status_code=400)
 
+    windower = findOption(options, BaseWindower)
+    window_size = int(windower.get_param_value_by_name("window_size"))
+    n_sensors = len(model.timeSeries)
+
+    module = buildExportModule(options)
+    example_input = torch.zeros(1, window_size, n_sensors, dtype=torch.float32)
+    return compileToPte(module, example_input)
+
+
+def assembleExecutorchFiles(options, model, pte_bytes: bytes):
+    """Cheap part: bundle the (possibly cached) .pte with a freshly generated
+    manifest, README and example — safe to run per request."""
     windower = findOption(options, BaseWindower)
     featureExtractor = findOption(options, BaseFeatureExtractor)
     normalizer = findOption(options, BaseNormalizer)
     classifier = findOption(options, BaseClassififer)
 
     window_size = int(windower.get_param_value_by_name("window_size"))
-    n_sensors = len(model.timeSeries)
-
-    module = buildExportModule(options)
-    example_input = torch.zeros(1, window_size, n_sensors, dtype=torch.float32)
-    pte_bytes = compileToPte(module, example_input)
-
     executorch_version = getExecutorchVersion()
     bakes_features = isinstance(featureExtractor, SimpleFeatureExtractor)
 
@@ -114,3 +126,33 @@ def buildExecutorchExport(options, model):
         ExtraFile("README.md", buildReadme(model, executorch_version, bakes_features)),
         ExtraFile("ExampleClassifier.kt", buildKotlinExample(model, window_size)),
     ]
+
+
+def _pte_store_key(model) -> str:
+    return f"executorch_{model.id}"
+
+
+def storeExecutorchPte(model, pte_bytes: bytes):
+    DATASTORE.saveObj(_pte_store_key(model), BytesIO(pte_bytes))
+
+
+def loadExecutorchPte(model):
+    """Returns the cached .pte bytes, or None if it was never precompiled
+    (e.g. a model trained before precompilation existed)."""
+    try:
+        return DATASTORE.loadObj(_pte_store_key(model)).read()
+    except Exception:
+        return None
+
+
+def buildExecutorchExport(options, model):
+    blockers = getExportBlockers(options)
+    if blockers:
+        raise ExecutorchExportError(" ".join(blockers), status_code=400)
+
+    pte_bytes = loadExecutorchPte(model)
+    if pte_bytes is None:
+        # Fallback for models predating train-time precompilation.
+        pte_bytes = buildExecutorchPte(options, model)
+
+    return assembleExecutorchFiles(options, model, pte_bytes)

@@ -288,8 +288,9 @@ class TestExportGating(unittest.TestCase):
 
 
 class TestZipCompatibility(unittest.TestCase):
-    """The deploy route wraps export files in StringFile and zips them —
-    binary .pte content has to survive that path."""
+    """downloadModel zips the export files directly — binary .pte content has to
+    survive, and ExtraFile (what the exporters return) must be zippable without
+    a re-wrap into StringFile."""
 
     def test_zip_with_binary_content(self):
         from app.utils.StringFile import StringFile
@@ -300,6 +301,55 @@ class TestZipCompatibility(unittest.TestCase):
         with zipfile.ZipFile(BytesIO(buffer.read())) as archive:
             self.assertEqual(archive.read("model.pte"), b"\x00\x01binary")
             self.assertEqual(archive.read("manifest.json"), b'{"a": 1}')
+
+    def test_extrafile_is_directly_zippable(self):
+        from app.ml.PipelineExport.C.Common.CPart import ExtraFile
+        from app.utils.zipfile import zipFiles
+
+        files = [ExtraFile("model.pte", b"\x00\x01binary"), ExtraFile("manifest.json", '{"a": 1}')]
+        buffer = zipFiles(files)
+        with zipfile.ZipFile(BytesIO(buffer.read())) as archive:
+            self.assertEqual(archive.read("model.pte"), b"\x00\x01binary")
+            self.assertEqual(archive.read("manifest.json"), b'{"a": 1}')
+
+
+class TestPteCache(unittest.TestCase):
+    """Train-time precompilation stores the .pte; downloads reuse it."""
+
+    def test_load_missing_pte_returns_none(self):
+        from app.ml.PipelineExport.Executorch.ExecutorchCompiler import loadExecutorchPte
+
+        self.assertIsNone(loadExecutorchPte(make_model_doc()))
+
+    def test_store_then_load_roundtrip(self):
+        from app.ml.PipelineExport.Executorch.ExecutorchCompiler import (
+            loadExecutorchPte,
+            storeExecutorchPte,
+        )
+
+        model = make_model_doc()
+        model.id = "1" * 24  # avoid clashing with other tests' default id
+        storeExecutorchPte(model, b"\x00pte-bytes")
+        self.assertEqual(loadExecutorchPte(model), b"\x00pte-bytes")
+
+    def test_export_uses_cached_pte(self):
+        """buildExecutorchExport must stream cached bytes rather than recompiling."""
+        from app.ml.PipelineExport.Executorch.ExecutorchCompiler import (
+            buildExecutorchExport,
+            storeExecutorchPte,
+        )
+
+        X, y = make_windows()
+        featureExtractor, normalizer, classifier = train_pipeline(
+            RawSensorExtractor, MinMaxNormalizer, TorchCNN1D, X, y
+        )
+        options = [make_windower(), featureExtractor, normalizer, classifier]
+        model = make_model_doc(num_classes=classifier.arch["num_classes"])
+        model.id = "2" * 24
+
+        storeExecutorchPte(model, b"SENTINEL_PTE")
+        files = buildExecutorchExport(options, model)
+        self.assertEqual(get_file(files, "model.pte").content, b"SENTINEL_PTE")
 
 
 if __name__ == "__main__":

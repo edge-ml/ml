@@ -14,6 +14,11 @@ class ExtraFile():
         self.content = content
         self.name = name
 
+    def read(self):
+        # so ExtraFile can be zipped directly by app.utils.zipfile.zipFiles,
+        # without depending on a re-wrap into StringFile
+        return self.content
+
 class CStep():
     def __init__(self, variables, code, input_shape: List[int], output_shape: List[int], globals=[], includes=[], extra_files : List[ExtraFile] = []) -> None:
         self.variables : Dict = variables

@@ -87,6 +87,22 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         model.timeSeries = timeSeries
         model.samplingRate = samplingRate
         model.formats = computeFormats(pipeline.options)
+
+        # Precompile and cache the ExecuTorch .pte now, so downloads only stream
+        # bytes instead of re-running the (expensive) tracing/lowering per click.
+        # A compile failure just drops EXECUTORCH from the advertised formats
+        # rather than failing the whole training run.
+        if "EXECUTORCH" in (model.formats or []):
+            try:
+                from app.ml.PipelineExport.Executorch.ExecutorchCompiler import (
+                    buildExecutorchPte,
+                    storeExecutorchPte,
+                )
+                storeExecutorchPte(model, buildExecutorchPte(pipeline.options, model))
+            except Exception as e:
+                print("ExecuTorch precompile failed; removing EXECUTORCH from formats:", e)
+                print(traceback.format_exc())
+                model.formats = [f for f in model.formats if f != "EXECUTORCH"]
         model.labels = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
 
         model.labels = [Labeling(**x) for x in model.labels]

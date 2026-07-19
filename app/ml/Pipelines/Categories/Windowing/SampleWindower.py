@@ -18,7 +18,7 @@ class SampleWindower(BaseWindower):
 
     @staticmethod
     def get_platforms():
-        return [Platforms.C]
+        return [Platforms.C, Platforms.EXECUTORCH]
 
     @staticmethod
     def get_description():

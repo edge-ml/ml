@@ -1,4 +1,5 @@
 from app.ml.Pipelines.Categories.FeatureExtraction import BaseFeatureExtractor
+from app.ml.BaseConfig import Platforms
 import numpy as np
 
 
@@ -21,7 +22,7 @@ class RawSensorExtractor(BaseFeatureExtractor):
 
     @staticmethod
     def get_platforms():
-        return []
+        return [Platforms.EXECUTORCH]
 
     def extract_features(self, windows):
         try:

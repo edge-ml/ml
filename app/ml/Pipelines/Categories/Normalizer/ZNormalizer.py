@@ -1,4 +1,5 @@
 from app.ml.Pipelines.Categories.Normalizer.BaseNormalizer import BaseNormalizer
+from app.ml.BaseConfig import Platforms
 import numpy as np
 import json
 from app.utils.jsonEncoder import JSONEncoder
@@ -21,6 +22,10 @@ class ZNormalizer(BaseNormalizer):
     @staticmethod
     def config():
         return {"name": ZNormalizer.get_name(), "parameters": {}}
+
+    @staticmethod
+    def get_platforms():
+        return [Platforms.EXECUTORCH]
 
     def fit_normalize(self, data):
         self.mean = np.mean(data, axis=0)

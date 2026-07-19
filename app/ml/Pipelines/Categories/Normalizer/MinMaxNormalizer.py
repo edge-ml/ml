@@ -31,7 +31,7 @@ class MinMaxNormalizer(BaseNormalizer):
     
     @staticmethod
     def get_platforms():
-        return [Platforms.C]
+        return [Platforms.C, Platforms.EXECUTORCH]
     
     def fit_normalize(self, data):
         self.min = np.min(data, axis=0)

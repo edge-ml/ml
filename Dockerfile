@@ -9,6 +9,11 @@ RUN pip3 install -r requirements.txt
 # lttbc's isolated build compiles against numpy 1.x and then fails to import
 # under the numpy 2 pin — rebuild it against the installed numpy.
 RUN pip3 install --force-reinstall --no-deps --no-build-isolation --no-cache-dir lttbc==0.2.4
+# MicroNAS pulls triton 2.1.0 (for its torch 2.1.1 pin); it is orphaned under the
+# torch 2.9.0 upgrade and predates triton.backends, so torch._inductor crashes on
+# `import triton.backends.compiler` during torch.export, breaking ExecuTorch export.
+# CPU export does not need triton — remove it so has_triton_package() is False.
+RUN pip3 uninstall -y triton || true
 # The executorch .pte serializer shells out to the flatbuffers compiler (flatc),
 # which is not bundled in the executorch wheel. flatbuffers only publishes an
 # x86-64 Linux flatc binary, so on arm64 we build it from source at the same

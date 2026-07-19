@@ -7,6 +7,7 @@ from torch import nn
 from bson.objectid import ObjectId
 
 from app.codegen.inference.InferenceFormats import InferenceFormats
+from app.ml.BaseConfig import Platforms
 from app.utils.parameter_builder import ParameterBuilder
 from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
 from app.dataLoader import DATASTORE
@@ -44,7 +45,11 @@ class TorchNeuralNetwork(BaseClassififer):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON]
+        # Runs server-side (PYTHON) and exports to mobile via ExecuTorch (.pte).
+        # Actual export eligibility still depends on the full pipeline
+        # (see PipelineExport.formats.computeFormats); this advertises the
+        # classifier's capability so the wizard can surface it.
+        return [InferenceFormats.PYTHON, Platforms.EXECUTORCH]
 
     def build_arch(self, input_shape, num_classes) -> dict:
         raise NotImplementedError()

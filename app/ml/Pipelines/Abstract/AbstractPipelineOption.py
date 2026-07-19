@@ -56,12 +56,26 @@ class AbstractPipelineOption():
     
     @classmethod
     def get_train_config(cls):
+        # Accurate, download-flow-truthful export capability of this option, so
+        # the training wizard can filter options by deployment target. Mirrors
+        # PipelineExport.formats._supportsC: a real C download requires exportC
+        # to be implemented, not merely a declared C platform (some legacy
+        # options declare C via the old codegen API without implementing exportC).
+        platform_values = [
+            str(getattr(p, "value", p)).lower() for p in cls.get_platforms()
+        ]
+        declares_c = any(p in ("c", "cpp") for p in platform_values)
+        exports_c = declares_c and (cls.exportC is not AbstractPipelineOption.exportC)
         return {
         "name": cls.get_name(),
         "description":  cls.get_description(),
         "parameters":  cls.get_parameters(),
         "platforms":  cls.get_platforms(),
-        "type": cls.type
+        "type": cls.type,
+        "exportTargets": {
+            "c": exports_c,
+            "executorch": "executorch" in platform_values,
+        },
         }
 
     def get_param_value_by_name(self, name):

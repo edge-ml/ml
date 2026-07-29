@@ -117,6 +117,7 @@ def assembleExecutorchFiles(options, model, pte_bytes: bytes):
     classifier = findOption(options, BaseClassififer)
 
     window_size = int(windower.get_param_value_by_name("window_size"))
+    sliding_step = int(windower.get_param_value_by_name("sliding_step"))
     executorch_version = getExecutorchVersion()
     bakes_features = isinstance(featureExtractor, SimpleFeatureExtractor)
 
@@ -124,7 +125,7 @@ def assembleExecutorchFiles(options, model, pte_bytes: bytes):
         ExtraFile("model.pte", pte_bytes),
         ExtraFile("manifest.json", buildManifest(model, windower, featureExtractor, normalizer, classifier, executorch_version)),
         ExtraFile("README.md", buildReadme(model, executorch_version, bakes_features)),
-        ExtraFile("ExampleClassifier.kt", buildKotlinExample(model, window_size)),
+        ExtraFile("ExampleClassifier.kt", buildKotlinExample(model, window_size, sliding_step, classifier.arch["num_classes"])),
     ]
 
 

@@ -6,7 +6,11 @@ from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import
 def buildManifest(model, windower, featureExtractor, normalizer, classifier, executorch_version):
     window_size = int(windower.get_param_value_by_name("window_size"))
     sliding_step = int(windower.get_param_value_by_name("sliding_step"))
-    labels = [x.name for x in model.labels]
+    num_classes = classifier.arch["num_classes"]
+    # Only labels that map to an actual output logit. A configured label can end
+    # up with no windows after windowing (so num_classes < len(model.labels));
+    # shipping the extra names would misalign labels with outputs on-device.
+    labels = [x.name for x in model.labels][:num_classes]
     sampling_rate = float(model.samplingRate) if model.samplingRate is not None else None
 
     manifest = {
@@ -38,7 +42,7 @@ def buildManifest(model, windower, featureExtractor, normalizer, classifier, exe
         },
         "output": {
             "type": "logits",
-            "shape": [1, classifier.arch["num_classes"]],
+            "shape": [1, num_classes],
             "labels": labels,
         },
     }

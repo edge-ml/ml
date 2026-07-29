@@ -53,6 +53,7 @@ class ExampleClassifier(modelPath: String) {
 
     companion object {
         const val WINDOW_SIZE = __WINDOW_SIZE__
+        const val STRIDE = __STRIDE__
         const val CHANNELS = __CHANNELS__
         val LABELS = arrayOf(__LABELS__)
     }
@@ -60,6 +61,7 @@ class ExampleClassifier(modelPath: String) {
     private val module: Module = Module.load(modelPath)
     private val buffer = FloatArray(WINDOW_SIZE * CHANNELS)
     private var samplesSeen = 0
+    private var samplesSinceLast = 0
 
     /** Call once per sensor sample, values ordered like manifest input.timeseries. */
     fun addDatapoint(values: FloatArray) {
@@ -67,11 +69,18 @@ class ExampleClassifier(modelPath: String) {
         System.arraycopy(buffer, CHANNELS, buffer, 0, (WINDOW_SIZE - 1) * CHANNELS)
         System.arraycopy(values, 0, buffer, (WINDOW_SIZE - 1) * CHANNELS, CHANNELS)
         samplesSeen++
+        samplesSinceLast++
     }
 
-    /** Returns the predicted label, or null while the window is still filling up. */
+    /**
+     * Returns a fresh predicted label, or null while the window is still filling
+     * up or fewer than STRIDE new samples have arrived since the last prediction.
+     * Call it after every addDatapoint; it classifies once per STRIDE samples,
+     * matching manifest.json -> window.stride.
+     */
     fun predict(): String? {
-        if (samplesSeen < WINDOW_SIZE) return null
+        if (samplesSeen < WINDOW_SIZE || samplesSinceLast < STRIDE) return null
+        samplesSinceLast = 0
         val input = Tensor.fromBlob(buffer, longArrayOf(1, WINDOW_SIZE.toLong(), CHANNELS.toLong()))
         val logits = module.forward(EValue.from(input))[0].toTensor().dataAsFloatArray
         var best = 0
@@ -91,12 +100,15 @@ def buildReadme(model, executorch_version, bakes_features):
     )
 
 
-def buildKotlinExample(model, window_size):
-    labels = ", ".join(f'"{x.name}"' for x in model.labels)
+def buildKotlinExample(model, window_size, stride, num_classes):
+    # Clamp to the labels that map to an actual output logit (see manifest.py):
+    # this array indexes predictions on-device, so extra names would mislabel.
+    labels = ", ".join(f'"{x.name}"' for x in model.labels[:num_classes])
     return (
         _KOTLIN.replace("__MODEL_NAME__", model.name)
         .replace("__TIMESERIES__", ", ".join(model.timeSeries))
         .replace("__WINDOW_SIZE__", str(window_size))
+        .replace("__STRIDE__", str(stride))
         .replace("__CHANNELS__", str(len(model.timeSeries)))
         .replace("__LABELS__", labels)
     )

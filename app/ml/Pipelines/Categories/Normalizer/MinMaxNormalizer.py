@@ -36,13 +36,15 @@ class MinMaxNormalizer(BaseNormalizer):
     def fit_normalize(self, data):
         self.min = np.min(data, axis=0)
         self.max = np.max(data, axis=0)
-        data = (data - self.min) / (self.max - self.min)
+        # + 1e-8 guards against a constant channel (max == min) producing NaN.
+        # Must match the baked torch op (TorchMinMaxNormalize) for export parity.
+        data = (data - self.min) / (self.max - self.min + 1e-8)
         return data
 
     def normalize(self, data):
         if self.min is None or self.max is None:
             raise Exception()
-        return (data - self.min) / (self.max - self.min)
+        return (data - self.min) / (self.max - self.min + 1e-8)
     
     def get_state(self):
         return {"min": json.dumps(self.min, cls=JSONEncoder), "max": json.dumps(self.max, cls=JSONEncoder)}

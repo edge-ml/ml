@@ -69,7 +69,8 @@ class TorchMinMaxNormalize(nn.Module):
         self.register_buffer("max_values", torch.as_tensor(np.asarray(max_values, dtype=np.float32)))
 
     def forward(self, x):
-        return (x - self.min_values) / (self.max_values - self.min_values)
+        # + 1e-8 matches MinMaxNormalizer.normalize (guards a constant channel).
+        return (x - self.min_values) / (self.max_values - self.min_values + 1e-8)
 
 
 class TorchZNormalize(nn.Module):
@@ -81,4 +82,5 @@ class TorchZNormalize(nn.Module):
         self.register_buffer("std", torch.as_tensor(np.asarray(std, dtype=np.float32)))
 
     def forward(self, x):
-        return (x - self.mean) / self.std
+        # + 1e-8 matches ZNormalizer.normalize (guards a constant channel).
+        return (x - self.mean) / (self.std + 1e-8)

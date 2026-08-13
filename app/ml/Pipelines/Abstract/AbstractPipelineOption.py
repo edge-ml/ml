@@ -9,6 +9,9 @@ class AbstractPipelineOption():
         self.parameters = parameters
         self.input_shape = None
         self.output_shape = None
+        # Optional (current, total) progress callback set by the trainer before
+        # fitting. Only options with an epoch loop (the Torch classifiers) use it.
+        self.progress_cb = None
         type = None
 
     @staticmethod

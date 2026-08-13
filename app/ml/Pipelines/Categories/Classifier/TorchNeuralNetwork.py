@@ -94,6 +94,12 @@ class TorchNeuralNetwork(BaseClassififer):
                 optimizer.step()
                 epoch_loss += loss.item() * batch_X.shape[0]
             print(f"Epoch {epoch + 1}/{epochs} - loss: {epoch_loss / len(dataset):.6f}")
+            if self.progress_cb is not None:
+                # Report live epoch progress; never let a reporting hiccup abort training.
+                try:
+                    self.progress_cb(epoch + 1, epochs)
+                except Exception as e:
+                    print("progress_cb failed:", e)
         self.model.eval()
 
     def predict(self, X_test):

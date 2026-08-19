@@ -25,3 +25,7 @@ tensorflow
 torch==2.9.0
 tensorflow-model-optimization
 executorch==1.0.0
+# einops: runtime dep of the whar-models neural architectures (#62). whar-models
+# itself is installed --no-deps in the Dockerfile, so its light runtime dep is
+# listed here explicitly.
+einops

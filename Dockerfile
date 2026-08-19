@@ -6,6 +6,12 @@ RUN pip3 install MicroNAS-1.0.0-py3-none-any.whl
 RUN pip3 install torch==2.9.0 --index-url https://download.pytorch.org/whl/cpu
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
+# whar-models (teco-kit) neural architectures for the "WHAR Model" classifier (#62).
+# Installed --no-deps so its numpy>=2.2 / pandas / scikit-learn==1.8 / tsfresh
+# floors (used only by its classical models, which are out of scope) don't
+# override executorch's required numpy==2.0.2. The neural models need only torch
+# (installed above) + einops (in requirements.txt).
+RUN pip3 install --no-cache-dir --no-deps "whar-models @ git+https://github.com/teco-kit/whar-models.git@c64f35931f15072af95f52d57a09486b28834426"
 # lttbc's isolated build compiles against numpy 1.x and then fails to import
 # under the numpy 2 pin — rebuild it against the installed numpy.
 RUN pip3 install --force-reinstall --no-deps --no-build-isolation --no-cache-dir lttbc==0.2.4

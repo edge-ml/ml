@@ -1,5 +1,6 @@
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from app.ml.Pipelines.PipelineContainer import PipelineContainer
+from app.utils.labels import UNLABELED_LABEL
 import numpy as np
 
 class BaseWindower(AbstractPipelineOption):
@@ -11,7 +12,7 @@ class BaseWindower(AbstractPipelineOption):
         raise NotImplementedError()
 
     def _filterLabelings(self, train_X, train_Y, metaData):
-        filter = np.array([x != 9*10^10 for x in train_Y])
+        filter = np.array([x != UNLABELED_LABEL for x in train_Y])
         # print(train_Y)
         # print(filter)
         train_X = train_X[filter]

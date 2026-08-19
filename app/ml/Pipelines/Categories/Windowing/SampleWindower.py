@@ -1,5 +1,6 @@
 from app.ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower
 from app.utils.parameter_builder import ParameterBuilder
+from app.utils.labels import window_majority_label
 import numpy as np
 from app.ml.BaseConfig import Platforms
 from jinja2 import Template
@@ -76,9 +77,7 @@ class SampleWindower(BaseWindower):
 
             for w in fused:
                 X.append(w[:, :-1])
-                counts = np.bincount(w[:,-1].astype(int))
-                label = np.argmax(counts)
-                Y.append(label)
+                Y.append(window_majority_label(w[:, -1]))
                 Meta.append(datasetMetadata)
 
             train_X.extend(X)

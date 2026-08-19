@@ -6,6 +6,7 @@ from app.DataModels.dataset import DatasetSchema
 
 
 from app.DataProcessor.DataLoader.binaryStore import BinaryStore
+from app.utils.labels import UNLABELED_LABEL
 
 
 def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):
@@ -53,7 +54,7 @@ def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):
         maxVal = max(labelMap.values())
 
         for i, t in enumerate(arr):
-            arr[i][-1] = maxVal if useZero else 9*10^10
+            arr[i][-1] = maxVal if useZero else UNLABELED_LABEL
             for l in labels:
                 if t[0] >= int(l.start) and t[0] <= int(l.end):
                     arr[i][-1] = labelMap[str(l.type)]

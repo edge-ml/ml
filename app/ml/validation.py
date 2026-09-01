@@ -50,6 +50,20 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
     elif n_classes < 2:
         errors.append(_msg("labeling", "At least two classes are required — enable another label or the zero-class."))
 
+    # Classifiers that consume the raw window sequence must be paired with the raw
+    # feature extractor; the aggregated SimpleFeatureExtractor would feed them the
+    # wrong shape (silently poor training, or an error on short input).
+    RAW_ONLY_CLASSIFIERS = {"WHAR Model", "PyTorch 1D Convolutional Neural Network"}
+    RAW_EXTRACTOR = "Raw Time-Series (Sensors only)"
+    optionNames = [s.options.name for s in trainReq.selectedPipeline.steps]
+    rawOnly = next((n for n in optionNames if n in RAW_ONLY_CLASSIFIERS), None)
+    if rawOnly is not None and RAW_EXTRACTOR not in optionNames:
+        errors.append(_msg(
+            "featureExtraction",
+            f"'{rawOnly}' needs the '{RAW_EXTRACTOR}' feature extraction. Go back to the "
+            f"Feature Extraction step and select it.",
+        ))
+
     if errors:
         return {"valid": False, "errors": errors, "warnings": warnings}
 

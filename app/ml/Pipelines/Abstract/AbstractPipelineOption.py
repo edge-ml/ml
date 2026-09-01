@@ -78,6 +78,11 @@ class AbstractPipelineOption():
         "exportTargets": {
             "c": exports_c,
             "executorch": "executorch" in platform_values,
+            # PyTorch (TorchScript) export reuses the same composed module as
+            # ExecuTorch, so any option usable in an ExecuTorch pipeline is usable
+            # here; it just also succeeds for architectures that can't lower to
+            # mobile (verified per-model at train time via computeFormats).
+            "pytorch": "executorch" in platform_values,
         },
         }
 

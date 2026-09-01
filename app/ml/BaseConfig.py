@@ -5,6 +5,7 @@ from typing import List
 class Platforms(Enum):
     C = "C"
     EXECUTORCH = "EXECUTORCH"
+    PYTORCH = "PYTORCH"
 
 
 class BaseConfig():

@@ -107,6 +107,10 @@ class Pipeline():
             from app.ml.PipelineExport.Executorch.ExecutorchCompiler import buildExecutorchExport
             return buildExecutorchExport(self.options, model)
 
+        if platform == Platforms.PYTORCH:
+            from app.ml.PipelineExport.PyTorch.PyTorchCompiler import buildPytorchExport
+            return buildPytorchExport(self.options, model)
+
         exportSteps = []
         for (step, option) in zip(self.steps, self.options):
             if step.type in [StepType.PRE, StepType.CORE]:

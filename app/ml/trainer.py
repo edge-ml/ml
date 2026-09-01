@@ -140,6 +140,19 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
                 print("ExecuTorch precompile failed; removing EXECUTORCH from formats:", e)
                 print(traceback.format_exc())
                 model.formats = [f for f in model.formats if f != "EXECUTORCH"]
+
+        # Validate the PyTorch (TorchScript) export the same way: only advertise
+        # it if the trace actually succeeds for this architecture, so the UI never
+        # offers a download that would fail. Cheap (a trace), so just verify here.
+        if "PYTORCH" in (model.formats or []):
+            try:
+                from app.ml.PipelineExport.PyTorch.PyTorchCompiler import buildPytorchExport
+                buildPytorchExport(pipeline.options, model)
+            except Exception as e:
+                print("PyTorch export unavailable; removing PYTORCH from formats:", e)
+                print(traceback.format_exc())
+                model.formats = [f for f in model.formats if f != "PYTORCH"]
+
         model.labels = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
 
         model.labels = [Labeling(**x) for x in model.labels]

@@ -10,7 +10,9 @@ from typing import List
 
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from app.ml.Pipelines.Abstract.StepType import StepType
-from app.ml.PipelineExport.Executorch.support import supportsExecutorch
+from app.ml.PipelineExport.Executorch.support import supportsExecutorch, findOption
+from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
+from app.ml.Pipelines.Categories.Classifier.TorchNeuralNetwork import TorchNeuralNetwork
 
 
 def _supportsC(option) -> bool:
@@ -23,6 +25,12 @@ def _supportsC(option) -> bool:
     return declares_c and implements_c
 
 
+def _supportsPytorch(options) -> bool:
+    # Any PyTorch classifier can be exported as TorchScript (runs on a
+    # server/desktop), regardless of whether it also lowers to mobile ExecuTorch.
+    return isinstance(findOption(options, BaseClassififer), TorchNeuralNetwork)
+
+
 def computeFormats(options) -> List[str]:
     formats = []
     pre_core = [x for x in options if x.type in (StepType.PRE, StepType.CORE)]
@@ -30,4 +38,6 @@ def computeFormats(options) -> List[str]:
         formats.append("C")
     if supportsExecutorch(options):
         formats.append("EXECUTORCH")
+    if _supportsPytorch(options):
+        formats.append("PYTORCH")
     return formats

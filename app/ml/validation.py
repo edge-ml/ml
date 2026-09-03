@@ -64,6 +64,33 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
             f"Feature Extraction step and select it.",
         ))
 
+    # A few WHAR architectures constrain the channel count: deepsense splits the
+    # channels into an acc/gyro pair (needs an even count) and global_fusion needs
+    # enough channels to fuse (>= 6). They're offered in the picker but only work
+    # when the selected data fits; block early with a clear message instead of a
+    # cryptic shape error at fit time. Channel count = selected timeseries.
+    n_channels = len(datasets[0].timeSeries)
+    wharStep = next((s for s in trainReq.selectedPipeline.steps if s.options.name == "WHAR Model"), None)
+    if wharStep is not None:
+        model_id = next(
+            (p.value for p in wharStep.options.parameters if p.parameter_name == "model_id"),
+            None,
+        )
+        if model_id == "deepsense" and n_channels % 2 != 0:
+            errors.append(_msg(
+                "classification",
+                f"The 'deepsense' architecture needs an even number of channels (it pairs "
+                f"acc/gyro), but the selected data has {n_channels}. Pick a different "
+                f"architecture or adjust the selected sensors.",
+            ))
+        elif model_id == "global_fusion" and n_channels < 6:
+            errors.append(_msg(
+                "classification",
+                f"The 'global_fusion' architecture needs at least 6 channels, but the "
+                f"selected data has {n_channels}. Pick a different architecture or select "
+                f"more sensors.",
+            ))
+
     if errors:
         return {"valid": False, "errors": errors, "warnings": warnings}
 

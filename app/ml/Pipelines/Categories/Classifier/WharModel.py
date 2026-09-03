@@ -15,16 +15,15 @@ try:
     )
 
     # Architectures with hard input constraints that don't fit edge-ml's
-    # arbitrary-channel datasets: deepsense needs an even channel count (acc/gyro
-    # split) and global_fusion needs a larger channel count, so both fail on
-    # 3-channel data like WISDM. Excluded from the picker; easy to revisit.
-    _EXCLUDED_MODEL_IDS = {"deepsense", "global_fusion"}
-
     # The neural (torch) architectures only; the classical ones (knn/rf/svm) are
     # sklearn + tsfresh and out of scope for this torch-trained classifier.
+    # deepsense/global_fusion have channel-count constraints (deepsense needs an
+    # even count, global_fusion needs >= 6); rather than exclude them platform-
+    # wide, they're offered here and the wizard hides them only when the selected
+    # dataset's channel count is incompatible (see CHANNEL_CONSTRAINED_ARCHS in
+    # the frontend and the preflight guardrail in validation.py).
     _NEURAL_MODEL_IDS = [
-        m.value for m in WHARModelID
-        if get_model_spec(m).framework == "torch" and m.value not in _EXCLUDED_MODEL_IDS
+        m.value for m in WHARModelID if get_model_spec(m).framework == "torch"
     ]
 except Exception:  # pragma: no cover - library missing in a bare dev env
     WHARModelID = None

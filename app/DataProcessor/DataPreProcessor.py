@@ -1,4 +1,5 @@
 import numpy as np
+from app.utils.labels import window_majority_label
 
 FEATURES = [np.sum, np.median, np.mean, np.std, np.var, np.max, lambda x : np.abs(np.max(x)), np.min]
 
@@ -19,9 +20,7 @@ def getDatasetWindows(dataset, window_size, stride):
 
     for w in fused:
         windows.append(w[:, :-1])
-        counts = np.bincount(w[:,-1].astype(int))
-        label = np.argmax(counts)
-        labels.append(label)
+        labels.append(window_majority_label(w[:, -1]))
 
     windows = np.array(windows)
     labels = np.array(labels)

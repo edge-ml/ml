@@ -2,6 +2,7 @@ from app.dataLoader.BaseDataLoader import BaseDataLoader
 import struct
 import numpy as np
 import os
+from io import BytesIO
 from app.internal.config import TSDATA
 
 DATA_PREFIX = TSDATA
@@ -31,3 +32,11 @@ class FileSystemDataLoader(BaseDataLoader):
     def delete(self, id):
         path = os.path.join(DATA_PREFIX, id + ".bin")
         os.remove(path)
+
+    def saveObj(self, id, obj):
+        with open(os.path.join(DATA_PREFIX, id + ".obj"), "wb") as f:
+            f.write(obj.getvalue())
+
+    def loadObj(self, id):
+        with open(os.path.join(DATA_PREFIX, id + ".obj"), "rb") as f:
+            return BytesIO(f.read())

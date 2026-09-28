@@ -18,7 +18,9 @@ model_controller = ModelController()
 @router.get("/{model_id}")
 async def get_model_by_id(model_id, project: str = Header(...)):
     res = model_controller.get_model_by_id(project, model_id)
-    return Response(json.dumps(res, cls=JSONEncoder), media_type="application/json")
+    # res is a pydantic Model; serialize to a dict first (the list route does the
+    # same). Passing the model object straight to json.dumps raised a 500.
+    return Response(json.dumps(res.dict(by_alias=True), cls=JSONEncoder), media_type="application/json")
 
 @router.get("/")
 async def get_models(project: str = Header(...)):

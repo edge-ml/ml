@@ -20,7 +20,7 @@ class SimpleFeatureExtractor(BaseFeatureExtractor):
 
     @staticmethod
     def get_platforms():
-        return [Platforms.C]
+        return [Platforms.C, Platforms.EXECUTORCH]
 
     @staticmethod
     def get_description():

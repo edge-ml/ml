@@ -2,7 +2,44 @@ FROM python:3.10.14-bullseye
 WORKDIR /app
 COPY MicroNAS-1.0.0-py3-none-any.whl MicroNAS-1.0.0-py3-none-any.whl
 RUN pip3 install MicroNAS-1.0.0-py3-none-any.whl
+# Install the CPU build of torch first so the CUDA build (several GB) is never pulled in.
+RUN pip3 install torch==2.9.0 --index-url https://download.pytorch.org/whl/cpu
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
+# whar-models (teco-kit) neural architectures for the "WHAR Model" classifier (#62).
+# --no-deps so its numpy>=2.2 / pandas / scikit-learn==1.8 / tsfresh floors (used
+# only by its classical models, which are out of scope) don't override
+# executorch's required numpy==2.0.2; the neural models need only torch (above) +
+# einops (requirements.txt). --ignore-requires-python because whar-models declares
+# requires-python>=3.11, but that is conservative: verified all 17 neural models
+# import + build + train on this image's Python 3.10 with torch 2.9.0 / numpy 2.0.2.
+RUN pip3 install --no-cache-dir --no-deps --ignore-requires-python "whar-models @ git+https://github.com/teco-kit/whar-models.git@c64f35931f15072af95f52d57a09486b28834426"
+# lttbc's isolated build compiles against numpy 1.x and then fails to import
+# under the numpy 2 pin — rebuild it against the installed numpy.
+RUN pip3 install --force-reinstall --no-deps --no-build-isolation --no-cache-dir lttbc==0.2.4
+# MicroNAS pulls triton 2.1.0 (for its torch 2.1.1 pin); it is orphaned under the
+# torch 2.9.0 upgrade and predates triton.backends, so torch._inductor crashes on
+# `import triton.backends.compiler` during torch.export, breaking ExecuTorch export.
+# CPU export does not need triton — remove it so has_triton_package() is False.
+RUN pip3 uninstall -y triton || true
+# The executorch .pte serializer shells out to the flatbuffers compiler (flatc),
+# which is not bundled in the executorch wheel. flatbuffers only publishes an
+# x86-64 Linux flatc binary, so on arm64 we build it from source at the same
+# pinned version (the prebuilt amd64 path is unchanged).
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      curl -fsSL "https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g%2B%2B-13.zip" -o /tmp/flatc.zip \
+      && python3 -c "import zipfile; zipfile.ZipFile('/tmp/flatc.zip').extractall('/usr/local/bin')" \
+      && chmod +x /usr/local/bin/flatc \
+      && rm /tmp/flatc.zip; \
+    else \
+      apt-get update && apt-get install -y --no-install-recommends cmake g++ make git \
+      && git clone --depth 1 --branch v25.2.10 https://github.com/google/flatbuffers.git /tmp/fb \
+      && cmake -S /tmp/fb -B /tmp/fb/build -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_TESTS=OFF \
+      && cmake --build /tmp/fb/build --target flatc -j "$(nproc)" \
+      && cp /tmp/fb/build/flatc /usr/local/bin/flatc \
+      && rm -rf /tmp/fb /var/lib/apt/lists/*; \
+    fi \
+    && flatc --version
 COPY . .
 CMD ["python", "main.py", "--env", "docker", "--workers", "2"]

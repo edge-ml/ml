@@ -24,6 +24,5 @@ import io
 def downloadModel(model, platform: Platforms):
     pipeline = getPipeline(model)
     files = pipeline.export(model, platform)
-    files = [StringFile(file.content, file.name) for file in files]
     return zipFiles(files)
 

@@ -82,8 +82,16 @@ class Model(BaseModel):
     labels: List[Labeling] | None = None
     timeSeries: List[str] | None = None
     samplingRate: float | None = None
+    formats: List[str] | None = None
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
+    # Live training progress (polled by the frontend). stage is a coarse label
+    # for every classifier; currentEpoch/totalEpochs/progress are only populated
+    # for classifiers with a real epoch loop (the PyTorch ones).
+    stage: Optional[str] = None
+    currentEpoch: Optional[int] = None
+    totalEpochs: Optional[int] = None
+    progress: Optional[int] = None
 
     class Config:
         json_encoders = {

@@ -26,6 +26,13 @@ RUN pip3 uninstall -y triton || true
 # which is not bundled in the executorch wheel. flatbuffers only publishes an
 # x86-64 Linux flatc binary, so on arm64 we build it from source at the same
 # pinned version (the prebuilt amd64 path is unchanged).
+#
+# cmake comes from pip rather than apt. bullseye is oldstable, and its security
+# pool rotates faster than the index served by deb.debian.org: installing cmake
+# via apt started failing with 404s for libarchive13 and git at +deb11u5, which
+# the index still advertised after the pool had dropped them. The base image
+# (buildpack-deps lineage) already provides git, g++ and make, so cmake was the
+# only missing piece and pip ships an aarch64 wheel for it.
 ARG TARGETARCH
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
       curl -fsSL "https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g%2B%2B-13.zip" -o /tmp/flatc.zip \
@@ -33,12 +40,12 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
       && chmod +x /usr/local/bin/flatc \
       && rm /tmp/flatc.zip; \
     else \
-      apt-get update && apt-get install -y --no-install-recommends cmake g++ make git \
+      pip3 install --no-cache-dir cmake \
       && git clone --depth 1 --branch v25.2.10 https://github.com/google/flatbuffers.git /tmp/fb \
       && cmake -S /tmp/fb -B /tmp/fb/build -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_TESTS=OFF \
       && cmake --build /tmp/fb/build --target flatc -j "$(nproc)" \
       && cp /tmp/fb/build/flatc /usr/local/bin/flatc \
-      && rm -rf /tmp/fb /var/lib/apt/lists/*; \
+      && rm -rf /tmp/fb; \
     fi \
     && flatc --version
 COPY . .

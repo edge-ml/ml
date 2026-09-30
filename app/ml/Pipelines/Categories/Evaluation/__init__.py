@@ -1,11 +1,13 @@
 from app.ml.Pipelines.Categories.Evaluation.BaseEvaluation import BaseEvaluation
 from app.ml.Pipelines.Categories.Evaluation.KFold import KFold
 from app.ml.Pipelines.Categories.Evaluation.TestTrainSplitEvaluation import TestTrainSplitEvaluation
+from app.ml.Pipelines.Categories.Evaluation.LeaveOneGroupOut import LeaveOneGroupOut
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep, StepType
 from typing import List
 
 EVALAUTIONS : List[BaseEvaluation] = [
     TestTrainSplitEvaluation,
+    LeaveOneGroupOut,
     KFold,
 ]
 

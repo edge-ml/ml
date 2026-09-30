@@ -95,7 +95,13 @@ class Pipeline():
         return data
 
     def clone(self):
-        return Pipeline([x.__class__(x.parameters) for x in self.options])
+        # steps has always been required by __init__; clone omitted it and so
+        # raised on every call. Nothing exercised it until leave-one-out started
+        # building a fresh pipeline per fold. The options are rebuilt from their
+        # parameters so the copy carries no fitted state, which is the point.
+        return Pipeline(
+            [x.__class__(x.parameters) for x in self.options], self.steps
+        )
 
     def eval(self, data, labels):
         [evaluator] = [x for x in self.options if x.type == StepType.EVAL]

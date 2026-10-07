@@ -117,6 +117,10 @@ class Pipeline():
             from app.ml.PipelineExport.PyTorch.PyTorchCompiler import buildPytorchExport
             return buildPytorchExport(self.options, model)
 
+        if platform == Platforms.ONNX:
+            from app.ml.PipelineExport.Onnx.OnnxCompiler import buildOnnxExport
+            return buildOnnxExport(self.options, model)
+
         exportSteps = []
         for (step, option) in zip(self.steps, self.options):
             if step.type in [StepType.PRE, StepType.CORE]:

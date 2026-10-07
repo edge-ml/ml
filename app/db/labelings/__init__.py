@@ -16,3 +16,7 @@ async def get_labeling(id: str, projectId: str) -> LabelingModel:
     if obj is None:
         raise RuntimeError("Labeling with given id does not exist")
     return LabelingModel.parse_obj(obj=obj)
+
+async def get_project_labelings(projectId: str) -> List[dict]:
+    cursor = _labelings().find({'projectId': ObjectId(projectId)})
+    return await cursor.to_list(length=None)

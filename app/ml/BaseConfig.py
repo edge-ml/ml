@@ -6,6 +6,7 @@ class Platforms(Enum):
     C = "C"
     EXECUTORCH = "EXECUTORCH"
     PYTORCH = "PYTORCH"
+    ONNX = "ONNX"
 
 
 class BaseConfig():

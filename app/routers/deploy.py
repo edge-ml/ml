@@ -4,6 +4,7 @@ from app.db.models import ModelDB
 from app.Deploy.Base import downloadModel
 from app.ml.BaseConfig import Platforms
 from app.ml.PipelineExport.Executorch.support import ExecutorchExportError
+from app.ml.PipelineExport.Onnx.support import OnnxExportError
 from fastapi.responses import StreamingResponse
 from app.ml.Pipeline import Pipeline
 from app.Deploy.Devices import DEVICES
@@ -50,7 +51,7 @@ async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
         # downloadModel is CPU-bound (zip assembly, and a possible .pte compile
         # fallback) — keep it off the event loop.
         code = await run_in_threadpool(downloadModel, model, format)
-    except ExecutorchExportError as e:
+    except (ExecutorchExportError, OnnxExportError) as e:
         raise HTTPException(status_code=e.status_code, detail=str(e))
     except NotImplementedError:
         # e.g. requesting C export for a classifier that has no exportC

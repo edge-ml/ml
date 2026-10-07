@@ -83,6 +83,9 @@ class AbstractPipelineOption():
             # here; it just also succeeds for architectures that can't lower to
             # mobile (verified per-model at train time via computeFormats).
             "pytorch": "executorch" in platform_values,
+            # ONNX bakes the same torch preprocessing as ExecuTorch and also
+            # converts the sklearn trees (which declare ONNX explicitly).
+            "onnx": "executorch" in platform_values or "onnx" in platform_values,
         },
         }
 

@@ -19,3 +19,8 @@ S3_SECRET_KEY = config("S3_SECRET_KEY")
 S3_MODEL_BUCKET_NAME = config("S3_MODEL_BUCKET_NAME")
 
 FIRMWARE_COMPILE_URL = config("FIRMWARE_COMPILE_URL")
+# Device API keys (created in the dataset-store) — used by the /ml/device routes
+# the edge-ml JS library calls. Defaults to the project database the auth DB
+# already points at.
+DEVICE_API_DB_NAME = config("DEVICE_API_DB_NAME", default=AUTH_DATABASE_NAME)
+DEVICE_API_COLLNAME = config("DEVICE_API_COLLNAME", default="deviceapis")

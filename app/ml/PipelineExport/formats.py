@@ -11,6 +11,7 @@ from typing import List
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from app.ml.Pipelines.Abstract.StepType import StepType
 from app.ml.PipelineExport.Executorch.support import supportsExecutorch, findOption
+from app.ml.PipelineExport.Onnx.support import supportsOnnx
 from app.ml.Pipelines.Categories.Classifier.BaseClassififer import BaseClassififer
 from app.ml.Pipelines.Categories.Classifier.TorchNeuralNetwork import TorchNeuralNetwork
 
@@ -40,4 +41,6 @@ def computeFormats(options) -> List[str]:
         formats.append("EXECUTORCH")
     if _supportsPytorch(options):
         formats.append("PYTORCH")
+    if supportsOnnx(options):
+        formats.append("ONNX")
     return formats

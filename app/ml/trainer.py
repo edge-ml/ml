@@ -185,10 +185,10 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         raise e
 
 
-async def train(req: PipelineRequest, project, background_tasks):
+async def train(req: PipelineRequest, project, background_tasks, preset=None):
     try:
         data = req.dict(by_alias=True)
-        model = Model(name=req.name, pipeline=req, projectId=project)
+        model = Model(name=req.name, pipeline=req, projectId=project, preset=preset)
         id = modelDB.add_model(model)
         background_tasks.add_task(init_train, req, model, id, project)
         return id

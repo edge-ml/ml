@@ -1,6 +1,6 @@
-"""Tests for the device-API routes used by the edge-ml JavaScript library:
-compact training request -> PipelineRequest, API-key access levels, and the
-ONNX download endpoints."""
+"""Tests for the device-API routes used by the edge-ml JavaScript and Dart
+libraries: compact training request -> PipelineRequest, presets, API-key access
+levels, and the ONNX / ExecuTorch download endpoints."""
 import json
 import os
 import sys
@@ -10,13 +10,23 @@ from types import SimpleNamespace
 from bson.objectid import ObjectId
 
 sys.path.insert(0, os.path.dirname(__file__))
-from test_torch_executorch import make_model_doc, make_windower, make_windows, train_pipeline  # noqa: E402
+from test_torch_executorch import (  # noqa: E402
+    execute_pte, fast_params, make_model_doc, make_windower, make_windows, train_pipeline,
+)
 
 from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.DataModels.model import ModelStatus  # noqa: E402
-from app.ml.device_train import DeviceTrainError, DeviceTrainRequest, buildPipelineRequest  # noqa: E402
+from app.ml.device_presets import PRESETS  # noqa: E402
+from app.ml.device_train import (  # noqa: E402
+    STEPS, DeviceTrainError, DeviceTrainRequest, buildPipelineRequest, executorchWarning,
+)
+from app.ml.PipelineExport.Executorch.support import supportsExecutorch  # noqa: E402
+from app.ml.Pipelines.PipelineContainer import PipelineContainer  # noqa: E402
+from app.ml.Pipelines.Categories.FeatureExtraction.RawSensorExtractor import RawSensorExtractor  # noqa: E402
+from app.ml.Pipelines.Categories.Normalizer.ZNormalizer import ZNormalizer  # noqa: E402
+from app.ml.Pipelines.Categories.Classifier.TorchCNN1D import TorchCNN1D  # noqa: E402
 from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor  # noqa: E402
 from app.ml.Pipelines.Categories.Normalizer.MinMaxNormalizer import MinMaxNormalizer  # noqa: E402
 from app.ml.Pipelines.Categories.Classifier.random_forest import RandomForest  # noqa: E402
@@ -100,6 +110,81 @@ class TestBuildPipelineRequest(unittest.TestCase):
             buildPipelineRequest(DeviceTrainRequest(name="m", labeling="nope"), DATASETS, LABELINGS)
 
 
+def step(req, key):
+    options = req.selectedPipeline.steps[list(STEPS).index(key)].options
+    return options.name, {p.parameter_name: p.value for p in options.parameters}
+
+
+def option(req, key):
+    """Instantiates the pipeline option the request selected for a step."""
+    name, params = step(req, key)
+    cls = next(o for o in STEPS[key][0].options if o.get_name() == name)
+    return cls(fast_params(cls, params))
+
+
+class TestPresets(unittest.TestCase):
+
+    def test_preset_expands(self):
+        req = build(preset="small_cnn")
+        self.assertEqual(step(req, "featureExtraction")[0], "Raw Time-Series (Sensors only)")
+        self.assertEqual(step(req, "normalizer")[0], "ZNormalizer")
+        name, params = step(req, "classifier")
+        self.assertEqual(name, "PyTorch 1D Convolutional Neural Network")
+        self.assertEqual((params["conv_blocks"], params["base_filters"]), (1, 8))
+        self.assertEqual(step(req, "windowing")[1]["window_size"], 50)
+        self.assertEqual(step(req, "evaluation")[0], "TestTrainSplit")
+
+    def test_overrides_merge_or_replace(self):
+        # same option (unnamed) -> parameters merge with the preset's
+        req = build(preset="large_cnn", pipeline={"classifier": {"parameters": {"epochs": 3}},
+                                                  "windowing": {"parameters": {"window_size": 80}}})
+        name, params = step(req, "classifier")
+        self.assertEqual((params["conv_blocks"], params["base_filters"], params["epochs"]), (3, 32, 3))
+        windowing = step(req, "windowing")[1]
+        self.assertEqual((windowing["window_size"], windowing["sliding_step"]), (80, 25))
+        # different option -> step replaced, preset parameters dropped
+        req = build(preset="large_cnn", pipeline={"classifier": {"name": "PyTorch Dense Neural Network"}})
+        self.assertEqual(step(req, "classifier")[0], "PyTorch Dense Neural Network")
+
+    def test_unknown_preset(self):
+        with self.assertRaises(DeviceTrainError) as ctx:
+            build(preset="huge_cnn")
+        self.assertIn("small_cnn", str(ctx.exception))
+
+    def test_executorch_warning(self):
+        self.assertIsNone(executorchWarning(DeviceTrainRequest(name="m", labeling="a", preset="small_dense")))
+        # no preset -> no promise, no warning
+        self.assertIsNone(executorchWarning(DeviceTrainRequest(name="m", labeling="a")))
+        warning = executorchWarning(DeviceTrainRequest(
+            name="m", labeling="a", preset="small_cnn",
+            pipeline={"classifier": {"name": "Random Forest Classifier"}}))
+        self.assertIn("PyTorch classifier", warning)
+
+    def test_every_preset_exports_to_executorch(self):
+        """Train each preset's steps briefly and compile + run the .pte."""
+        import torch
+        from app.ml.PipelineExport.Executorch.ExecutorchCompiler import buildExecutorchPte
+
+        for preset_id in PRESETS:
+            with self.subTest(preset=preset_id):
+                req = build(preset=preset_id, pipeline={"classifier": {"parameters": {"epochs": 1}}})
+                windower, fe, norm, clf = [option(req, key) for key in ["windowing", "featureExtraction", "normalizer", "classifier"]]
+                window_size = int(windower.get_param_value_by_name("window_size"))
+
+                X, y = make_windows(window=window_size)
+                container = PipelineContainer(X, y, [None] * len(y))
+                container = fe.fit_exec(container)
+                container = norm.fit_exec(container)
+                clf.fit_exec(container)
+                options = [windower, fe, norm, clf]
+
+                self.assertTrue(supportsExecutorch(options))
+                model = make_model_doc(num_classes=clf.arch["num_classes"])
+                pte = buildExecutorchPte(options, model)
+                out = execute_pte(pte, torch.zeros(1, window_size, 3, dtype=torch.float32))
+                self.assertEqual(tuple(out.shape), (1, clf.arch["num_classes"]))
+
+
 class FakeCollection:
     def __init__(self, docs):
         self.docs = docs
@@ -151,8 +236,9 @@ class TestDeviceRoutes(unittest.TestCase):
         async def preflight(req, project):
             return {"valid": True, "errors": [], "warnings": ["few windows"]}
 
-        async def fake_train(req, project, background_tasks):
+        async def fake_train(req, project, background_tasks, preset=None):
             calls["req"] = req
+            calls["preset"] = preset
             return ObjectId("0" * 24)
 
         self._patch("get_project_datasets_meta", datasets)
@@ -167,6 +253,17 @@ class TestDeviceRoutes(unittest.TestCase):
         self.assertEqual(calls["req"].name, "m")
 
         res = self.client.post("/ml/device/WRITE/train", json={"name": "m", "labeling": "nope"})
+        self.assertEqual(res.status_code, 400)
+
+        res = self.client.post("/ml/device/WRITE/train", json={"name": "m", "labeling": "activities", "preset": "small_cnn"})
+        self.assertEqual(res.status_code, 200, res.text)
+        self.assertEqual(calls["preset"], "small_cnn")
+        res = self.client.post("/ml/device/WRITE/train", json={
+            "name": "m", "labeling": "activities", "preset": "small_cnn",
+            "pipeline": {"classifier": {"name": "Decision Tree Classifier"}}})
+        self.assertEqual(res.status_code, 200, res.text)
+        self.assertIn("ExecuTorch", res.json()["warnings"][-1])
+        res = self.client.post("/ml/device/WRITE/train", json={"name": "m", "labeling": "activities", "preset": "nope"})
         self.assertEqual(res.status_code, 400)
 
         async def failing_preflight(req, project):
@@ -198,6 +295,50 @@ class TestDeviceRoutes(unittest.TestCase):
         self.assertEqual(self.client.get("/ml/device/READ/models/x/onnx/model.onnx").status_code, 400)
         model.trainStatus = ModelStatus.training
         self.assertEqual(self.client.get("/ml/device/READ/models/x/onnx/model.onnx").status_code, 409)
+
+    def test_presets(self):
+        res = self.client.get("/ml/device/READ/presets")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual([p["id"] for p in res.json()], list(PRESETS))
+        self.assertEqual(self.client.get("/ml/device/BAD/presets").status_code, 401)
+
+    def test_executorch_download(self):
+        import torch
+        from app.ml.PipelineExport.Executorch import ExecutorchCompiler
+
+        X, y = make_windows()
+        fe, norm, clf = train_pipeline(RawSensorExtractor, ZNormalizer, TorchCNN1D, X, y)
+        options = [make_windower(), fe, norm, clf]
+        model = make_model_doc(num_classes=clf.arch["num_classes"])
+        model.id = "3" * 24
+        model.trainStatus = ModelStatus.done
+        model.formats = ["EXECUTORCH", "ONNX"]
+        self._patch("_get_model", lambda model_id, project: model)
+        self._patch("getPipeline", lambda m: SimpleNamespace(options=options))
+
+        res = self.client.get("/ml/device/READ/models/x/executorch/manifest.json")
+        self.assertEqual(res.status_code, 200, res.text)
+        manifest = res.json()
+        self.assertEqual(manifest["format"], "executorch")
+        self.assertEqual(manifest["input"]["timeseries"], ["x", "y", "z"])
+        self.assertEqual(manifest["output"]["labels"], ["class_0", "class_1"])
+
+        # not precompiled -> compiled on request, and the result runs
+        res = self.client.get("/ml/device/READ/models/x/executorch/model.pte")
+        self.assertEqual(res.status_code, 200, res.text)
+        out = execute_pte(res.content, torch.zeros(1, manifest["window"]["size"], 3))
+        self.assertEqual(tuple(out.shape), (1, 2))
+
+        # precompiled -> served from the cache
+        ExecutorchCompiler.storeExecutorchPte(model, b"CACHED_PTE")
+        self.assertEqual(self.client.get("/ml/device/READ/models/x/executorch/model.pte").content, b"CACHED_PTE")
+
+        model.formats = ["ONNX"]
+        res = self.client.get("/ml/device/READ/models/x/executorch/model.pte")
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("preset", res.json()["detail"])
+        model.trainStatus = ModelStatus.training
+        self.assertEqual(self.client.get("/ml/device/READ/models/x/executorch/manifest.json").status_code, 409)
 
 
 if __name__ == "__main__":

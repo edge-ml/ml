@@ -1,15 +1,18 @@
-"""Device-API routes for the edge-ml JavaScript library.
+"""Device-API routes for the edge-ml JavaScript and Dart libraries.
 
 Authenticated with the project's device API key (the same read/write keys the
-dataset-store upload routes use), so a browser or Node app can train a model
-and download it as ONNX without a user session:
+dataset-store upload routes use), so a browser, Node or Flutter app can train a
+model and download it as ONNX or ExecuTorch without a user session:
 
     GET  /ml/device/{api_key}/pipelines                      available steps/options (read)
+    GET  /ml/device/{api_key}/presets                        ExecuTorch-ready training presets (read)
     POST /ml/device/{api_key}/train                          start training (write)
     GET  /ml/device/{api_key}/models                         list models (read)
     GET  /ml/device/{api_key}/models/{model_id}              training status (read)
     GET  /ml/device/{api_key}/models/{model_id}/onnx/manifest.json
     GET  /ml/device/{api_key}/models/{model_id}/onnx/model.onnx
+    GET  /ml/device/{api_key}/models/{model_id}/executorch/manifest.json
+    GET  /ml/device/{api_key}/models/{model_id}/executorch/model.pte
 """
 import json
 
@@ -24,8 +27,10 @@ from app.db.labelings import get_project_labelings
 from app.db.models import ModelDB
 from app.internal.config import DEVICE_API_COLLNAME, DEVICE_API_DB_NAME
 from app.DataModels.model import ModelStatus
-from app.ml.device_train import DeviceTrainError, DeviceTrainRequest, buildPipelineRequest, modelSummary
+from app.ml.device_presets import listPresets
+from app.ml.device_train import DeviceTrainError, DeviceTrainRequest, buildPipelineRequest, executorchWarning, modelSummary
 from app.ml.Pipelines import PIPELINES_CONFIG, getPipeline
+from app.ml.PipelineExport.Executorch.support import ExecutorchExportError, getExportBlockers
 from app.ml.PipelineExport.Onnx.support import OnnxExportError
 from app.ml.trainer import train
 from app.ml.validation import preflight_train
@@ -81,9 +86,27 @@ def _onnx_ready_pipeline(model):
     return getPipeline(model)
 
 
+def _executorch_ready_pipeline(model):
+    if model.trainStatus != ModelStatus.done:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail=f"Model is not trained yet (status: {model.trainStatus.value}).")
+    pipeline = getPipeline(model)
+    if "EXECUTORCH" not in (model.formats or []):
+        reasons = " ".join(getExportBlockers(pipeline.options)) or "ExecuTorch compilation failed for this model."
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail=f"This model cannot be exported to ExecuTorch. {reasons} Train it with one of the presets.",
+        )
+    return pipeline
+
+
 @router.get("/{api_key}/pipelines")
 async def device_pipelines(project: str = Depends(requireApiKey("read"))):
     return PIPELINES_CONFIG
+
+
+@router.get("/{api_key}/presets")
+async def device_presets(project: str = Depends(requireApiKey("read"))):
+    return listPresets()
 
 
 @router.post("/{api_key}/train")
@@ -99,6 +122,7 @@ async def device_train(
     except DeviceTrainError as e:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+    warning = executorchWarning(body)
     check = await preflight_train(req, project)
     if not check.get("valid", False):
         raise HTTPException(
@@ -106,8 +130,9 @@ async def device_train(
             detail="; ".join(f"{e['step']}: {e['message']}" for e in check.get("errors", [])),
         )
 
-    model_id = await train(req, project=project, background_tasks=background_tasks)
-    return _json({"id": str(model_id), "warnings": check.get("warnings", [])})
+    model_id = await train(req, project=project, background_tasks=background_tasks, preset=body.preset)
+    warnings = check.get("warnings", []) + ([warning] if warning else [])
+    return _json({"id": str(model_id), "warnings": warnings})
 
 
 @router.get("/{api_key}/models")
@@ -142,4 +167,31 @@ async def device_onnx_model(model_id: str, project: str = Depends(requireApiKey(
         raise HTTPException(status_code=e.status_code, detail=str(e))
     return Response(model_bytes, media_type="application/octet-stream", headers={
         "Content-Disposition": f'attachment; filename="{model.name}.onnx"'
+    })
+
+
+@router.get("/{api_key}/models/{model_id}/executorch/manifest.json")
+async def device_executorch_manifest(model_id: str, project: str = Depends(requireApiKey("read"))):
+    from app.ml.PipelineExport.Executorch.ExecutorchCompiler import buildExecutorchManifest
+
+    model = _get_model(model_id, project)
+    pipeline = _executorch_ready_pipeline(model)
+    return _json(buildExecutorchManifest(pipeline.options, model))
+
+
+@router.get("/{api_key}/models/{model_id}/executorch/model.pte")
+async def device_executorch_model(model_id: str, project: str = Depends(requireApiKey("read"))):
+    from app.ml.PipelineExport.Executorch.ExecutorchCompiler import buildExecutorchPte, loadExecutorchPte
+
+    model = _get_model(model_id, project)
+    pipeline = _executorch_ready_pipeline(model)
+    pte_bytes = loadExecutorchPte(model)
+    if pte_bytes is None:
+        # models trained before train-time precompilation; lowering is CPU-bound
+        try:
+            pte_bytes = await run_in_threadpool(buildExecutorchPte, pipeline.options, model)
+        except ExecutorchExportError as e:
+            raise HTTPException(status_code=e.status_code, detail=str(e))
+    return Response(pte_bytes, media_type="application/octet-stream", headers={
+        "Content-Disposition": f'attachment; filename="{model.name}.pte"'
     })

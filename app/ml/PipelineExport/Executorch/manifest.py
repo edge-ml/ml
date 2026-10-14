@@ -4,6 +4,10 @@ from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import
 
 
 def buildManifest(model, windower, featureExtractor, normalizer, classifier, executorch_version):
+    return json.dumps(buildManifestDict(model, windower, featureExtractor, normalizer, classifier, executorch_version), indent=2)
+
+
+def buildManifestDict(model, windower, featureExtractor, normalizer, classifier, executorch_version) -> dict:
     window_size = int(windower.get_param_value_by_name("window_size"))
     sliding_step = int(windower.get_param_value_by_name("sliding_step"))
     num_classes = classifier.arch["num_classes"]
@@ -15,6 +19,7 @@ def buildManifest(model, windower, featureExtractor, normalizer, classifier, exe
 
     manifest = {
         "schema_version": 1,
+        "format": "executorch",
         "model_name": model.name,
         "model_id": str(model.id),
         "executorch": {
@@ -49,4 +54,4 @@ def buildManifest(model, windower, featureExtractor, normalizer, classifier, exe
     if sampling_rate is not None and sliding_step:
         manifest["classification_frequency_hint_hz"] = sampling_rate / sliding_step
 
-    return json.dumps(manifest, indent=2)
+    return manifest

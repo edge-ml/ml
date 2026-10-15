@@ -44,3 +44,20 @@ def computeFormats(options) -> List[str]:
     if supportsOnnx(options):
         formats.append("ONNX")
     return formats
+
+
+def formatsForStoredModel(model) -> List[str]:
+    """Formats for a model trained before formats were stored on the model
+    (``model.formats is None``). Derived from the pipeline's step types alone,
+    like computeFormats at train time, so the model's weights are not loaded.
+    Without it the frontend falls back to offering only C."""
+    from app.ml.Pipelines import getPipelineOption  # avoid an import cycle
+
+    try:
+        options = [
+            getPipelineOption(step.options.name)(step.options.parameters)
+            for step in model.pipeline.selectedPipeline.steps
+        ]
+    except Exception:
+        return []  # an option that no longer exists: nothing can be exported
+    return computeFormats(options)

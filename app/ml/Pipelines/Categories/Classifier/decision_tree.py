@@ -5,6 +5,7 @@ from sklearn.tree import DecisionTreeClassifier
 from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
 import pickle
+from app.ml.Pipelines.Categories.Classifier import sklearn_compat
 from app.ml.BaseConfig import Platforms
 from app.StorageProvider import StorageProvider
 
@@ -234,7 +235,8 @@ class DecisionTree(BaseClassififer):
     def restore(self, dict):
         self.data_id = dict.state["data_id"]
         byte_clf = StorageProvider.load(self.data_id)
-        self.clf = pickle.loads(byte_clf)
+        # also loads models pickled by older scikit-learn versions
+        self.clf = sklearn_compat.loads(byte_clf)
         super().restore(dict)
 
     def persist(self):

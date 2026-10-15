@@ -54,7 +54,9 @@ class AbstractPipelineOption():
     def export(self, params, platform: Platforms):
         return self.exportC(params)
 
-    def exportC(params):
+    def exportC(self, params):
+        # no C export for this option; the download route turns this into a
+        # 400 "does not support C export" (without self it raised TypeError -> 500)
         raise NotImplementedError()
     
     @classmethod

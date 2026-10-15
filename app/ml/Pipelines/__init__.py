@@ -71,6 +71,24 @@ for x in _pipelineOptions:
 def getPipelineOption(name):
     return _pipelineMap[name]
 
+class ModelLoadError(Exception):
+    """A stored model could not be loaded: its stored files are missing, or it
+    was saved by an older edge-ml version that the current libraries can no
+    longer read (e.g. Keras 2 models)."""
+
+
+def modelLoadError(error: Exception) -> ModelLoadError:
+    """The user-facing ModelLoadError for an exception raised while restoring
+    a stored model."""
+    response = getattr(error, "response", None)
+    code = response.get("Error", {}).get("Code") if isinstance(response, dict) else None
+    if code == "NoSuchKey":
+        reason = "Its stored files are missing."
+    else:
+        reason = "It was trained with an older edge-ml version that can no longer be loaded."
+    return ModelLoadError(f"{reason} Retrain the model to download it.")
+
+
 def getPipeline(model):
     stepOptions = model.pipeline.selectedPipeline.steps
     categories = [getCategory(x.name) for x in stepOptions]

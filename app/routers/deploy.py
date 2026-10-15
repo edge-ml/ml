@@ -5,6 +5,8 @@ from app.Deploy.Base import downloadModel
 from app.ml.BaseConfig import Platforms
 from app.ml.PipelineExport.Executorch.support import ExecutorchExportError
 from app.ml.PipelineExport.Onnx.support import OnnxExportError
+from app.ml.Pipelines import ModelLoadError
+from pydantic import ValidationError
 from fastapi.responses import StreamingResponse
 from app.ml.Pipeline import Pipeline
 from app.Deploy.Devices import DEVICES
@@ -46,13 +48,23 @@ async def export(format: str):
 
 @router.get("/{model_id}/download/{format}")
 async def dlmodel(model_id: str, format: Platforms, project: str = Header(...)):
-    model = ModelDB().get_model(model_id, project)
+    try:
+        model = ModelDB().get_model(model_id, project)
+    except ValidationError:
+        # stored by a very old edge-ml version in a shape the model schema rejects
+        raise HTTPException(
+            status_code=409,
+            detail="This model was stored by an older edge-ml version and can no longer be loaded. "
+                   "Retrain the model to download it.",
+        )
     try:
         # downloadModel is CPU-bound (zip assembly, and a possible .pte compile
         # fallback) — keep it off the event loop.
         code = await run_in_threadpool(downloadModel, model, format)
     except (ExecutorchExportError, OnnxExportError) as e:
         raise HTTPException(status_code=e.status_code, detail=str(e))
+    except ModelLoadError as e:
+        raise HTTPException(status_code=409, detail=str(e))
     except NotImplementedError:
         # e.g. requesting C export for a classifier that has no exportC
         raise HTTPException(

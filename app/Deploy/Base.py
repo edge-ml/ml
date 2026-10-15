@@ -1,7 +1,7 @@
 from app.ml.Pipelines.Categories.Normalizer import get_normalizer_by_name
 from app.DataModels.model import Model
 from app.ml.BaseConfig import Platforms
-from app.ml.Pipelines import getPipeline
+from app.ml.Pipelines import getPipeline, modelLoadError
 from io import BytesIO
 from app.utils.zipfile import zipFiles
 from app.utils.StringFile import StringFile
@@ -22,7 +22,12 @@ import io
 #     return zip_buffer.read()
 
 def downloadModel(model, platform: Platforms):
-    pipeline = getPipeline(model)
+    try:
+        pipeline = getPipeline(model)
+    except Exception as e:
+        # stored files missing / saved by an older version: tell the user to
+        # retrain instead of failing with the library's error (500)
+        raise modelLoadError(e) from e
     files = pipeline.export(model, platform)
     return zipFiles(files)
 

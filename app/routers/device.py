@@ -19,6 +19,7 @@ import json
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response, status
+from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
 
 from app.db.db import get_auth_db
@@ -29,7 +30,7 @@ from app.internal.config import DEVICE_API_COLLNAME, DEVICE_API_DB_NAME
 from app.DataModels.model import ModelStatus
 from app.ml.device_presets import listPresets
 from app.ml.device_train import DeviceTrainError, DeviceTrainRequest, buildPipelineRequest, executorchWarning, modelSummary
-from app.ml.Pipelines import PIPELINES_CONFIG, getPipeline
+from app.ml.Pipelines import PIPELINES_CONFIG, getPipeline, modelLoadError
 from app.ml.PipelineExport.Executorch.support import ExecutorchExportError, getExportBlockers
 from app.ml.PipelineExport.Onnx.support import OnnxExportError
 from app.ml.trainer import train
@@ -70,7 +71,20 @@ def _get_model(model_id: str, project: str):
         doc = None
     if doc is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Model not found")
-    return modelDB.get_model(model_id, project)
+    try:
+        return modelDB.get_model(model_id, project)
+    except ValidationError:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            detail="This model was stored by an older edge-ml version and can no longer be loaded. Retrain it.",
+        )
+
+
+def _load_pipeline(model):
+    try:
+        return getPipeline(model)
+    except Exception as e:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail=str(modelLoadError(e))) from e
 
 
 def _onnx_ready_pipeline(model):
@@ -83,13 +97,13 @@ def _onnx_ready_pipeline(model):
                    "SimpleFeatureExtractor or raw time-series, a MinMax/Z normalizer and a Decision Tree, "
                    "Random Forest or PyTorch classifier.",
         )
-    return getPipeline(model)
+    return _load_pipeline(model)
 
 
 def _executorch_ready_pipeline(model):
     if model.trainStatus != ModelStatus.done:
         raise HTTPException(status.HTTP_409_CONFLICT, detail=f"Model is not trained yet (status: {model.trainStatus.value}).")
-    pipeline = getPipeline(model)
+    pipeline = _load_pipeline(model)
     if "EXECUTORCH" not in (model.formats or []):
         reasons = " ".join(getExportBlockers(pipeline.options)) or "ExecuTorch compilation failed for this model."
         raise HTTPException(

@@ -5,7 +5,8 @@ from sklearn.cluster import KMeans
 import numpy as np
 from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
-import pickle 
+import pickle
+from app.ml.Pipelines.Categories.Classifier import sklearn_compat
 from app.Deploy.Sklearn.exportC_decisionTree import convert
 from app.StorageProvider import StorageProvider
 
@@ -80,7 +81,8 @@ class KMeansClassifier(BaseClassififer):
     def restore(self, dict):
         self.data_id = dict.state["data_id"]
         byte_clf = StorageProvider.load(self.data_id)
-        self.clf = pickle.loads(byte_clf)
+        # also loads models pickled by older scikit-learn versions
+        self.clf = sklearn_compat.loads(byte_clf)
 
     def persist(self):
         self.data_id = ObjectId()

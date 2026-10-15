@@ -278,13 +278,14 @@ class TestExportGating(unittest.TestCase):
         featureExtractor = SimpleFeatureExtractor(SimpleFeatureExtractor.get_parameters())
         normalizer = MinMaxNormalizer(MinMaxNormalizer.get_parameters())
 
-        # DecisionTree + Simple + MinMax + SampleWindower is the classic C pipeline
+        # DecisionTree + Simple + MinMax + SampleWindower is the classic C pipeline;
+        # skl2onnx also makes it runnable in the browser
         tree_formats = computeFormats([windower, featureExtractor, normalizer, DecisionTree(DecisionTree.get_parameters())])
-        self.assertEqual(tree_formats, ["C"])
+        self.assertEqual(tree_formats, ["C", "ONNX"])
 
-        # torch classifier: EXECUTORCH but no C
+        # torch classifier: EXECUTORCH, PYTORCH and ONNX but no C
         torch_formats = computeFormats([windower, featureExtractor, normalizer, TorchDense(TorchDense.get_parameters())])
-        self.assertEqual(torch_formats, ["EXECUTORCH"])
+        self.assertEqual(torch_formats, ["EXECUTORCH", "PYTORCH", "ONNX"])
 
 
 class TestZipCompatibility(unittest.TestCase):

@@ -83,6 +83,8 @@ class Model(BaseModel):
     timeSeries: List[str] | None = None
     samplingRate: float | None = None
     formats: List[str] | None = None
+    # Device-API training preset the model was trained from (see device_presets).
+    preset: Optional[str] = None
     trainStatus: ModelStatus = ModelStatus.waiting
     error: str = Field(default="")
     # Live training progress (polled by the frontend). stage is a coarse label

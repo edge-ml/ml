@@ -153,6 +153,17 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
                 print(traceback.format_exc())
                 model.formats = [f for f in model.formats if f != "PYTORCH"]
 
+        # Same for ONNX (browser / edge-ml JS library): only advertise it when
+        # the export actually builds for this pipeline.
+        if "ONNX" in (model.formats or []):
+            try:
+                from app.ml.PipelineExport.Onnx.OnnxCompiler import buildOnnxModel
+                buildOnnxModel(pipeline.options, model)
+            except Exception as e:
+                print("ONNX export unavailable; removing ONNX from formats:", e)
+                print(traceback.format_exc())
+                model.formats = [f for f in model.formats if f != "ONNX"]
+
         model.labels = [x.dict(by_alias=True) for x in selectedLabels] + ([{"name": "Zero", "color": "#ffffff"}] if trainReq.labeling.useZeroClass else [])
 
         model.labels = [Labeling(**x) for x in model.labels]
@@ -174,10 +185,10 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         raise e
 
 
-async def train(req: PipelineRequest, project, background_tasks):
+async def train(req: PipelineRequest, project, background_tasks, preset=None):
     try:
         data = req.dict(by_alias=True)
-        model = Model(name=req.name, pipeline=req, projectId=project)
+        model = Model(name=req.name, pipeline=req, projectId=project, preset=preset)
         id = modelDB.add_model(model)
         background_tasks.add_task(init_train, req, model, id, project)
         return id

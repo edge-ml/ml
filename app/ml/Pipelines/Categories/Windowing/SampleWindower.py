@@ -62,7 +62,7 @@ class SampleWindower(BaseWindower):
         train_X = []
         train_Y = []
         metadata = []
-        for dataset in datasets:
+        for dataset_idx, dataset in enumerate(datasets):
             fused = []
             idx = 0
             while idx < dataset.shape[0]:
@@ -75,10 +75,20 @@ class SampleWindower(BaseWindower):
             Y = []
             Meta = []
 
+            # Every window carries the metadata of the dataset it came from, so
+            # later stages can group windows by dataset (leave-one-group-out
+            # needs this). Previously the whole per-dataset list was appended to
+            # every window, which made the windows indistinguishable.
+            window_meta = (
+                datasetMetadata[dataset_idx]
+                if datasetMetadata is not None and dataset_idx < len(datasetMetadata)
+                else {}
+            )
+
             for w in fused:
                 X.append(w[:, :-1])
                 Y.append(window_majority_label(w[:, -1]))
-                Meta.append(datasetMetadata)
+                Meta.append(window_meta)
 
             train_X.extend(X)
             train_Y.extend(Y)

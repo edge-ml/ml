@@ -16,7 +16,7 @@ from app.ml.PipelineExport.Executorch.torch_ops import (
     TorchSimpleFeatures,
     TorchZNormalize,
 )
-from app.ml.PipelineExport.Executorch.manifest import buildManifest
+from app.ml.PipelineExport.Executorch.manifest import buildManifest, buildManifestDict
 from app.ml.PipelineExport.Executorch.templates import buildKotlinExample, buildReadme
 from app.ml.Pipelines.Categories.Windowing.BaseWindower import BaseWindower
 from app.ml.Pipelines.Categories.FeatureExtraction.BaseFeatureExtractor import BaseFeatureExtractor
@@ -127,6 +127,18 @@ def assembleExecutorchFiles(options, model, pte_bytes: bytes):
         ExtraFile("README.md", buildReadme(model, executorch_version, bakes_features)),
         ExtraFile("ExampleClassifier.kt", buildKotlinExample(model, window_size, sliding_step, classifier.arch["num_classes"])),
     ]
+
+
+def buildExecutorchManifest(options, model) -> dict:
+    """manifest.json alone, for the device API (no .pte compile needed)."""
+    return buildManifestDict(
+        model,
+        findOption(options, BaseWindower),
+        findOption(options, BaseFeatureExtractor),
+        findOption(options, BaseNormalizer),
+        findOption(options, BaseClassififer),
+        getExecutorchVersion(),
+    )
 
 
 def _pte_store_key(model) -> str:

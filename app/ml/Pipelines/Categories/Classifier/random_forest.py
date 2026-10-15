@@ -9,6 +9,7 @@ from app.ml.Pipelines.Categories.Classifier.utils import reshapeSklearn
 from bson.objectid import ObjectId
 from app.StorageProvider import StorageProvider
 import pickle
+from app.ml.BaseConfig import Platforms
 
 
 
@@ -223,7 +224,7 @@ class RandomForest(BaseClassififer):
 
     @staticmethod
     def get_platforms():
-        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C]
+        return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C, Platforms.ONNX]
 
     def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
         if platform == InferenceFormats.PYTHON:

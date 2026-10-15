@@ -19,3 +19,9 @@ S3_SECRET_KEY = config("S3_SECRET_KEY")
 S3_MODEL_BUCKET_NAME = config("S3_MODEL_BUCKET_NAME")
 
 FIRMWARE_COMPILE_URL = config("FIRMWARE_COMPILE_URL")
+# Device API keys (created in the dataset-store) — used by the /ml/device routes
+# the edge-ml JS and Dart libraries call. The dataset-store keeps them in its
+# PROJECT_DBNAME, which is in the .env both services share; AUTH_DATABASE_NAME
+# is not that database on the deployed envs, so it is only the last resort.
+DEVICE_API_DB_NAME = config("DEVICE_API_DB_NAME", default=config("PROJECT_DBNAME", default=AUTH_DATABASE_NAME))
+DEVICE_API_COLLNAME = config("DEVICE_API_COLLNAME", default="deviceapis")

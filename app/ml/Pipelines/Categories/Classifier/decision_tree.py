@@ -175,7 +175,7 @@ class DecisionTree(BaseClassififer):
 
     @staticmethod
     def get_platforms():
-        return [Platforms.C]
+        return [Platforms.C, Platforms.ONNX]
 
     def exportC(self, params):
 

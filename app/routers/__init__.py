@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routers import models, deploy, train
+from app.routers import models, deploy, train, device
 
 router = APIRouter()
 
@@ -19,4 +19,10 @@ router.include_router(
     train.router,
     prefix="/train",
     tags=["Train a model"]
+)
+
+router.include_router(
+    device.router,
+    prefix="/device",
+    tags=["Device API (edge-ml JS library)"]
 )

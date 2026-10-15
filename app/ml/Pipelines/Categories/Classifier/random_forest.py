@@ -227,22 +227,11 @@ class RandomForest(BaseClassififer):
     def get_platforms():
         return [InferenceFormats.PYTHON, InferenceFormats.JAVASCRIPT, InferenceFormats.CPP, InferenceFormats.C, Platforms.ONNX]
 
-    def export(self, platform: InferenceFormats, window_size, labels, timeseries, scaler):
-        if platform == InferenceFormats.PYTHON:
-            return m2c.export_to_python(self.clf)
-        elif platform == InferenceFormats.C_EMBEDDED:
-            return port(self.clf)
-        # elif platform == InferenceFormats.C:
-        #     return m2c.export_to_c(self.clf)
-        elif platform == InferenceFormats.JAVASCRIPT:
-            return export_javascript(self)
-        elif platform == InferenceFormats.CPP:
-            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.CPP)
-        elif platform == InferenceFormats.C:
-            return convertMCU(self, window_size, labels, timeseries, scaler, language=McuLanguage.C)
-        else:
-            print(platform)
-            raise NotImplementedError
+    # The old codegen export(platform, window_size, labels, timeseries, scaler)
+    # was removed: nothing called it anymore, and it shadowed
+    # AbstractPipelineOption.export(model, platform), so a C download of a
+    # random forest crashed with TypeError (500) instead of answering 400
+    # "does not support C export" (random forests have no exportC).
 
     # class methods
     def __init__(self, hyperparameters={}):

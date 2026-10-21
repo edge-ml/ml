@@ -21,6 +21,7 @@ import torch
 from torch import nn
 
 from app.ml.PipelineExport.C.Common.CPart import ExtraFile
+from app.units.deploy import input_units, units_summary
 from app.ml.PipelineExport.Executorch.ExecutorchCompiler import buildExportModule
 from app.ml.PipelineExport.Executorch.support import findOption
 from app.ml.PipelineExport.Executorch.torch_ops import (
@@ -219,6 +220,8 @@ def buildOnnxManifest(options, model) -> dict:
             "dtype": "float32",
             "layout": "window x channel",
             "timeseries": list(model.timeSeries),
+            # Per channel: expected quantity/unit and how to convert to it.
+            "units": input_units(model),
         },
         "preprocessing": {
             "baked": [featureExtractor.get_name(), normalizer.get_name()]
@@ -246,7 +249,16 @@ so you only feed it windows of raw sensor values.
 
 ## Files
 - `model.onnx` — the model. Input `raw_window` float32 `[batch, window_size, num_sensors]`, output `scores`.
-- `manifest.json` — window size, sensor order, sampling rate and the label of every output column.
+- `manifest.json` — window size, sensor order, expected units, sampling rate and the label of every output column.
+
+## Input units
+Feed each sensor in the unit the model was trained on. `manifest.json` → `input.units`
+lists, per sensor, the conversion from other units (`expected = value * scale + offset`);
+the edge-ml library applies it when you tell it your sensor's unit.
+
+```
+{units_summary(model)}
+```
 - `index.html` — a minimal browser example using the edge-ml library.
 
 ## Quick start (browser)

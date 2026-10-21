@@ -1,6 +1,12 @@
 #ifndef EDGEMLPIPELINE_HPP
 #define EDGEMLPIPELINE_HPP
 
+/*
+ * Expected input units, in add_datapoint order. Convert sensor values to these
+ * before passing them in (expected = value * scale + offset):
+{% for line in unitLines %} *   {{ line }}
+{% endfor %} */
+
 #include <vector>
 #include <string>
 {% for include in includes %}

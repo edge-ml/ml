@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routers import models, deploy, train, device
+from app.routers import models, deploy, train, device, units
 
 router = APIRouter()
 
@@ -25,4 +25,10 @@ router.include_router(
     device.router,
     prefix="/device",
     tags=["Device API (edge-ml JS library)"]
+)
+
+router.include_router(
+    units.router,
+    prefix="/units",
+    tags=["Unit catalog"]
 )

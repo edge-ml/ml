@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from app.DataModels.parameter import Parameter
 from app.DataModels.PipelineRequest import PipelineRequest
+from app.units.resolve import InputUnit
 
 
 class ModelStatus(str, Enum):
@@ -81,6 +82,9 @@ class Model(BaseModel):
     pipeline: PipelineRequest 
     labels: List[Labeling] | None = None
     timeSeries: List[str] | None = None
+    # Expected quantity/unit per input channel, in timeSeries order. Training
+    # converts known units to these; deployments convert device data to them.
+    inputUnits: List[InputUnit] | None = None
     samplingRate: float | None = None
     formats: List[str] | None = None
     # Device-API training preset the model was trained from (see device_presets).

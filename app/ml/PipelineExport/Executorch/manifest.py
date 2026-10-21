@@ -1,5 +1,7 @@
 import json
 
+from app.units.deploy import input_units
+
 from app.ml.Pipelines.Categories.FeatureExtraction.SimpleFeatureExtractor import SimpleFeatureExtractor
 
 
@@ -38,6 +40,8 @@ def buildManifestDict(model, windower, featureExtractor, normalizer, classifier,
             "dtype": "float32",
             "layout": "window x channel",
             "timeseries": list(model.timeSeries),
+            # Per channel: expected quantity/unit and how to convert to it.
+            "units": input_units(model),
         },
         "preprocessing": {
             "baked": [featureExtractor.get_name(), normalizer.get_name()]

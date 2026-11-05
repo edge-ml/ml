@@ -41,6 +41,7 @@ from app.ml.Pipelines.Categories.FeatureExtraction import FEATUREEXTRACTION_CATE
 from app.ml.Pipelines.Categories.Normalizer import NORMALIZER_CATEGORY
 from app.ml.Pipelines.Categories.Classifier import CLASSIFIER_CATEGORY
 from app.ml.Pipelines.Categories.Evaluation import EVALUATION_CATEGORY
+from app.units.deploy import input_units
 
 
 class DeviceTrainError(Exception):
@@ -219,6 +220,7 @@ def modelSummary(model) -> dict:
         "preset": getattr(model, "preset", None),
         "labels": [l.name for l in (model.labels or [])],
         "timeSeries": model.timeSeries or [],
+        "inputUnits": input_units(model),
         "samplingRate": model.samplingRate,
         "metrics": metrics,
     }

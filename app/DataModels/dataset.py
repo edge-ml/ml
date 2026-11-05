@@ -13,6 +13,8 @@ class TimeSeries(BaseModel):
     start: int
     end: int
     unit: str = Field(default="")
+    # Physical quantity (catalog id, custom label, or None when unknown).
+    quantity: Optional[str] = None
     name: str
     data: List | None = None
     samplingRate: SamplingRateSchema

@@ -21,6 +21,7 @@ import traceback
 
 from app.ml.fit_to_pipeline import fit_to_pipeline, buildPipeline, getEvaluator
 from app.ml.PipelineExport.formats import computeFormats
+from app.units.resolve import resolve_units
 
 
 modelDB = ModelDB()
@@ -66,7 +67,12 @@ async def init_train(trainReq : PipelineRequest, model : Model, id, project):
         if trainReq.labeling.useZeroClass:
             labels.append("Zero")
 
-        datasets_processed, datasetMetaData, samplingRate = processDatasets(datasets, trainReq.labeling, labelMap)
+        # Known units are converted to each quantity's default before any
+        # preprocessing; the model records what it expects per channel.
+        inputUnits, conversions = resolve_units(datasets)
+        model.inputUnits = inputUnits
+
+        datasets_processed, datasetMetaData, samplingRate = processDatasets(datasets, trainReq.labeling, labelMap, conversions)
 
 
         # pipeline, evaluator = fit_to_pipeline(trainReq, datasets_processed, datasetMetaData, labels)

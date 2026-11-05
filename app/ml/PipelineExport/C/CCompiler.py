@@ -1,9 +1,19 @@
 from app.ml.PipelineExport.C.Common.CPart import CStep, ExtraFile
 from app.ml.PipelineExport.C.Common.utils import getCode
 from jinja2 import Template
+from app.units.deploy import input_units, units_summary
 import math
 
 from typing import List
+
+def unitLines(model) -> List[str]:
+    lines = units_summary(model).split("\n")
+    for u in input_units(model):
+        for unit, c in u["conversions"].items():
+            if unit != u["unit"]:
+                lines.append(f"  {u['name']} from {unit}: scale {c['scale']:.9g}, offset {c['offset']:.9g}")
+    return lines
+
 
 def buildCCode(steps: List[CStep], model):
 
@@ -48,6 +58,7 @@ def buildCCode(steps: List[CStep], model):
         "predictSteps": predictSteps,
         "labels": [x.name for x in model.labels],
         "samplingRate": math.floor(model.samplingRate * 100) / 100,
+        "unitLines": unitLines(model),
         "enumerate": enumerate,})
 
     files = []

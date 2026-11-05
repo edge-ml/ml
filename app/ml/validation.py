@@ -16,6 +16,7 @@ from app.DataModels import PipelineRequest
 from app.ml.Pipelines import getPipelineOption, getCategory
 from app.ml.Pipelines.Abstract.StepType import StepType
 from app.ml.Pipelines.PipelineContainer import PipelineContainer
+from app.units.resolve import UnitError, resolve_units
 
 
 def _msg(step, message):
@@ -42,6 +43,12 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
         errors.append(_msg("datasets", "No timeseries are selected."))
     if not all(len(x.timeSeries) == len(datasets[0].timeSeries) for x in datasets):
         errors.append(_msg("datasets", "Selected datasets have a mismatching number of timeseries."))
+
+    conversions = {}
+    try:
+        _, conversions = resolve_units(datasets)
+    except UnitError as e:
+        errors.append(_msg("datasets", str(e)))
 
     selectedLabels = [l for l in labeling.labels if l.id not in trainReq.labeling.disabledLabelIDs]
     n_classes = len(selectedLabels) + (1 if trainReq.labeling.useZeroClass else 0)
@@ -102,7 +109,7 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
 
     try:
         datasets_processed, datasetMetaData, samplingRate = processDatasets(
-            datasets, trainReq.labeling, labelMap
+            datasets, trainReq.labeling, labelMap, conversions
         )
     except Exception as e:
         return {"valid": False, "errors": [_msg("datasets", f"Could not load the selected data: {e}")], "warnings": warnings}

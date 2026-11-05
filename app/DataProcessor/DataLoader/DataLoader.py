@@ -9,7 +9,10 @@ from app.DataProcessor.DataLoader.binaryStore import BinaryStore
 from app.utils.labels import UNLABELED_LABEL
 
 
-def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):
+def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap, conversions=None):
+    """conversions maps (dataset id, time-series id) to the (scale, offset) that
+    brings that series into the model's units (see app.units.resolve)."""
+    conversions = conversions or {}
     
     useZero = reqLabeling.useZeroClass
     labeling_id = reqLabeling.id
@@ -33,6 +36,9 @@ def processDatasets(datasets: List[DatasetSchema], reqLabeling, labelMap):
             binStore.loadSeries()
             ts_data = binStore.getFull()
             data = ts_data["data"]
+            if (str(dataset.id), str(ts.id)) in conversions:
+                scale, offset = conversions[(str(dataset.id), str(ts.id))]
+                data = np.asarray(data, dtype=float) * scale + offset
             time = ts_data["time"]
             df = pd.DataFrame({"time": time, ts.name: data})
             dfs.append(df)

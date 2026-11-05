@@ -14,7 +14,8 @@ edge-ml model **__MODEL_NAME__** for running on smartphones and other mobile dev
 ## How inference works
 
 1. Sample the sensors listed in `manifest.json` → `input.timeseries` (in that exact order)
-   at `sampling_rate` Hz.
+   at `sampling_rate` Hz, in the units given by `input.units` (convert with
+   `expected = value * scale + offset` from the matching `conversions` entry).
 2. Buffer the last `window.size` samples into a float32 array of shape
    `[1, window.size, channels]` (sample-major: all channel values of sample 0, then
    sample 1, ...). Do **not** include timestamps.

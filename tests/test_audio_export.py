@@ -290,6 +290,8 @@ class GatingTest(unittest.TestCase):
         from app.ml.Pipelines import PIPELINES_CONFIG
 
         config = next(p for p in PIPELINES_CONFIG if p["name"] == AudioClassificationPipeline.get_name())
+        self.assertTrue(config["usesRecordings"])
+        self.assertNotIn("usesRecordings", PIPELINES_CONFIG[0])
         self.assertEqual([s["name"] for s in config["steps"]], ["Windowing", "Feature extraction", "Normalizer", "Classifier", "Evaluator"])
         classifier = config["steps"][3]["options"][0]
         self.assertFalse(classifier["exportTargets"]["c"])

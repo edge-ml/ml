@@ -33,3 +33,8 @@ class AudioClassificationPipeline(AbstractPipeLineCreator):
     @staticmethod
     def get_categories():
         return AUDIO_CATEGORIES
+
+    @classmethod
+    def get_train_config(cls):
+        # the wizard offers recordings (mediaSeries) for this pipeline only
+        return {**super().get_train_config(), "usesRecordings": True}

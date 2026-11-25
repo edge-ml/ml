@@ -18,10 +18,12 @@ async def get_dataset(dataset_id: str, projectId: str) -> DatasetSchema:
     return DatasetSchema.parse_obj(obj=obj)
 
 async def get_project_datasets_meta(projectId: str) -> List[dict]:
-    """Ids, names, labelings and time-series names of every dataset in a
-    project — without the time-series data."""
+    """Ids, names, labelings, time-series names and recordings of every
+    dataset in a project — without the time-series data."""
     cursor = _datasets().find(
         {'projectId': ObjectId(projectId)},
-        {'name': 1, 'labelings.labelingId': 1, 'timeSeries._id': 1, 'timeSeries.name': 1},
+        {'name': 1, 'labelings.labelingId': 1, 'timeSeries._id': 1, 'timeSeries.name': 1,
+         'mediaSeries._id': 1, 'mediaSeries.name': 1, 'mediaSeries.kind': 1, 'mediaSeries.status': 1,
+         'mediaSeries.meta.audioCodec': 1},
     )
     return await cursor.to_list(length=None)

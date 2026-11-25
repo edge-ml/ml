@@ -165,7 +165,8 @@ class TestPresets(unittest.TestCase):
         import torch
         from app.ml.PipelineExport.Executorch.ExecutorchCompiler import buildExecutorchPte
 
-        for preset_id in PRESETS:
+        # the audio presets are checked in TestAudioRequests and test_audio_export
+        for preset_id in [p for p in PRESETS if PRESETS[p].inputs == "sensors"]:
             with self.subTest(preset=preset_id):
                 req = build(preset=preset_id, pipeline={"classifier": {"parameters": {"epochs": 1}}})
                 windower, fe, norm, clf = [option(req, key) for key in ["windowing", "featureExtraction", "normalizer", "classifier"]]
@@ -183,6 +184,88 @@ class TestPresets(unittest.TestCase):
                 pte = buildExecutorchPte(options, model)
                 out = execute_pte(pte, torch.zeros(1, window_size, 3, dtype=torch.float32))
                 self.assertEqual(tuple(out.shape), (1, clf.arch["num_classes"]))
+
+
+def rec(name, **extra):
+    return {"_id": ObjectId(), "name": name, "kind": "audio", "status": "ready", "meta": {"audioCodec": "aac"}, **extra}
+
+
+AUDIO_DATASETS = [
+    {"_id": ObjectId(), "name": "a1", "labelings": [{"labelingId": LABELING_ID}],
+     "timeSeries": [ts("accX"), ts("accY")], "mediaSeries": [rec("mic"), rec("camera", kind="video")]},
+    {"_id": ObjectId(), "name": "a2", "labelings": [{"labelingId": LABELING_ID}],
+     "timeSeries": [ts("accY"), ts("accX")], "mediaSeries": [rec("mic")]},
+    {"_id": ObjectId(), "name": "no sound", "labelings": [{"labelingId": LABELING_ID}],
+     "timeSeries": [ts("accX"), ts("accY")], "mediaSeries": [rec("mic", kind="video", meta={"audioCodec": None})]},
+]
+
+
+def build_audio(datasets=("a1", "a2"), **kwargs):
+    return buildPipelineRequest(DeviceTrainRequest(name="m", labeling="activities", datasets=list(datasets) if datasets else None,
+                                                   **kwargs), AUDIO_DATASETS, LABELINGS)
+
+
+class TestAudioRequests(unittest.TestCase):
+
+    def test_audio_preset(self):
+        req = build_audio(preset="audio_cnn")
+        self.assertEqual(req.selectedPipeline.name, "Audio & Sensor Classification")
+        self.assertEqual([s.options.name for s in req.selectedPipeline.steps], [
+            "Time based (sensors & audio)", "Log-mel spectrogram & sensors", "Per-channel ZNormalizer",
+            "PyTorch Audio & Sensor CNN", "TestTrainSplit"])
+        # sound only; the one recording both datasets share
+        mic = [next(m["_id"] for m in d["mediaSeries"] if m["name"] == "mic") for d in AUDIO_DATASETS[:2]]
+        self.assertEqual([d.timeSeries for d in req.datasets], [[], []])
+        self.assertEqual([d.mediaSeries for d in req.datasets], [[mic[0]], [mic[1]]])
+        self.assertEqual(step(req, "windowing")[1]["window_ms"], 1000)
+
+    def test_mixed_preset_takes_shared_sensors(self):
+        req = build_audio(preset="mixed_cnn")
+        self.assertEqual(len(req.datasets[0].timeSeries), 2)
+        # in the first dataset's order: accX, accY
+        names = {t["_id"]: t["name"] for d in AUDIO_DATASETS for t in d["timeSeries"]}
+        self.assertEqual([names[i] for i in req.datasets[1].timeSeries], ["accX", "accY"])
+        self.assertEqual(len(req.datasets[1].mediaSeries), 1)
+
+    def test_audio_field_without_preset(self):
+        req = build_audio(audio="mic")
+        self.assertEqual(req.selectedPipeline.name, "Audio & Sensor Classification")
+        self.assertEqual(req.datasets[0].timeSeries, [])
+        req = build_audio(audio="mic", timeSeries=["accY"])
+        self.assertEqual(len(req.datasets[0].timeSeries), 1)
+
+    def test_default_datasets_have_the_recording(self):
+        req = build_audio(datasets=None, audio="camera")
+        self.assertEqual([str(d.id) for d in req.datasets], [str(AUDIO_DATASETS[0]["_id"])])
+
+    def test_errors(self):
+        with self.assertRaisesRegex(DeviceTrainError, "share these recordings with sound: camera, mic"):
+            build_audio(datasets=("a1",), preset="audio_cnn")
+        with self.assertRaisesRegex(DeviceTrainError, "has no recording 'mic' with sound"):
+            build_audio(datasets=("a1", "no sound"), audio="mic")
+        with self.assertRaisesRegex(DeviceTrainError, "Use the preset 'audio_cnn' or 'mixed_cnn'"):
+            build_audio(preset="small_cnn", audio="mic")
+        with self.assertRaisesRegex(DeviceTrainError, "Name the recording"):
+            build_audio(datasets=("a1", "no sound"), preset="audio_cnn")
+
+    def test_executorch_warning(self):
+        self.assertIsNone(executorchWarning(DeviceTrainRequest(name="m", labeling="a", preset="mixed_cnn")))
+        # the audio pipeline only offers options that export, so an override
+        # outside them is refused with what is available
+        with self.assertRaisesRegex(DeviceTrainError, "Available: Per-channel ZNormalizer"):
+            build_audio(preset="audio_cnn", pipeline={"normalizer": {"name": "MinMaxNormalizer"}})
+
+    def test_summary_lists_the_sound_input(self):
+        from types import SimpleNamespace
+        from app.DataModels.model import AudioInput
+        from app.ml.device_train import modelSummary
+
+        req = build_audio(preset="audio_cnn")
+        model = SimpleNamespace(id=ObjectId(), name="m", pipeline=req, trainStatus=ModelStatus.done, stage=None,
+                                progress=100, error="", formats=["ONNX"], preset="audio_cnn", labels=[],
+                                timeSeries=[], inputUnits=[], samplingRate=None,
+                                audioInputs=[AudioInput(name="mic", sampleRate=16000)])
+        self.assertEqual(modelSummary(model)["audioInputs"], [{"name": "mic", "sampleRate": 16000}])
 
 
 class FakeCollection:
@@ -343,3 +426,30 @@ class TestDeviceRoutes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDatasetLookup(unittest.TestCase):
+
+    def test_recordings_are_read(self):
+        """The device routes see a dataset's recordings (their lookup once left
+        mediaSeries out, so no training request ever found one)."""
+        import asyncio
+        from unittest import mock
+        import app.db.datasets as db
+
+        seen = {}
+
+        class Cursor:
+            async def to_list(self, length=None):
+                return []
+
+        class Coll:
+            def find(self, query, projection):
+                seen.update(projection)
+                return Cursor()
+
+        with mock.patch.object(db, "_datasets", lambda: Coll()):
+            asyncio.run(db.get_project_datasets_meta(str(ObjectId())))
+        for field in ("mediaSeries._id", "mediaSeries.name", "mediaSeries.kind", "mediaSeries.status",
+                      "mediaSeries.meta.audioCodec"):
+            self.assertIn(field, seen)

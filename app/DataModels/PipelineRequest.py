@@ -13,6 +13,9 @@ class ConfigObj(BaseModel):
 class TrainDatasetModel(BaseModel):
     id : PyObjectId = Field(alias="_id")
     timeSeries: List[PyObjectId]
+    # recordings (mediaSeries ids) whose sound is a model input; only the
+    # audio pipeline uses them
+    mediaSeries: List[PyObjectId] = []
     class Config:
         json_encoders = {
             PyObjectId: str,

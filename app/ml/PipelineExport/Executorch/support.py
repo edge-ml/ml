@@ -34,6 +34,10 @@ def findOption(options, baseClass):
 def getExportBlockers(options) -> List[str]:
     """Returns human-readable reasons why this pipeline cannot be exported to
     ExecuTorch. An empty list means the pipeline is exportable."""
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.audio_blockers(options, "ExecuTorch")
     blockers = []
 
     windower = findOption(options, BaseWindower)

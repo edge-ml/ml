@@ -20,7 +20,7 @@ class BaseClassififer(AbstractPipelineOption):
         raise NotImplementedError
     
     def exec(self, data: PipelineContainer) -> PipelineContainer:
-        return PipelineContainer(self.predict(data.data), data.labels, data.meta)
+        return PipelineContainer(self.predict(data.data), data.labels, data.meta, data.layout)
     
     def fit_exec(self, data: PipelineContainer) -> PipelineContainer:
         print("0" * 30)
@@ -31,4 +31,4 @@ class BaseClassififer(AbstractPipelineOption):
         output = self.predict(data.data)
         self.input_shape = data.data.shape[1:]
         self.output_shape = [1]
-        return PipelineContainer(output, data.labels, data.meta)
+        return PipelineContainer(output, data.labels, data.meta, data.layout)

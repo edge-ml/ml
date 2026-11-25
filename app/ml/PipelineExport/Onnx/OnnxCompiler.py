@@ -168,6 +168,10 @@ def _sklearn_onnx(options, example_input):
 
 def buildOnnxModel(options, model) -> bytes:
     """Builds the .onnx bytes for a restored pipeline."""
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.build_onnx(options)
     blockers = getOnnxBlockers(options)
     if blockers:
         raise OnnxExportError(" ".join(blockers), status_code=400)
@@ -196,6 +200,10 @@ def outputLabels(options, model):
 
 
 def buildOnnxManifest(options, model) -> dict:
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.onnx_manifest(options, model)
     windower = findOption(options, BaseWindower)
     featureExtractor = findOption(options, BaseFeatureExtractor)
     normalizer = findOption(options, BaseNormalizer)
@@ -305,6 +313,10 @@ def _example_html(manifest) -> str:
 
 
 def buildOnnxExport(options, model):
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.onnx_files(options, model)
     manifest = buildOnnxManifest(options, model)
     return [
         ExtraFile("model.onnx", buildOnnxModel(options, model)),

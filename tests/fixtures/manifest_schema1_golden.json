@@ -1,0 +1,167 @@
+{
+  "executorch": {
+    "classification_frequency_hint_hz": 5.0,
+    "executorch": {
+      "backend": "xnnpack",
+      "version": "<version>"
+    },
+    "format": "executorch",
+    "input": {
+      "dtype": "float32",
+      "layout": "window x channel",
+      "name": "raw_window",
+      "shape": [
+        1,
+        20,
+        3
+      ],
+      "timeseries": [
+        "acc_x",
+        "acc_y",
+        "acc_z"
+      ],
+      "units": [
+        {
+          "conversions": {},
+          "name": "acc_x",
+          "quantity": null,
+          "unit": ""
+        },
+        {
+          "conversions": {},
+          "name": "acc_y",
+          "quantity": null,
+          "unit": ""
+        },
+        {
+          "conversions": {},
+          "name": "acc_z",
+          "quantity": null,
+          "unit": ""
+        }
+      ]
+    },
+    "model_id": "000000000000000000000000",
+    "model_name": "golden",
+    "output": {
+      "labels": [
+        "walk",
+        "run",
+        "sit"
+      ],
+      "shape": [
+        1,
+        3
+      ],
+      "type": "logits"
+    },
+    "preprocessing": {
+      "baked": [
+        "ZNormalizer"
+      ],
+      "on_device": [
+        "windowing"
+      ]
+    },
+    "sampling_rate": 50.0,
+    "schema_version": 1,
+    "window": {
+      "size": 20,
+      "stride": 10,
+      "unit": "samples"
+    }
+  },
+  "onnx": {
+    "classification_frequency_hint_hz": 5.0,
+    "format": "onnx",
+    "input": {
+      "dtype": "float32",
+      "layout": "window x channel",
+      "name": "raw_window",
+      "shape": [
+        1,
+        20,
+        3
+      ],
+      "timeseries": [
+        "acc_x",
+        "acc_y",
+        "acc_z"
+      ],
+      "units": [
+        {
+          "conversions": {},
+          "name": "acc_x",
+          "quantity": null,
+          "unit": ""
+        },
+        {
+          "conversions": {},
+          "name": "acc_y",
+          "quantity": null,
+          "unit": ""
+        },
+        {
+          "conversions": {},
+          "name": "acc_z",
+          "quantity": null,
+          "unit": ""
+        }
+      ]
+    },
+    "model_id": "000000000000000000000000",
+    "model_name": "golden",
+    "opset": 17,
+    "output": {
+      "labels": [
+        "walk",
+        "run",
+        "sit"
+      ],
+      "name": "scores",
+      "type": "logits"
+    },
+    "preprocessing": {
+      "baked": [
+        "ZNormalizer"
+      ],
+      "on_device": [
+        "windowing"
+      ]
+    },
+    "sampling_rate": 50.0,
+    "schema_version": 1,
+    "window": {
+      "size": 20,
+      "stride": 10,
+      "unit": "samples"
+    }
+  },
+  "pytorch": {
+    "bakes_features": false,
+    "framework": "pytorch-torchscript",
+    "input_description": "float32 tensor of shape (batch, window_size, num_sensors) \u2014 raw sensor windows. Preprocessing (feature extraction + normalization) is baked into the model, so feed the raw window directly.",
+    "input_shape": [
+      1,
+      20,
+      3
+    ],
+    "labels": [
+      "walk",
+      "run",
+      "sit",
+      "unused"
+    ],
+    "name": "golden",
+    "num_classes": 4,
+    "num_sensors": 3,
+    "output": "raw logits (batch, num_classes); argmax over the last dim gives the class index",
+    "samplingRate": 50.0,
+    "sensors": [
+      "acc_x",
+      "acc_y",
+      "acc_z"
+    ],
+    "window_size": 20
+  }
+}

@@ -34,12 +34,23 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
     datasets = [await get_dataset(x.id, project) for x in trainReq.datasets]
     labeling = await get_labeling(trainReq.labeling.id, project)
 
-    # keep only the selected timeseries (mirrors trainer.init_train)
+    # keep only the selected timeseries and recordings (mirrors trainer.init_train)
     for ds in datasets:
         reqDs = next(r for r in trainReq.datasets if r.id == ds.id)
         ds.timeSeries = [ts for ts in ds.timeSeries if ts.id in reqDs.timeSeries]
+        ds.mediaSeries = [m for m in ds.mediaSeries if m.id in reqDs.mediaSeries]
 
-    if len(datasets[0].timeSeries) == 0:
+    windowStep = next(
+        (s for s in trainReq.selectedPipeline.steps if getCategory(s.name).type == StepType.PRE),
+        None,
+    )
+    usesRecordings = windowStep is not None and getattr(
+        getPipelineOption(windowStep.options.name), "consumes_recordings", False)
+
+    if usesRecordings:
+        if all(len(ds.timeSeries) == 0 and len(ds.mediaSeries) == 0 for ds in datasets):
+            errors.append(_msg("datasets", "Select sensors, a recording, or both."))
+    elif len(datasets[0].timeSeries) == 0:
         errors.append(_msg("datasets", "No timeseries are selected."))
     if not all(len(x.timeSeries) == len(datasets[0].timeSeries) for x in datasets):
         errors.append(_msg("datasets", "Selected datasets have a mismatching number of timeseries."))
@@ -107,6 +118,9 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
     if trainReq.labeling.useZeroClass:
         labelMap["Zero"] = maxIdx + 1
 
+    if usesRecordings:
+        return _preflight_recordings(trainReq, datasets, windowStep, labelMap, conversions, errors, warnings)
+
     try:
         datasets_processed, datasetMetaData, samplingRate = processDatasets(
             datasets, trainReq.labeling, labelMap, conversions
@@ -114,10 +128,6 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
     except Exception as e:
         return {"valid": False, "errors": [_msg("datasets", f"Could not load the selected data: {e}")], "warnings": warnings}
 
-    windowStep = next(
-        (s for s in trainReq.selectedPipeline.steps if getCategory(s.name).type == StepType.PRE),
-        None,
-    )
     if windowStep is None:
         return {"valid": False, "errors": [_msg("windowing", "No windowing step is configured.")], "warnings": warnings}
 
@@ -134,6 +144,12 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
         return {"valid": False, "errors": errors, "warnings": warnings}
 
     labels_after = list(windowed.labels) if windowed.labels is not None else []
+    _check_window_counts(labels_after, errors, warnings)
+    return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings}
+
+
+def _check_window_counts(labels_after, errors, warnings):
+    """Errors and warnings about the windows that survive windowing."""
     n_windows = len(labels_after)
     n_unique = len({int(x) for x in labels_after}) if n_windows else 0
 
@@ -167,4 +183,59 @@ async def preflight_train(trainReq: PipelineRequest, project: str):
                 "Consider a smaller window/step or more data.",
             ))
 
+
+def _preflight_recordings(trainReq, datasets, windowStep, labelMap, conversions, errors, warnings):
+    """The audio pipeline's checks. Only the recordings' metadata is read:
+    nothing is decoded, so this stays fast."""
+    from app.DataProcessor.DataLoader.recordings import RecordingsError, align_sources, build_sources
+    from app.internal.config import AUDIO_MAX_TOTAL_SECONDS, MAX_TRAIN_WINDOWS
+
+    for ds in datasets:
+        if len(ds.mediaSeries) > 1:
+            errors.append(_msg("datasets", f"Dataset '{ds.name}': select one recording; the model takes one sound input."))
+        for m in ds.mediaSeries:
+            if not m.has_sound:
+                errors.append(_msg("datasets", f"The recording '{m.name}' in '{ds.name}' has no sound track."))
+            elif m.status not in (None, "ready"):
+                errors.append(_msg("datasets", f"The recording '{m.name}' in '{ds.name}' is still being processed. Try again in a moment."))
+            rate = (m.meta or {}).get("sampleRate")
+            if rate and int(rate) < 16000:
+                warnings.append(_msg("datasets", f"'{m.name}' in '{ds.name}' was recorded at {int(rate)} Hz; "
+                                                 "sounds above half that rate are missing from it."))
+    names = {m.name for ds in datasets for m in ds.mediaSeries}
+    if len(names) > 1:
+        warnings.append(_msg("datasets", "The selected recordings have different names (" + ", ".join(sorted(names)) +
+                             "). They are used as the same input; make sure they were recorded the same way."))
+    if errors:
+        return {"valid": False, "errors": errors, "warnings": warnings}
+
+    try:
+        sources = align_sources(build_sources(datasets, trainReq.labeling, labelMap, conversions))
+    except RecordingsError as e:
+        return {"valid": False, "errors": [_msg("datasets", str(e))], "warnings": warnings}
+
+    windower = getPipelineOption(windowStep.options.name)(windowStep.options.parameters)
+    try:
+        plans = windower.plan(sources)
+    except Exception as e:
+        return {"valid": False, "errors": [_msg("windowing", str(e))], "warnings": warnings}
+
+    seconds = windower.audio_seconds(sources) if windower.audio_rate else 0
+    if seconds > AUDIO_MAX_TOTAL_SECONDS:
+        errors.append(_msg("datasets", f"The selected recordings are {seconds / 3600:.1f} h long; this server trains on at "
+                                       f"most {AUDIO_MAX_TOTAL_SECONDS / 3600:.1f} h of audio. Select fewer datasets."))
+    total = sum(len(starts) for starts, _ in plans)
+    if total > MAX_TRAIN_WINDOWS:
+        errors.append(_msg("windowing", f"The settings give {total} windows; this server trains on at most "
+                                        f"{MAX_TRAIN_WINDOWS}. Use a larger window step or fewer datasets."))
+    for source, ds, (starts, _) in zip(sources, datasets, plans):
+        if source.span() is None:
+            warnings.append(_msg("datasets", f"In '{ds.name}' the selected sensors and recording do not overlap in time; "
+                                             "it gives no windows."))
+        elif len(starts) == 0 and len(source.labels.starts):
+            warnings.append(_msg("windowing", f"No labeled window fits into '{ds.name}'. Check that its labels lie "
+                                              "where the recording and sensors are."))
+
+    labels_after = [int(x) for _, labels in plans for x in labels]
+    _check_window_counts(labels_after, errors, warnings)
     return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings}

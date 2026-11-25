@@ -19,10 +19,10 @@ class BaseNormalizer(AbstractPipelineOption):
         raise NotImplementedError()
     
     def exec(self, data : PipelineContainer) -> PipelineContainer:
-        return PipelineContainer(self.normalize(data.data), data.labels, data.meta)
+        return PipelineContainer(self.normalize(data.data), data.labels, data.meta, data.layout)
     
     def fit_exec(self, data: PipelineContainer) -> PipelineContainer:
         output = self.fit_normalize(data.data)
         self.input_shape = data.data.shape[1:]
         self.output_shape = output.shape[1:]
-        return PipelineContainer(output, data.labels, data.meta)
+        return PipelineContainer(output, data.labels, data.meta, data.layout)

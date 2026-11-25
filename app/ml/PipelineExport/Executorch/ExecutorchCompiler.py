@@ -95,6 +95,10 @@ def buildExecutorchPte(options, model) -> bytes:
 
     Run once at train time (see trainer.init_train) and cached, rather than on
     every download request."""
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.build_pte(options)
     blockers = getExportBlockers(options)
     if blockers:
         raise ExecutorchExportError(" ".join(blockers), status_code=400)
@@ -111,6 +115,10 @@ def buildExecutorchPte(options, model) -> bytes:
 def assembleExecutorchFiles(options, model, pte_bytes: bytes):
     """Cheap part: bundle the (possibly cached) .pte with a freshly generated
     manifest, README and example — safe to run per request."""
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.executorch_files(options, model, pte_bytes)
     windower = findOption(options, BaseWindower)
     featureExtractor = findOption(options, BaseFeatureExtractor)
     normalizer = findOption(options, BaseNormalizer)
@@ -131,6 +139,10 @@ def assembleExecutorchFiles(options, model, pte_bytes: bytes):
 
 def buildExecutorchManifest(options, model) -> dict:
     """manifest.json alone, for the device API (no .pte compile needed)."""
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.executorch_manifest(options, model)
     return buildManifestDict(
         model,
         findOption(options, BaseWindower),

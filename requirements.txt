@@ -33,3 +33,5 @@ skl2onnx==1.20.0
 # itself is installed --no-deps in the Dockerfile, so its light runtime dep is
 # listed here explicitly.
 einops
+# static ffmpeg binary, used to decode audio recordings for training (#100)
+imageio-ffmpeg==0.6.0

@@ -34,6 +34,10 @@ SKLEARN_CLASSIFIERS = (DecisionTree, RandomForest)
 
 
 def getOnnxBlockers(options) -> List[str]:
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.audio_blockers(options, "ONNX")
     blockers = []
 
     windower = findOption(options, BaseWindower)

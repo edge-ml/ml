@@ -75,6 +75,13 @@ class Labeling(BaseModel):
     color: str
 
 
+class AudioInput(BaseModel):
+    """An audio input of a model: which recording (by name) it was trained on
+    and the sample rate the model expects."""
+    name: str
+    sampleRate: int
+
+
 class Model(BaseModel):
     id: PyObjectId = Field(default_factory=ObjectId, alias="_id")
     projectId: PyObjectId
@@ -86,6 +93,9 @@ class Model(BaseModel):
     # converts known units to these; deployments convert device data to them.
     inputUnits: List[InputUnit] | None = None
     samplingRate: float | None = None
+    # Audio the model takes besides (or instead of) timeSeries; None for the
+    # sensor-only pipelines.
+    audioInputs: List[AudioInput] | None = None
     formats: List[str] | None = None
     # Device-API training preset the model was trained from (see device_presets).
     preset: Optional[str] = None

@@ -19,6 +19,13 @@ S3_SECRET_KEY = config("S3_SECRET_KEY")
 S3_MODEL_BUCKET_NAME = config("S3_MODEL_BUCKET_NAME")
 
 FIRMWARE_COMPILE_URL = config("FIRMWARE_COMPILE_URL")
+
+# Audio training (#100). Recordings are decoded once per sample rate and kept on
+# local disk; caps keep a training run within the server's memory.
+AUDIO_CACHE_DIR = config("AUDIO_CACHE_DIR", default="/tmp/edgeml-audio")
+AUDIO_CACHE_MAX_BYTES = int(config("AUDIO_CACHE_MAX_BYTES", default=2 * 1024 ** 3))
+AUDIO_MAX_TOTAL_SECONDS = float(config("AUDIO_MAX_TOTAL_SECONDS", default=4 * 3600))
+MAX_TRAIN_WINDOWS = int(config("MAX_TRAIN_WINDOWS", default=20000))
 # Device API keys (created in the dataset-store) — used by the /ml/device routes
 # the edge-ml JS and Dart libraries call. The dataset-store keeps them in its
 # PROJECT_DBNAME, which is in the .env both services share; AUTH_DATABASE_NAME

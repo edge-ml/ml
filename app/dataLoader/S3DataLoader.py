@@ -36,6 +36,10 @@ class S3DataLoader(BaseDataLoader):
         self.s3.delete_object(Bucket=S3_BUCKET_NAME, Key=id)
         print(f"Object with id {id} deleted successfully.")
 
+    def load_media_to_file(self, media_id, path):
+        # streamed to disk: recordings can be large, and MP4 needs a seekable file
+        self.s3.download_file(S3_BUCKET_NAME, f"media/{media_id}", path)
+
     def saveObj(self, id, obj: BytesIO):
         self.s3.put_object(Bucket=S3_BUCKET_NAME, Key=id, Body=obj.getvalue())
     

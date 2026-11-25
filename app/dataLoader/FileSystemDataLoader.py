@@ -33,6 +33,10 @@ class FileSystemDataLoader(BaseDataLoader):
         path = os.path.join(DATA_PREFIX, id + ".bin")
         os.remove(path)
 
+    def load_media_to_file(self, media_id, path):
+        import shutil
+        shutil.copyfile(os.path.join(DATA_PREFIX, "media", str(media_id)), path)
+
     def saveObj(self, id, obj):
         with open(os.path.join(DATA_PREFIX, id + ".obj"), "wb") as f:
             f.write(obj.getvalue())

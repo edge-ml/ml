@@ -16,3 +16,8 @@ class BaseDataLoader():
     
     def delete(self, id):
         raise NotImplementedError()
+
+    def load_media_to_file(self, media_id, path):
+        """Copy the original file of a recording (stored by the dataset-store
+        under media/{id}) to a local path."""
+        raise NotImplementedError()

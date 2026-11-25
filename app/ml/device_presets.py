@@ -1,8 +1,10 @@
 """Named training presets for the device-API libraries (JS, Python, Dart).
 
 A preset is a partial `pipeline` for a DeviceTrainRequest. Every preset uses
-sample-based windowing, a Z normalizer and a PyTorch classifier, so the trained
-model can be exported to ExecuTorch and run on a phone. Keeping them here (not
+a Z normalizer and a PyTorch classifier, so the trained model can be exported
+to ExecuTorch and run on a phone. The sensor presets use sample-based
+windowing; the audio presets (`inputs` "audio" or "mixed") use the audio
+pipeline, with windows of a fixed duration. Keeping them here (not
 in each library) lets us tune them without releasing the libraries.
 
 Request `pipeline` entries are applied on top of the preset: the same option
@@ -20,6 +22,10 @@ from app.ml.Pipelines.Categories.Normalizer.ZNormalizer import ZNormalizer
 from app.ml.Pipelines.Categories.Classifier.TorchNeuralNetwork import TorchNeuralNetwork
 from app.ml.Pipelines.Categories.Classifier.TorchCNN1D import TorchCNN1D
 from app.ml.Pipelines.Categories.Classifier.TorchDense import TorchDense
+from app.ml.Pipelines.Categories.Classifier.TorchMultimodalCNN import TorchMultimodalCNN
+from app.ml.Pipelines.Categories.FeatureExtraction.LogMelSensorExtractor import LogMelSensorExtractor
+from app.ml.Pipelines.Categories.Normalizer.ChannelZNormalizer import ChannelZNormalizer
+from app.ml.Pipelines.Categories.Windowing.SyncedTimeWindower import SyncedTimeWindower
 
 
 class Preset(BaseModel):
@@ -27,6 +33,8 @@ class Preset(BaseModel):
     name: str
     description: str
     pipeline: Dict[str, dict]
+    # what the model takes: "sensors", "audio" (a recording's sound) or "mixed"
+    inputs: str = "sensors"
 
 
 def _window():
@@ -53,6 +61,15 @@ def _dense(hidden_layers: int, hidden_units: int):
     }
 
 
+def _audio(size: str):
+    return {
+        "windowing": {"name": SyncedTimeWindower.get_name(), "parameters": {"window_ms": 1000, "stride_ms": 500}},
+        "featureExtraction": {"name": LogMelSensorExtractor.get_name()},
+        "normalizer": {"name": ChannelZNormalizer.get_name()},
+        "classifier": {"name": TorchMultimodalCNN.get_name(), "parameters": {"size": size}},
+    }
+
+
 PRESETS: Dict[str, Preset] = {p.id: p for p in [
     Preset(id="small_cnn", name="Small CNN",
            description="1 convolution block, 8 filters, on raw windows. Fastest and smallest.",
@@ -69,6 +86,12 @@ PRESETS: Dict[str, Preset] = {p.id: p for p in [
     Preset(id="large_dense", name="Large Dense",
            description="3 hidden layers of 64 units on simple statistical features.",
            pipeline=_dense(3, 64)),
+    Preset(id="audio_cnn", name="Audio CNN", inputs="audio",
+           description="Sound only: 1 s windows of a recording's sound as a log-mel spectrogram, into a CNN.",
+           pipeline=_audio("medium")),
+    Preset(id="mixed_cnn", name="Audio & Sensor CNN", inputs="mixed",
+           description="Sound and sensors together: a CNN branch for each, combined. 1 s windows.",
+           pipeline=_audio("medium")),
 ]}
 
 
@@ -94,6 +117,14 @@ def executorchBlockers(option_classes: Dict[str, type]) -> List[str]:
     """Static version of Executorch.support.getExportBlockers for a request
     that has not been trained yet: option classes by step key."""
     blockers = []
+    if issubclass(option_classes["windowing"], SyncedTimeWindower):
+        if not issubclass(option_classes["featureExtraction"], LogMelSensorExtractor):
+            blockers.append("the log-mel spectrogram & sensors features")
+        if not issubclass(option_classes["normalizer"], ZNormalizer):
+            blockers.append("the per-channel Z normalizer")
+        if not issubclass(option_classes["classifier"], TorchNeuralNetwork):
+            blockers.append("a PyTorch classifier")
+        return blockers
     if not issubclass(option_classes["windowing"], SampleWindower):
         blockers.append("sample-based windowing")
     if not issubclass(option_classes["featureExtraction"], (SimpleFeatureExtractor, RawSensorExtractor)):

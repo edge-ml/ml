@@ -326,13 +326,15 @@ class DecodeTest(unittest.TestCase):
             media.decode_file(path, RATE)
 
     def test_load_from_store_is_cached(self):
-        os.makedirs(os.path.join(_TSDATA_DIR, "media"), exist_ok=True)
+        from app.internal.config import TSDATA  # set by whichever test module loaded first
+
+        os.makedirs(os.path.join(TSDATA, "media"), exist_ok=True)
         media_id = "a" * 24
         src = self.make("stored.wav", *self.tone(seconds=2))
-        os.replace(src, os.path.join(_TSDATA_DIR, "media", media_id))
+        os.replace(src, os.path.join(TSDATA, "media", media_id))
         first = media.load_audio(media_id, 8000)
         self.assertEqual(len(first), 16000)
-        os.remove(os.path.join(_TSDATA_DIR, "media", media_id))  # served from the cache now
+        os.remove(os.path.join(TSDATA, "media", media_id))  # served from the cache now
         np.testing.assert_array_equal(media.load_audio(media_id, 8000), first)
 
 

@@ -95,3 +95,30 @@ def build_sources(datasets: List[DatasetSchema], reqLabeling, labelMap, conversi
             zero_class=zero,
         ))
     return sources
+
+
+class RecordingsError(ValueError):
+    pass
+
+
+def align_sources(sources: List[RecordingSource]) -> List[RecordingSource]:
+    """Every dataset must give the model the same inputs: the same sensor
+    channels (put into the first dataset's order here) and, for all or none of
+    them, a recording with sound."""
+    if not sources:
+        raise RecordingsError("Select at least one dataset.")
+    names = sources[0].sensor_names
+    with_audio = [s for s in sources if s.audio is not None]
+    if with_audio and len(with_audio) != len(sources):
+        raise RecordingsError(
+            f"{len(sources) - len(with_audio)} of {len(sources)} selected datasets have no selected recording with sound. "
+            "Select a recording in every dataset, or none.")
+    for s in sources[1:]:
+        if sorted(s.sensor_names) != sorted(names):
+            raise RecordingsError("The selected datasets have different sensors: "
+                                  f"{', '.join(names) or 'none'} vs {', '.join(s.sensor_names) or 'none'}.")
+        order = [s.sensor_names.index(n) for n in names]
+        for attr in ("sensor_names", "sensor_ids", "sensor_spans", "sensor_periods_ms"):
+            values = getattr(s, attr)
+            setattr(s, attr, [values[i] for i in order])
+    return sources

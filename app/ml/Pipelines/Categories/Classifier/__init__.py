@@ -13,6 +13,7 @@ from app.ml.Pipelines.Categories.Classifier.TorchNeuralNetwork import TorchNeura
 from app.ml.Pipelines.Categories.Classifier.TorchDense import TorchDense
 from app.ml.Pipelines.Categories.Classifier.TorchCNN1D import TorchCNN1D
 from app.ml.Pipelines.Categories.Classifier.WharModel import WharModel
+from app.ml.Pipelines.Categories.Classifier.TorchMultimodalCNN import TorchMultimodalCNN
 
 from app.ml.Pipelines.Abstract.AbstractPipelineStep import AbstractPipelineStep
 

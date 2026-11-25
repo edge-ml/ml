@@ -118,6 +118,10 @@ def buildPytorchExport(options, model):
 
     Works for any PyTorch classifier pipeline; the composed module (baked
     preprocessing + classifier) is the same one the ExecuTorch path uses."""
+    from app.ml.PipelineExport import torch_export
+
+    if torch_export.is_audio_pipeline(options):
+        return torch_export.pytorch_files(options, model)
     windower = findOption(options, BaseWindower)
     featureExtractor = findOption(options, BaseFeatureExtractor)
     classifier = findOption(options, BaseClassififer)

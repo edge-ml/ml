@@ -7,12 +7,13 @@ import fnmatch
 from app.ml.Pipelines.Abstract.AbstractPipelineCreator import AbstractPipeLineCreator
 from app.ml.Pipelines.AutoMLClassificationPipeline import AutoMLClassificationPipeline
 from app.ml.Pipelines.ManualClassificationPipeline import ManualClassificationPipeline
+from app.ml.Pipelines.AudioClassificationPipeline import AudioClassificationPipeline
 from app.ml.Pipelines.Abstract.AbstractPipelineOption import AbstractPipelineOption
 from app.ml.Pipeline import Pipeline
 
 
 # _pipelines : List[AbstractPipeLineCreator] = [ManualClassificationPipeline, AutoMLClassificationPipeline]
-_pipelines : List[AbstractPipeLineCreator] = [ManualClassificationPipeline]
+_pipelines : List[AbstractPipeLineCreator] = [ManualClassificationPipeline, AudioClassificationPipeline]
 
 
 def get_configs():

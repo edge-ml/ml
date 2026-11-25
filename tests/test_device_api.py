@@ -426,3 +426,30 @@ class TestDeviceRoutes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDatasetLookup(unittest.TestCase):
+
+    def test_recordings_are_read(self):
+        """The device routes see a dataset's recordings (their lookup once left
+        mediaSeries out, so no training request ever found one)."""
+        import asyncio
+        from unittest import mock
+        import app.db.datasets as db
+
+        seen = {}
+
+        class Cursor:
+            async def to_list(self, length=None):
+                return []
+
+        class Coll:
+            def find(self, query, projection):
+                seen.update(projection)
+                return Cursor()
+
+        with mock.patch.object(db, "_datasets", lambda: Coll()):
+            asyncio.run(db.get_project_datasets_meta(str(ObjectId())))
+        for field in ("mediaSeries._id", "mediaSeries.name", "mediaSeries.kind", "mediaSeries.status",
+                      "mediaSeries.meta.audioCodec"):
+            self.assertIn(field, seen)

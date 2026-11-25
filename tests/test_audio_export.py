@@ -382,3 +382,93 @@ class PreflightTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TrainerTest(unittest.TestCase):
+    """init_train end to end for a mixed model: datasets and labeling from
+    (mocked) Mongo, sensors from the file store, audio from (mocked) storage."""
+
+    def test_init_train_mixed(self):
+        import asyncio
+        from unittest import mock
+
+        from app.DataModels.PipelineRequest import PipelineRequest
+        from app.DataModels.labelings import LabelingModel
+        from app.DataModels.model import Model, ModelStatus
+        from app.DataProcessor.DataLoader.binaryStore import BinaryStore
+        from app.ml import trainer
+
+        project, labeling_id = "7" * 24, "6" * 24
+        still, shaking = "a" * 24, "b" * 24
+        datasets = {}
+        pcm = {}
+        for n in range(2):
+            src, media_id, audio = synthetic(n)
+            pcm[media_id] = audio
+            series = []
+            for c, (times, values) in enumerate(src._sensors):
+                ts_id = f"{n + 1}{c + 1}".ljust(24, "0")
+                store = BinaryStore(ts_id)
+                store.time_arr = times.astype(np.uint64)
+                store.data_arr = values
+                store.saveSeries()
+                series.append({"_id": ts_id, "name": src.sensor_names[c], "start": 0, "end": SECONDS * 1000,
+                               "samplingRate": {"mean": 20, "var": 0}})
+            ds_id = f"{n + 1}".ljust(24, "d")
+            datasets[ds_id] = DatasetSchema.model_validate({
+                "_id": ds_id, "name": f"kitchen {n}", "metaData": {"subject": f"s{n}"}, "timeSeries": series,
+                "labelings": [{"labelingId": labeling_id, "labels": [
+                    {"start": int(s), "end": int(e), "type": still if c == 0 else shaking}
+                    for s, e, c in zip(src.labels.starts, src.labels.ends, src.labels.classes)]}],
+                "mediaSeries": [{"_id": media_id, "kind": "video", "name": "mic", "start": 0, "end": SECONDS * 1000,
+                                 "durationMs": SECONDS * 1000, "status": "ready", "meta": {"audioCodec": "aac"}},
+                                {"_id": "e" * 24, "kind": "audio", "name": "not selected", "start": 0, "end": 1000,
+                                 "durationMs": 1000, "meta": {"audioCodec": "mp3"}}],
+            })
+        labeling = LabelingModel.model_validate({"_id": labeling_id, "name": "activity", "projectId": project, "labels": [
+            {"_id": still, "name": "still", "color": "#000000"}, {"_id": shaking, "name": "shaking", "color": "#ffffff"}]})
+
+        steps = []
+        overrides = {"Windowing": {"window_ms": 1000, "stride_ms": 1000}, "Classifier": {"size": "small", "epochs": 6},
+                     "Evaluator": {"Train_test_split": 75}}
+        for category in AUDIO_CATEGORIES:
+            option = category.options[0]
+            steps.append({"name": category.name, "description": category.description, "type": category.type,
+                          "options": {"name": option.get_name(), "description": option.get_description(),
+                                      "parameters": params(option, **overrides.get(category.name, {}))}})
+        req = PipelineRequest.model_validate({
+            "name": "kitchen", "options": [],
+            "datasets": [{"_id": ds_id, "timeSeries": [ts.id for ts in ds.timeSeries], "mediaSeries": [ds.mediaSeries[0].id]}
+                         for ds_id, ds in datasets.items()],
+            "labeling": {"_id": labeling_id, "useZeroClass": False, "disabledLabelIDs": []},
+            "selectedPipeline": {"name": AudioClassificationPipeline.get_name(), "description": "", "steps": steps},
+        })
+        model = Model(name="kitchen", pipeline=req, projectId=project)
+
+        async def get_dataset(id, _):
+            return datasets[str(id)].model_copy(deep=True)
+
+        async def get_labeling(id, _):
+            return labeling
+
+        old_load = media.load_audio
+        media.load_audio = lambda media_id, rate: pcm[str(media_id)]
+        try:
+            with mock.patch.object(trainer, "get_dataset", get_dataset), \
+                    mock.patch.object(trainer, "get_labeling", get_labeling), \
+                    mock.patch.object(trainer, "modelDB") as db:
+                asyncio.run(trainer.init_train(req, model, model.id, project))
+        finally:
+            media.load_audio = old_load
+
+        self.assertEqual(model.trainStatus, ModelStatus.done, model.error)
+        self.assertEqual(model.timeSeries, ["acc_x", "acc_y"])
+        self.assertEqual(model.samplingRate, 50.0)
+        self.assertEqual([a.model_dump() for a in model.audioInputs], [{"name": "mic", "sampleRate": 16000}])
+        self.assertEqual(model.formats, ["EXECUTORCH", "PYTORCH", "ONNX"])
+        evaluator = model.pipeline.selectedPipeline.steps[-1].options
+        self.assertGreater(evaluator["metrics"]["metrics"]["accuracy_score"], 0.9)
+        self.assertTrue(db.update_model.called)
+        # the decoded audio is not kept after training
+        from app.ml.Pipelines.Categories.Windowing import SyncedTimeWindower as windowing
+        self.assertEqual(windowing._ACTIVE, {})

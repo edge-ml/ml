@@ -9,6 +9,7 @@ import os
 import subprocess
 import tempfile
 import threading
+import uuid
 
 import numpy as np
 
@@ -81,9 +82,12 @@ def load_audio(media_id, rate) -> np.ndarray:
         except Exception as e:
             raise AudioDecodeError(f"The recording file could not be read from storage: {e}") from e
         pcm = decode_file(src, rate)
-    part = f"{path}.{os.getpid()}.part"
+    # trainings run in threads and in several workers, and two of them may
+    # decode the same recording at once: each writes its own file, and the
+    # last rename wins (with the same content)
+    part = f"{path}.{uuid.uuid4().hex}.part"
     pcm.tofile(part)
-    os.replace(part, path)  # both workers may decode the same file at once
+    os.replace(part, path)
     with _lock:
         _trim_cache()
     return pcm

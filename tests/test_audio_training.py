@@ -338,5 +338,23 @@ class DecodeTest(unittest.TestCase):
         np.testing.assert_array_equal(media.load_audio(media_id, 8000), first)
 
 
+    def test_concurrent_loads_of_one_recording(self):
+        """Two trainings (threads of one worker) decoding the same recording at
+        once once raced on one temporary file name."""
+        from concurrent.futures import ThreadPoolExecutor
+        from app.internal.config import TSDATA
+
+        os.makedirs(os.path.join(TSDATA, "media"), exist_ok=True)
+        media_id = "b" * 24
+        src = self.make("concurrent.wav", *self.tone(seconds=2))
+        os.replace(src, os.path.join(TSDATA, "media", media_id))
+        with ThreadPoolExecutor(6) as pool:
+            results = list(pool.map(lambda _: media.load_audio(media_id, 16000), range(6)))
+        for pcm in results:
+            self.assertEqual(len(pcm), 32000)
+            np.testing.assert_array_equal(pcm, results[0])
+        leftovers = [f for f in os.listdir(os.path.dirname(media._cache_path(media_id, 16000))) if f.endswith(".part")]
+        self.assertEqual(leftovers, [])
+
 if __name__ == "__main__":
     unittest.main()

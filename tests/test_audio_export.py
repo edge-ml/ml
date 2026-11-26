@@ -474,3 +474,40 @@ class TrainerTest(unittest.TestCase):
         # the decoded audio is not kept after training
         from app.ml.Pipelines.Categories.Windowing import SyncedTimeWindower as windowing
         self.assertEqual(windowing._ACTIVE, {})
+
+
+class NormalizationTest(unittest.TestCase):
+
+    def arch(self, **extra):
+        return {"type": "multimodal_cnn", "input_shape": [3920 + 150], "num_classes": 4, "size": "small",
+                "layout": {"audio": {"offset": 0, "frames": 98, "mels": 40},
+                           "sensors": {"offset": 3920, "samples": 50, "channels": 3}, "size": 4070},
+                "audio_filters": 16, "audio_blocks": 2, "sensor_filters": 16, "sensor_blocks": 2, "dropout": 0.2, **extra}
+
+    def test_new_models_behave_the_same_in_training_and_use(self):
+        """GroupNorm keeps no running statistics: a window gives the same
+        output whatever else is in its batch, so evaluation cannot drift from
+        what was learned (BatchNorm once misclassified a whole class)."""
+        torch.manual_seed(0)
+        net = TorchMultimodalCNN.build_model(self.arch(norm="group"))
+        self.assertFalse(any(isinstance(m, torch.nn.BatchNorm1d) for m in net.modules()))
+        x = torch.randn(6, 4070)
+        net.train()
+        net.dropout.p = 0.0
+        with torch.no_grad():
+            together = net(x)
+            alone = torch.cat([net(x[i:i + 1]) for i in range(6)])
+            net.eval()
+            evaluated = net(x)
+        torch.testing.assert_close(together, alone)
+        torch.testing.assert_close(together, evaluated)
+
+    def test_trained_architecture_says_group(self):
+        clf = TorchMultimodalCNN(params(TorchMultimodalCNN, size="small"))
+        clf._layout = self.arch()["layout"]
+        self.assertEqual(clf.build_arch([4070], 4)["norm"], "group")
+
+    def test_older_models_keep_batchnorm(self):
+        # architectures stored before the key existed were built with BatchNorm
+        net = TorchMultimodalCNN.build_model(self.arch())
+        self.assertTrue(any(isinstance(m, torch.nn.BatchNorm1d) for m in net.modules()))

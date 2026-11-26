@@ -3,6 +3,8 @@ and one over the sensor window, each pooled over time, concatenated and
 classified by a linear layer. Either branch may be absent (audio-only or
 sensor-only models). The input is the packed feature row of
 LogMelSensorExtractor; the layout is stored in the architecture."""
+import math
+
 import numpy as np
 import torch
 from torch import nn
@@ -19,15 +21,25 @@ SIZES = {
 }
 
 
+def _norm(kind, channels):
+    """GroupNorm normalizes each window on its own, the same way in training and
+    in use. BatchNorm (models trained before 2026-11-26) keeps running
+    statistics for use, and a class far from the others (e.g. near-silence)
+    could end up misclassified after training although it was learned."""
+    if kind == "batch":
+        return nn.BatchNorm1d(channels)
+    return nn.GroupNorm(math.gcd(8, channels), channels)
+
+
 class _Branch(nn.Module):
     """(batch, steps, channels) -> (batch, features)"""
 
-    def __init__(self, steps, channels, filters, blocks, kernel_size=5):
+    def __init__(self, steps, channels, filters, blocks, kernel_size=5, norm="group"):
         super().__init__()
         layers = []
         for b in range(blocks):
             out = min(filters * 2 ** b, 256)
-            layers += [nn.Conv1d(channels, out, kernel_size, padding=kernel_size // 2), nn.BatchNorm1d(out), nn.ReLU()]
+            layers += [nn.Conv1d(channels, out, kernel_size, padding=kernel_size // 2), _norm(norm, out), nn.ReLU()]
             if steps >= 2:
                 layers.append(nn.MaxPool1d(2))
                 steps //= 2
@@ -46,11 +58,12 @@ class MultimodalNet(nn.Module):
         self.audio = layout.get("audio")
         self.sensors = layout.get("sensors")
         width = 0
+        norm = arch.get("norm", "batch")  # architectures without the key used BatchNorm
         if self.audio:
-            self.audio_branch = _Branch(self.audio["frames"], self.audio["mels"], arch["audio_filters"], arch["audio_blocks"])
+            self.audio_branch = _Branch(self.audio["frames"], self.audio["mels"], arch["audio_filters"], arch["audio_blocks"], norm=norm)
             width += self.audio_branch.out_features
         if self.sensors:
-            self.sensor_branch = _Branch(self.sensors["samples"], self.sensors["channels"], arch["sensor_filters"], arch["sensor_blocks"])
+            self.sensor_branch = _Branch(self.sensors["samples"], self.sensors["channels"], arch["sensor_filters"], arch["sensor_blocks"], norm=norm)
             width += self.sensor_branch.out_features
         self.dropout = nn.Dropout(arch["dropout"])
         self.head = nn.Linear(width, arch["num_classes"])
@@ -119,6 +132,7 @@ class TorchMultimodalCNN(TorchNeuralNetwork):
             "sensor_filters": sensor_filters,
             "sensor_blocks": sensor_blocks,
             "dropout": self._get_param("dropout", 0.2, float),
+            "norm": "group",
         }
 
     @staticmethod
